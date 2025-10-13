@@ -45,7 +45,7 @@ pip install 'renoir[visualization]'
 Or install from source:
 
 ```bash
-git clone https://github.com/yourusername/renoir.git
+git clone https://github.com/MichailSemoglou/renoir.git
 cd renoir
 pip install -e .
 # For visualizations:
