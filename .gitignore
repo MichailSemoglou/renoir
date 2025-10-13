@@ -1,0 +1,82 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Data (don't commit large datasets)
+*.h5
+*.hdf5
+data/
+datasets/
+
+# Temporary files
+*.log
+*.tmp
+.cache/
+
+# Test artifacts
+test_*.png
+*_test.png
+test_visualization.py
+
+# Virtual environment (for testing)
+test_env/
+
+# Old scripts (not part of package)
+analyze_renoir_images.py
+analyze_renoir_images_Gemini.py
+analyze_renoir_images_still-life_Gemini.py
+art_research_renoir.py
+artists_id_distribution.py
+artists_names_in_the_dataset.py
+examine_wikiart_dataset_structure.py
+extract_and_analyse_Renoir_work_Claude.py
+mapping.py
+renoir_dataset.py
+verify.py
+wikiart_data_structure_Claude.py

@@ -1,0 +1,14 @@
+# Core dependencies
+datasets>=2.0.0
+Pillow>=8.0.0
+
+# Optional visualization dependencies
+# Uncomment if you want visualization capabilities:
+# matplotlib>=3.5.0
+# seaborn>=0.11.0
+
+# Optional development dependencies
+# Uncomment if needed for development:
+# pytest>=7.0
+# black>=22.0
+# flake8>=4.0
