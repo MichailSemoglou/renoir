@@ -10,8 +10,9 @@ These files are used for academic publication and are not part of the main packa
 ## About JOSS
 
 JOSS is a developer-friendly journal for research software packages. It provides:
+
 - Peer review of research software
-- DOI and citation for software packages  
+- DOI and citation for software packages
 - Academic recognition for software development
 
 The paper will be submitted once the package is mature and ready for academic publication.
