@@ -1,8 +1,6 @@
 # renoir
 
-A computational tool for analyzing and visualizing artist-specific works from the WikiArt dataset, designed for art and design education and research.
-
-Built specifically for the art and design community where such analytical tools are rare, `renoir` bridges traditional art history with computational methods. Perfect for creative coding courses, art and design research, and digital humanities where practitioners explore the intersection of art, data, and technology.
+A computational tool that analyzes and visualizes artist-specific works from the WikiArt dataset, bridging traditional art history with data-driven methods. Designed for creative coding courses, design research, and digital humanities practitioners who explore visual culture through computational approaches.
 
 <!-- [![DOI](https://joss.theoj.org/papers/10.21105/joss.XXXXX/status.svg)](https://doi.org/10.21105/joss.XXXXX) -->
 
