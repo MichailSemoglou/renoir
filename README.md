@@ -72,13 +72,13 @@ Support both pedagogical and scholarly work in art and design:
 ### Basic Installation
 
 ```bash
-pip install renoir
+pip install renoir-wikiart
 ```
 
 ### With Visualization Support
 
 ```bash
-pip install 'renoir[visualization]'
+pip install 'renoir-wikiart[visualization]'
 ```
 
 Or install from source:
@@ -251,7 +251,7 @@ This tool uses the [WikiArt dataset](https://huggingface.co/datasets/huggan/wiki
 - matplotlib >= 3.5.0
 - seaborn >= 0.11.0
 
-Install with: `pip install 'renoir[visualization]'`
+Install with: `pip install 'renoir-wikiart[visualization]'`
 
 ## Contributing
 

@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "renoir"
-version = "1.0.0"
+name = "renoir-wikiart"
+version = "2.0.0"
 description = "A pedagogical tool for analyzing artist-specific works from WikiArt"
 readme = "README.md"
 authors = [

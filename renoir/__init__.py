@@ -3,7 +3,10 @@ renoir: A pedagogical tool for analyzing artist-specific works from WikiArt.
 
 This package provides simple functions for extracting and analyzing works by 
 specific artists from the WikiArt dataset, designed for teaching computational 
-design and digital humanities courses.
+design and digital humanities courses."""
+
+__version__ = "2.0.0"
+__author__ = "Michail Semoglou"
 """
 
 __version__ = "1.0.0"

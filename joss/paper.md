@@ -22,13 +22,13 @@ bibliography: paper.bib
 
 # Summary
 
-`renoir` is a lightweight Python package designed to facilitate the teaching of computational methods in design and digital humanities courses. It provides an accessible interface for extracting and analyzing works by specific artists from the WikiArt dataset [@wikiart], enabling students to learn data analysis concepts through the lens of art history. Unlike existing computer vision and machine learning tools that focus on algorithmic sophistication, `renoir` prioritizes pedagogical clarity and ease of use for students encountering cultural datasets for the first time.
+`renoir` is a lightweight Python package designed for art and design education and research, addressing a significant gap in computational tools for the art and design community. It provides an accessible interface for extracting and analyzing works by specific artists from the WikiArt dataset [@wikiart], enabling design practitioners, educators, and students to explore visual culture through computational methods. Unlike existing computer vision and machine learning tools that focus on algorithmic sophistication, `renoir` prioritizes visual communication and analytical clarity, making it suitable for creative coding courses, design research, and digital humanities applications where practitioners need to bridge traditional design practice with computational analysis.
 
 # Statement of Need
 
-Computational design and digital humanities educators face a persistent challenge: introducing students to data analysis concepts using culturally meaningful datasets while maintaining technical accessibility. While numerous tools exist for advanced machine learning on art datasets [@elgammal2018; @tan2016], few are designed specifically for educational contexts where the goal is to teach fundamental data manipulation, exploration, and analysis skills.
+The art and design research community faces a significant tool gap when working with visual culture datasets. While numerous tools exist for advanced machine learning on art datasets [@elgammal2018; @tan2016], few are designed for art and design practitioners who need accessible analytical capabilities without algorithmic complexity. Art and design educators teaching creative coding, computational design, and digital humanities require tools that bridge traditional art and design practice with data-driven methods, maintaining both pedagogical clarity and research utility.
 
-The WikiArt dataset, available through HuggingFace [@wolf2020], contains over 100,000 artworks with rich metadata, making it ideal for teaching. However, its structure requires substantial boilerplate code for basic operations like extracting an artist's complete works or analyzing their genre distributions—operations that should be simple enough for first-day classroom demonstrations. `renoir` fills this gap by providing a clean, documented API specifically designed for educational use.
+The WikiArt dataset, available through HuggingFace [@wolf2020], contains over 81,000 artworks with rich metadata covering 129 artists, making it ideal for teaching. However, its structure requires substantial boilerplate code for basic operations like extracting an artist's complete works or analyzing their genre distributions—operations that should be simple enough for first-day classroom demonstrations. `renoir` fills this gap by providing a clean, documented API specifically designed for educational use.
 
 Key pedagogical advantages include:
 
@@ -39,12 +39,14 @@ Key pedagogical advantages include:
 
 # Target Audience
 
-`renoir` is designed for:
+`renoir` serves the art and design research and education community:
 
-- Instructors teaching computational design, digital humanities, or data science courses
-- Students learning to work with cultural datasets
-- Researchers needing quick exploratory analysis of artist-specific collections
-- Workshop facilitators introducing data analysis through art history
+- **Art and design researchers** studying visual culture, artistic movements, and creative processes
+- **Art and design educators** teaching creative coding, computational design, and digital humanities
+- **Graduate students** in art and design programs conducting research on visual culture and artistic practice
+- **Digital humanities scholars** working with art historical datasets
+- **Art and design practitioners** exploring data-driven approaches to understanding visual culture
+- **Interdisciplinary researchers** at the intersection of art, design, technology, and cultural analysis
 
 # Functionality
 
@@ -76,17 +78,20 @@ Core functionality includes:
 - Artist listing and search
 - Extensible base for student projects
 
-# Pedagogical Applications
+# Applications in Design Education and Research
 
-In classroom settings, `renoir` has been used to teach:
+`renoir` supports both pedagogical and research applications:
 
-1. **Data structures**: Understanding nested dictionaries and lists through artwork metadata
-2. **APIs and datasets**: Working with HuggingFace datasets as a first API experience
-3. **Exploratory data analysis**: Using `Counter` objects and distribution analysis
-4. **Comparative analysis**: Contrasting multiple artists' genre preferences
-5. **Data visualization**: Creating charts from analysis results as a follow-up exercise
+**Educational Applications:**
 
-The tool serves as a foundation for extended projects, such as timeline visualization, style evolution analysis, or comparative studies across artistic movements.
+1. **Creative coding courses**: Teaching programming through visual culture analysis
+2. **Computational design**: Integrating historical research with contemporary practice
+3. **Data structures and APIs**: Using cultural datasets to teach technical concepts
+4. **Visual analysis methods**: Introducing quantitative approaches to design research
+5. **Research methodology**: Combining traditional design inquiry with computational analysis
+
+**Research Applications:**
+The tool enables advanced projects including timeline visualization, style evolution analysis, artistic movement comparison, and influence mapping across historical periods. Its extensible architecture supports custom analysis methods for specialized design research questions.
 
 # Comparison to Existing Tools
 
