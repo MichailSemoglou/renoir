@@ -1,6 +1,8 @@
 # renoir
 
-A pedagogical tool for analyzing and visualizing artist-specific works from the WikiArt dataset, designed for teaching computational design and digital humanities.
+A computational tool for analyzing and visualizing artist-specific works from the WikiArt dataset, designed for art and design education and research.
+
+Built specifically for the art and design community where such analytical tools are rare, `renoir` bridges traditional art history with computational methods. Perfect for creative coding courses, art and design research, and digital humanities where practitioners explore the intersection of art, data, and technology.
 
 <!-- [![DOI](https://joss.theoj.org/papers/10.21105/joss.XXXXX/status.svg)](https://doi.org/10.21105/joss.XXXXX) -->
 
@@ -9,15 +11,24 @@ A pedagogical tool for analyzing and visualizing artist-specific works from the 
 
 ## Overview
 
-`renoir` is an educational Python package that simplifies the extraction, analysis, and visualization of artist-specific works from the WikiArt dataset. It's specifically designed for:
+`renoir` addresses a gap in the art and design research toolkit by providing accessible art data analysis capabilities. Unlike computer vision tools focused on algorithmic complexity, it emphasizes clarity and visual communication for art and design practitioners and educators.
 
-- **Computational design courses**: Teaching students how to work with cultural datasets
-- **Digital humanities education**: Bridging art history and data analysis
-- **Classroom demonstrations**: Quick exploratory data analysis with beautiful visualizations
-- **Student projects**: A foundation for extended analysis and publication-ready charts
-- **Research presentations**: Professional-quality plots for academic and educational use
+**Applications:**
 
-Unlike research-focused computer vision tools, `renoir` emphasizes pedagogical clarity, visual communication,, visual communication, and ease of use for students learning computational methods.
+- **Creative Coding Courses**: Teach programming through culturally meaningful datasets
+- **Art and Design Research**: Analyze visual patterns and artistic influences quantitatively
+- **Computational Design**: Explore historical precedents through data-driven methods
+- **Dynamic Branding Projects**: Study stylistic evolution and visual consistency across artists
+- **Digital Humanities Research**: Generate publication-ready visualizations for academic work
+- **Art and Design Studios**: Integrate historical analysis into contemporary practice
+
+**Why `renoir` for the art and design community:**
+
+- Fills a gap in art and design research tools
+- Focuses on visual culture and artistic practice
+- Publication-ready visualizations suitable for academic and professional contexts
+- Pedagogical clarity without sacrificing analytical depth
+- Extensible foundation for advanced art and design research projects
 
 ## Key Features
 
@@ -28,6 +39,35 @@ Unlike research-focused computer vision tools, `renoir` emphasizes pedagogical c
 - **Flexible Usage**: Works with or without visualization dependencies
 - **Export Capabilities**: Save plots as PNG files for reports and presentations
 - **Pure Python**: Easy to install and integrate into existing curricula
+
+## For Art & Design Education & Research
+
+### Research Applications
+
+Support both pedagogical and scholarly work in art and design:
+
+- **Style Evolution Analysis**: Quantify artistic development across periods
+- **Movement Comparison**: Compare visual approaches across artistic schools
+- **Influence Mapping**: Explore shared themes and techniques through data
+- **Portfolio Diversity**: Measure stylistic variety and consistency in artistic practice
+
+### Pedagogical Integration
+
+`renoir` serves art and design educators teaching computational methods:
+
+- Clean, readable code that students can understand and extend
+- Professional visualizations suitable for academic presentations
+- Jupyter notebook compatibility for interactive exploration
+- Minimal dependencies to reduce classroom setup friction
+- Extensible architecture for advanced student projects
+
+### Curriculum Applications
+
+- **Creative Coding**: Teach programming through visual culture analysis
+- **Computational Design**: Integrate historical research with contemporary practice
+- **Design Research Methods**: Introduce quantitative analysis in design contexts
+- **Dynamic Branding**: Study visual consistency and evolution in artistic identity
+- **Digital Humanities**: Bridge traditional art history with computational approaches
 
 ## Installation
 
@@ -187,9 +227,9 @@ analyzer.compare_artists_genres(impressionist_artists)
 
 This tool uses the [WikiArt dataset](https://huggingface.co/datasets/huggan/wikiart) from HuggingFace, which contains:
 
-- Over 100,000 artworks
-- Works by hundreds of artists
-- Metadata including genre, style, and artist information
+- Over 81,000 artworks
+- Works by 129 artists
+- Rich metadata including genre, style, and artist information
 
 ## Educational Philosophy
 
