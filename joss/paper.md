@@ -26,20 +26,22 @@ bibliography: paper.bib
 
 # Statement of Need
 
-The art and design research community faces a significant tool gap when working with visual culture datasets. While numerous tools exist for advanced machine learning on art datasets [@elgammal2018; @tan2016], few are designed for art and design practitioners who need accessible analytical capabilities without algorithmic complexity. Art and design educators teaching creative coding, computational design, and digital humanities require tools that bridge traditional art and design practice with data-driven methods, maintaining both pedagogical clarity and research utility.
+The art and design research community faces a significant tool gap when working with visual culture datasets. While numerous tools exist for advanced machine learning on art datasets, including CAN [@elgammal2017] and ArtGAN [@tan2019], few are designed for art and design practitioners who need accessible analytical capabilities without algorithmic complexity. Art and design educators teaching creative coding, computational design, and digital humanities require tools that bridge traditional art and design practice with data-driven methods, maintaining both pedagogical clarity and research utility.
 
-The WikiArt dataset, available through HuggingFace [@wolf2020], contains over 81,000 artworks with rich metadata covering 129 artists, making it ideal for teaching. However, its structure requires substantial boilerplate code for basic operations like extracting an artist's complete works or analyzing their genre distributions—operations that should be simple enough for first-day classroom demonstrations. `renoir` fills this gap by providing a clean, documented API specifically designed for educational use.
+This approach aligns with the principles of distant reading [@moretti2013] and cultural analytics [@manovich2020], enabling researchers to identify patterns and trends across large-scale art collections that would be impossible to observe through traditional close examination alone.
+
+The library seamlessly integrates with the Hugging Face `datasets` ecosystem [@wolf2019;@lhoest2021], ensuring compatibility with modern machine learning workflows.
 
 Key pedagogical advantages include:
 
-1. **Artist-centric analysis**: Unlike dataset-wide tools, focuses on individual artists, aligning with how art history is typically taught
-2. **Minimal dependencies**: Requires only the `datasets` library, reducing installation friction in classroom settings
-3. **Clear code structure**: Written to be read and understood by students learning Python
-4. **Extensibility**: Designed as a starting point for student projects and assignments
+1. **Artist-centric analysis**: Unlike dataset-wide tools, `renoir` focuses on individual artists, aligning with how art history is typically taught
+2. **Minimal dependencies**: `renoir` requires only the `datasets` library, reducing installation friction in classroom settings
+3. **Clear code structure**: The package is written to be read and understood by students learning Python
+4. **Extensibility**: The tool is designed as a starting point for student projects and assignments
 
 # Target Audience
 
-`renoir` serves the art and design research and education community:
+The target users of `renoir` include:
 
 - **Art and design researchers** studying visual culture, artistic movements, and creative processes
 - **Art and design educators** teaching creative coding, computational design, and digital humanities
@@ -91,20 +93,28 @@ Core functionality includes:
 5. **Research methodology**: Combining traditional design inquiry with computational analysis
 
 **Research Applications:**
-The tool enables advanced projects including timeline visualization, style evolution analysis, artistic movement comparison, and influence mapping across historical periods. Its extensible architecture supports custom analysis methods for specialized design research questions.
+
+The tool enables advanced projects including:
+
+- Timeline visualization
+- Style evolution analysis
+- Artistic movement comparison
+- Influence mapping across historical periods
+
+Its extensible architecture supports custom analysis methods for specialized design research questions.
 
 # Comparison to Existing Tools
 
 While several tools work with art datasets, `renoir` is distinguished by its educational focus:
 
-- **ArtGAN** [@elgammal2018]: Focuses on generative models, not exploratory analysis
-- **WikiArt Retriever** [@tan2016]: Emphasizes image retrieval, not metadata analysis
-- **HuggingFace Datasets**: Provides raw dataset access but requires substantial code for artist-specific operations
+- **CAN (Creative Adversarial Networks)** [@elgammal2017]: Focuses on generative models, not exploratory analysis
+- **ArtGAN** [@tan2019]: Emphasizes conditional image synthesis, not metadata analysis
+- **HuggingFace Datasets** [@lhoest2021]: Provides raw dataset access but requires substantial code for artist-specific operations
 
 `renoir` intentionally avoids machine learning complexity to maintain accessibility for introductory courses.
 
 # Acknowledgements
 
-This tool was developed through teaching computational design courses and observing student needs when working with cultural datasets. Thanks to students whose feedback shaped the API design, and to the WikiArt and HuggingFace teams for making cultural datasets accessible.
+The author developed this tool through teaching computational design courses and observing student needs when working with cultural datasets. Thanks to students whose feedback shaped the API design, and to the WikiArt and HuggingFace teams for making cultural datasets accessible.
 
 # References
