@@ -55,18 +55,21 @@ The primary educational users of `renoir` include:
 `renoir` is designed to support specific educational learning outcomes in computational creativity:
 
 **Technical Skills:**
+
 - **Data manipulation**: Students learn to extract, filter, and organize cultural datasets using Python
 - **API usage**: Understanding how to interact with external data sources and libraries
 - **Statistical analysis**: Computing distributions, frequencies, and basic descriptive statistics
 - **Data visualization**: Creating meaningful charts and graphs from cultural data
 
 **Conceptual Understanding:**
+
 - **Computational thinking**: Breaking down artistic analysis into algorithmic steps
 - **Cultural data literacy**: Understanding how cultural artifacts can be studied quantitatively
 - **Research methodology**: Combining traditional art historical inquiry with data-driven approaches
 - **Critical evaluation**: Assessing the limitations and biases in computational cultural analysis
 
 **Creative Applications:**
+
 - **Project development**: Using data analysis as a foundation for creative projects
 - **Interdisciplinary practice**: Bridging computational methods with traditional creative disciplines
 - **Historical contextualization**: Understanding artistic movements through quantitative patterns
@@ -106,22 +109,26 @@ Core functionality includes:
 `renoir` has been successfully implemented in various educational contexts with measurable learning outcomes:
 
 **Introductory Programming Courses:**
+
 - **Motivation through relevance**: Students engage more readily with programming when analyzing artists they recognize
 - **Scaffolded complexity**: Simple function calls (`quick_analysis()`) introduce programming concepts before advancing to object-oriented approaches
 - **Immediate visual feedback**: Results connect abstract code to concrete cultural insights, reinforcing learning
 
 **Data Literacy Curriculum:**
+
 - **Accessible entry point**: Art metadata provides intuitive context for understanding datasets, distributions, and statistical concepts
 - **Critical thinking development**: Students question what metrics can and cannot reveal about artistic practice
 - **Real-world application**: Skills transfer to other domains requiring data analysis and interpretation
 
 **Computational Design Workshops:**
+
 - **Historical research integration**: Students learn to combine traditional art historical methods with quantitative analysis
 - **Portfolio development**: Projects using `renoir` demonstrate technical skills to potential employers in creative industries
 - **Interdisciplinary collaboration**: Tool facilitates partnerships between art historians, designers, and data scientists
 
 **Assessment and Learning Outcomes:**
 The package's educational effectiveness has been observed through:
+
 - Increased student engagement in computational coursework (measured through attendance and assignment completion)
 - Successful project outcomes demonstrating both technical proficiency and cultural understanding
 - Positive student feedback regarding the relevance of cultural content to their creative practice
