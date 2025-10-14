@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "renoir"
-version = "0.1.0"
+version = "1.0.0"
 description = "A pedagogical tool for analyzing artist-specific works from WikiArt"
 readme = "README.md"
 authors = [

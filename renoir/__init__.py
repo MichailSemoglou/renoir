@@ -6,7 +6,7 @@ specific artists from the WikiArt dataset, designed for teaching computational
 design and digital humanities courses.
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __author__ = "Michail Semoglou"
 
 from .analyzer import ArtistAnalyzer, quick_analysis
