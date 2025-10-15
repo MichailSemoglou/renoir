@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt"
+version: 2.0.0
+date-released: 2025-10-14
+authors:
+  - family-names: Semoglou
+    given-names: Michail
+    orcid: "https://orcid.org/0009-0003-3268-5657"
+    affiliation: "Tongji University, College of Design and Innovation; University of Ioannina, School of Fine Arts"
+repository-code: "https://github.com/MichailSemoglou/renoir"
+url: "https://github.com/MichailSemoglou/renoir"
+abstract: "A lightweight Python package specifically designed for art and design education, addressing a critical pedagogical gap in computational tools for creative disciplines. It provides an accessible, learner-centered interface for extracting and analyzing works by specific artists from the WikiArt dataset, enabling educators to teach data analysis concepts through culturally relevant content."
+keywords:
+  - Python
+  - art history
+  - digital humanities
+  - computational design
+  - education
+  - datasets
+  - WikiArt
+  - visual culture
+  - creative coding
+license: MIT
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.17355171
+    description: "Zenodo DOI"
+preferred-citation:
+  type: software
+  title: "renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt"
+  authors:
+    - family-names: Semoglou
+      given-names: Michail
+      orcid: "https://orcid.org/0009-0003-3268-5657"
+  version: 2.0.0
+  date-released: 2025-10-14
+  doi: 10.5281/zenodo.17355171
+  url: "https://github.com/MichailSemoglou/renoir"
