@@ -2,8 +2,7 @@
 
 A computational tool that analyzes and visualizes artist-specific works from the WikiArt dataset, bridging traditional art history with data-driven methods. Designed for creative coding courses, design research, and digital humanities practitioners who explore visual culture through computational approaches.
 
-<!-- [![DOI](https://joss.theoj.org/papers/10.21105/joss.XXXXX/status.svg)](https://doi.org/10.21105/joss.XXXXX) -->
-
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17355171.svg)](https://doi.org/10.5281/zenodo.17355171)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
