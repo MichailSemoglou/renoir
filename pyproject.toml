@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
     {name = "Michail Semoglou", email = "m.semoglou@tongji.edu.cn"}
 ]
-license = {text = "MIT"}
+license = "MIT"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Education",
