@@ -3,18 +3,27 @@ renoir: A pedagogical tool for analyzing artist-specific works from WikiArt.
 
 This package provides simple functions for extracting and analyzing works by 
 specific artists from the WikiArt dataset, designed for teaching computational 
-design and digital humanities courses."""
+design and digital humanities courses.
 
-__version__ = "2.0.0"
-__author__ = "Michail Semoglou"
+Version 3.0.0 adds comprehensive color analysis capabilities for teaching
+computational color theory to art and design students.
 """
 
-__version__ = "1.0.0"
+__version__ = "3.0.0"
 __author__ = "Michail Semoglou"
 
 from .analyzer import ArtistAnalyzer, quick_analysis
 
-__all__ = ["ArtistAnalyzer", "quick_analysis"]
+# Color analysis module (new in v3.0.0)
+from .color import ColorExtractor, ColorAnalyzer, ColorVisualizer
+
+__all__ = [
+    "ArtistAnalyzer", 
+    "quick_analysis",
+    "ColorExtractor",
+    "ColorAnalyzer",
+    "ColorVisualizer"
+]
 
 # Make visualization capabilities easily discoverable
 try:
@@ -36,5 +45,5 @@ def check_visualization_support():
         print("You can use plotting methods and set show_plots=True in quick_analysis()")
     else:
         print("❌ Visualization libraries not installed.")
-        print("Install with: pip install 'renoir[visualization]'")
+        print("Install with: pip install 'renoir-wikiart[visualization]'")
     return VISUALIZATION_AVAILABLE
