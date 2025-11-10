@@ -1,70 +1,47 @@
 # renoir
 
-A computational tool that analyzes and visualizes artist-specific works from the WikiArt dataset, bridging traditional art history with data-driven methods. Designed for creative coding courses, design research, and digital humanities practitioners who explore visual culture through computational approaches.
+A computational tool for analyzing artist-specific works from WikiArt with comprehensive color analysis capabilities. Designed for teaching computational color theory and data analysis to art and design students through culturally meaningful examples.
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17355171.svg)](https://doi.org/10.5281/zenodo.17355171)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17573993.svg)](https://doi.org/10.5281/zenodo.17573993)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
 ## Overview
 
-`renoir` addresses a gap in the art and design research toolkit by providing accessible art data analysis capabilities. Unlike computer vision tools focused on algorithmic complexity, it emphasizes clarity and visual communication for art and design practitioners and educators.
+`renoir` bridges traditional art history with computational methods, providing accessible tools for art data analysis and color theory education. Unlike computer vision tools focused on algorithmic complexity, it emphasizes pedagogical clarity and visual communication for art and design practitioners and educators.
 
-**Applications:**
-
-- **Creative Coding Courses**: Teach programming through culturally meaningful datasets
-- **Art and Design Research**: Analyze visual patterns and artistic influences quantitatively
-- **Computational Design**: Explore historical precedents through data-driven methods
-- **Dynamic Branding Projects**: Study stylistic evolution and visual consistency across artists
-- **Digital Humanities Research**: Generate publication-ready visualizations for academic work
-- **Art and Design Studios**: Integrate historical analysis into contemporary practice
-
-**Why `renoir` for the art and design community:**
-
-- Fills a gap in art and design research tools
-- Focuses on visual culture and artistic practice
-- Publication-ready visualizations suitable for academic and professional contexts
-- Pedagogical clarity without sacrificing analytical depth
-- Extensible foundation for advanced art and design research projects
+**Version 3.0.0** adds comprehensive color analysis capabilities specifically designed for teaching computational color theory through art historical examples.
 
 ## Key Features
 
-- **Easy Art Analysis**: Extract and analyze works by 100+ artists from WikiArt
-- **Built-in Visualizations**: Genre distributions, style comparisons, artist overviews
-- **Educational Focus**: Designed specifically for classroom use and student projects
-- **Publication Ready**: High-quality plots suitable for presentations and reports
-- **Flexible Usage**: Works with or without visualization dependencies
-- **Export Capabilities**: Save plots as PNG files for reports and presentations
-- **Pure Python**: Easy to install and integrate into existing curricula
+### Artist Analysis
+- Extract and analyze works by 100+ artists from WikiArt
+- Built-in visualizations for genre and style distributions
+- Temporal analysis of artistic development
+- Comparative analysis across artists and movements
 
-## For Art & Design Education & Research
+### Color Analysis (New in v3.0.0)
+- **Color Extraction**: K-means clustering for intelligent palette extraction
+- **Color Space Analysis**: RGB, HSV, and HSL conversions
+- **Statistical Metrics**: Color diversity, saturation, brightness, temperature
+- **Color Relationships**: Complementary detection, WCAG contrast ratios
+- **8 Visualization Types**: Palettes, color wheels, distributions, 3D spaces
+- **Export Capabilities**: CSS variables and JSON formats
 
-### Research Applications
+### Educational Focus
+- Designed specifically for classroom use and student projects
+- Progressive complexity from beginner to advanced
+- Publication-ready visualizations
+- Comprehensive Jupyter notebook examples
+- Pure Python with minimal dependencies
 
-Support both pedagogical and scholarly work in art and design:
+## Applications
 
-- **Style Evolution Analysis**: Quantify artistic development across periods
-- **Movement Comparison**: Compare visual approaches across artistic schools
-- **Influence Mapping**: Explore shared themes and techniques through data
-- **Portfolio Diversity**: Measure stylistic variety and consistency in artistic practice
-
-### Pedagogical Integration
-
-`renoir` serves art and design educators teaching computational methods:
-
-- Clean, readable code that students can understand and extend
-- Professional visualizations suitable for academic presentations
-- Jupyter notebook compatibility for interactive exploration
-- Minimal dependencies to reduce classroom setup friction
-- Extensible architecture for advanced student projects
-
-### Curriculum Applications
-
-- **Creative Coding**: Teach programming through visual culture analysis
-- **Computational Design**: Integrate historical research with contemporary practice
-- **Design Research Methods**: Introduce quantitative analysis in design contexts
-- **Dynamic Branding**: Study visual consistency and evolution in artistic identity
-- **Digital Humanities**: Bridge traditional art history with computational approaches
+- **Creative Coding Courses**: Teach programming through culturally meaningful datasets
+- **Computational Color Theory**: Bridge traditional color theory with data science
+- **Art and Design Research**: Quantitative analysis of visual patterns and influences
+- **Computational Design**: Explore historical precedents through data-driven methods
+- **Digital Humanities**: Generate publication-ready visualizations for academic work
 
 ## Installation
 
@@ -74,25 +51,23 @@ Support both pedagogical and scholarly work in art and design:
 pip install renoir-wikiart
 ```
 
-### With Visualization Support
+### With Visualization Support (Recommended)
 
 ```bash
 pip install 'renoir-wikiart[visualization]'
 ```
 
-Or install from source:
+### From Source
 
 ```bash
 git clone https://github.com/MichailSemoglou/renoir.git
 cd renoir
-pip install -e .
-# For visualizations:
 pip install -e .[visualization]
 ```
 
 ## Quick Start
 
-### Basic Usage
+### Basic Artist Analysis
 
 ```python
 from renoir import quick_analysis
@@ -100,22 +75,64 @@ from renoir import quick_analysis
 # Text-based analysis
 quick_analysis('pierre-auguste-renoir')
 
-# With visualizations (requires matplotlib)
+# With visualizations
 quick_analysis('pierre-auguste-renoir', show_plots=True)
 ```
 
-### Advanced Usage
+### Color Palette Extraction (v3.0.0)
+
+```python
+from renoir import ArtistAnalyzer
+from renoir.color import ColorExtractor, ColorVisualizer
+
+# Get artist's works
+analyzer = ArtistAnalyzer()
+works = analyzer.extract_artist_works('claude-monet', limit=10)
+
+# Extract color palette
+extractor = ColorExtractor()
+colors = extractor.extract_dominant_colors(works[0]['image'], n_colors=5)
+
+# Visualize
+visualizer = ColorVisualizer()
+visualizer.plot_palette(colors, title="Monet's Palette")
+```
+
+### Color Analysis (v3.0.0)
+
+```python
+from renoir.color import ColorAnalyzer
+
+analyzer = ColorAnalyzer()
+
+# Analyze palette statistics
+stats = analyzer.analyze_palette_statistics(colors)
+print(f"Mean Saturation: {stats['mean_saturation']:.1f}%")
+print(f"Mean Brightness: {stats['mean_value']:.1f}%")
+
+# Calculate color diversity
+diversity = analyzer.calculate_color_diversity(colors)
+print(f"Color Diversity: {diversity:.3f}")
+
+# Analyze color temperature
+temp = analyzer.analyze_color_temperature_distribution(colors)
+print(f"Warm: {temp['warm_percentage']:.1f}%")
+print(f"Cool: {temp['cool_percentage']:.1f}%")
+```
+
+## Advanced Usage
+
+### Artist Work Extraction
 
 ```python
 from renoir import ArtistAnalyzer
 
-# Initialize analyzer
 analyzer = ArtistAnalyzer()
 
-# Extract works by a specific artist
+# Extract works by specific artist
 works = analyzer.extract_artist_works('pierre-auguste-renoir')
 
-# Analyze genre and style distributions
+# Analyze distributions
 genres = analyzer.analyze_genres(works)
 styles = analyzer.analyze_styles(works)
 
@@ -127,11 +144,7 @@ print(f"Styles: {styles}")
 ### Visualization Examples
 
 ```python
-from renoir import ArtistAnalyzer
-
-analyzer = ArtistAnalyzer()
-
-# Create visualizations for a single artist
+# Single artist visualizations
 analyzer.plot_genre_distribution('pierre-auguste-renoir')
 analyzer.plot_style_distribution('pablo-picasso')
 
@@ -141,101 +154,157 @@ analyzer.compare_artists_genres(['claude-monet', 'pierre-auguste-renoir', 'edgar
 # Comprehensive overview
 analyzer.create_artist_overview('vincent-van-gogh')
 
-# Save visualizations to files
+# Save to file
 analyzer.plot_genre_distribution('monet', save_path='monet_genres.png')
-analyzer.create_artist_overview('picasso', save_path='picasso_overview.png')
 ```
 
-### Check Visualization Support
+### Color Space Conversions (v3.0.0)
 
 ```python
-from renoir import check_visualization_support
+from renoir.color import ColorAnalyzer
 
-# Check if visualization libraries are installed
-check_visualization_support()
+analyzer = ColorAnalyzer()
+
+# Convert RGB to HSV
+hsv = analyzer.rgb_to_hsv((255, 87, 51))
+print(f"HSV: Hue={hsv[0]:.0f}°, Sat={hsv[1]:.0f}%, Val={hsv[2]:.0f}%")
+
+# Detect complementary colors
+complementary = analyzer.detect_complementary_colors(colors)
+print(f"Complementary pairs: {len(complementary)}")
+
+# Calculate contrast ratio
+ratio = analyzer.calculate_contrast_ratio((255, 255, 255), (0, 0, 0))
+print(f"Contrast ratio: {ratio:.2f}:1")
 ```
 
-### List Available Artists
+### Advanced Color Visualizations (v3.0.0)
+
+```python
+from renoir.color import ColorVisualizer
+
+visualizer = ColorVisualizer()
+
+# Color wheel visualization
+visualizer.plot_color_wheel(colors)
+
+# RGB distribution
+visualizer.plot_rgb_distribution(colors)
+
+# HSV distribution
+visualizer.plot_hsv_distribution(colors)
+
+# 3D color space
+visualizer.plot_3d_rgb_space(colors)
+
+# Compare two palettes
+visualizer.compare_palettes(colors1, colors2, labels=("Artist 1", "Artist 2"))
+
+# Comprehensive report
+visualizer.create_artist_color_report(colors, "Claude Monet")
+```
+
+### Export Color Palettes (v3.0.0)
+
+```python
+from renoir.color import ColorExtractor
+
+extractor = ColorExtractor()
+
+# Export as CSS variables
+extractor.export_palette_css(colors, 'palette.css', prefix='monet')
+
+# Export as JSON
+extractor.export_palette_json(colors, 'palette.json')
+```
+
+## Educational Examples
+
+### Example 1: Teaching K-means Clustering
 
 ```python
 from renoir import ArtistAnalyzer
+from renoir.color import ColorExtractor, ColorVisualizer
 
+# Students learn clustering through color extraction
 analyzer = ArtistAnalyzer()
-artists = analyzer.list_artists(limit=10)
-print(artists)
+extractor = ColorExtractor()
+visualizer = ColorVisualizer()
+
+# Get Impressionist works
+works = analyzer.extract_artist_works('claude-monet', limit=5)
+
+# Extract palettes with different cluster sizes
+for n in [3, 5, 10]:
+    colors = extractor.extract_dominant_colors(works[0]['image'], n_colors=n)
+    visualizer.plot_palette(colors, title=f"Monet - {n} Colors")
 ```
 
-## Pedagogical Applications
-
-### Classroom Exercise 1: Genre Distribution
-
-Students can compare genre distributions across different artists:
+### Example 2: Comparing Artistic Movements
 
 ```python
 from renoir import ArtistAnalyzer
+from renoir.color import ColorExtractor, ColorAnalyzer
 
-analyzer = ArtistAnalyzer()
+# Compare Impressionism vs Expressionism
+impressionists = ['claude-monet', 'pierre-auguste-renoir']
+expressionists = ['edvard-munch', 'ernst-ludwig-kirchner']
 
-artists = ['pierre-auguste-renoir', 'claude-monet', 'vincent-van-gogh']
-for artist in artists:
-    works = analyzer.extract_artist_works(artist)
-    genres = analyzer.analyze_genres(works)
-    print(f"\n{artist}: {genres}")
+def analyze_movement(artists):
+    analyzer = ArtistAnalyzer()
+    extractor = ColorExtractor()
+    color_analyzer = ColorAnalyzer()
+
+    all_colors = []
+    for artist in artists:
+        works = analyzer.extract_artist_works(artist, limit=5)
+        for work in works:
+            colors = extractor.extract_dominant_colors(work['image'], n_colors=5)
+            all_colors.extend(colors)
+
+    return color_analyzer.analyze_palette_statistics(all_colors)
+
+imp_stats = analyze_movement(impressionists)
+exp_stats = analyze_movement(expressionists)
+
+print(f"Impressionism - Saturation: {imp_stats['mean_saturation']:.1f}%")
+print(f"Expressionism - Saturation: {exp_stats['mean_saturation']:.1f}%")
 ```
 
-### Classroom Exercise 2: Visual Style Analysis
-
-Analyze and visualize an artist's style distribution:
+### Example 3: Color Space Education
 
 ```python
-from renoir import ArtistAnalyzer
+from renoir.color import ColorAnalyzer
 
-analyzer = ArtistAnalyzer()
+# Teaching RGB vs HSV
+analyzer = ColorAnalyzer()
 
-# Create a comprehensive visual overview
-analyzer.create_artist_overview('pablo-picasso')
-
-# Or create specific visualizations
-analyzer.plot_style_distribution('pablo-picasso')
-analyzer.plot_genre_distribution('pablo-picasso')
-```
-
-### Classroom Exercise 3: Comparative Analysis
-
-Compare multiple artists visually:
-
-```python
-from renoir import ArtistAnalyzer
-
-analyzer = ArtistAnalyzer()
-
-# Compare Impressionist masters
-impressionist_artists = [
-    'pierre-auguste-renoir',
-    'claude-monet',
-    'edgar-degas',
-    'camille-pissarro'
+test_colors = [
+    (255, 0, 0),    # Red
+    (0, 255, 0),    # Green
+    (0, 0, 255),    # Blue
 ]
 
-analyzer.compare_artists_genres(impressionist_artists)
+for rgb in test_colors:
+    hsv = analyzer.rgb_to_hsv(rgb)
+    print(f"RGB{rgb} -> HSV({hsv[0]:.0f}°, {hsv[1]:.0f}%, {hsv[2]:.0f}%)")
 ```
+
+## Jupyter Notebooks
+
+Three complete educational notebooks are included in `examples/color_analysis/`:
+
+1. **01_color_palette_extraction.ipynb** - Introduction to k-means clustering through art
+2. **02_color_space_analysis.ipynb** - Understanding RGB vs HSV color spaces
+3. **03_comparative_artist_analysis.ipynb** - Comparing artistic movements statistically
 
 ## Dataset Information
 
-This tool uses the [WikiArt dataset](https://huggingface.co/datasets/huggan/wikiart) from HuggingFace, which contains:
+Uses the [WikiArt dataset](https://huggingface.co/datasets/huggan/wikiart) from HuggingFace:
 
 - Over 81,000 artworks
 - Works by 129 artists
 - Rich metadata including genre, style, and artist information
-
-## Educational Philosophy
-
-`renoir` is built on these pedagogical principles:
-
-1. **Simplicity first**: Clear, readable code that students can understand
-2. **Cultural data**: Uses art history to teach data analysis concepts
-3. **Extensible**: Students can fork and extend for their own projects
-4. **Real datasets**: Works with actual cultural heritage data, not toy examples
 
 ## Requirements
 
@@ -244,6 +313,8 @@ This tool uses the [WikiArt dataset](https://huggingface.co/datasets/huggan/wiki
 - Python 3.8+
 - datasets >= 2.0.0
 - Pillow >= 8.0.0
+- numpy >= 1.20.0
+- scikit-learn >= 1.0.0
 
 ### Visualization Requirements (Optional)
 
@@ -252,12 +323,53 @@ This tool uses the [WikiArt dataset](https://huggingface.co/datasets/huggan/wiki
 
 Install with: `pip install 'renoir-wikiart[visualization]'`
 
+## Educational Philosophy
+
+`renoir` is built on these pedagogical principles:
+
+1. **Cultural Relevance**: Uses art history to teach computational concepts
+2. **Progressive Complexity**: From simple function calls to advanced analysis
+3. **Visual Learning**: Students see immediate, meaningful results
+4. **Real Data**: Works with actual cultural heritage data, not toy examples
+5. **Extensible**: Students can fork and extend for their own projects
+
+## API Overview
+
+### Artist Analysis
+- `ArtistAnalyzer` - Main class for artist work extraction and analysis
+- `quick_analysis()` - Convenience function for quick exploration
+
+### Color Analysis (v3.0.0)
+- `ColorExtractor` - Extract color palettes using k-means clustering
+- `ColorAnalyzer` - Analyze colors across multiple color spaces
+- `ColorVisualizer` - Create publication-quality color visualizations
+
+## Citation
+
+If you use this software in your research or teaching, please cite:
+
+```bibtex
+@software{semoglou2025renoir,
+  author = {Semoglou, Michail},
+  title = {renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt},
+  year = {2025},
+  version = {3.0.0},
+  doi = {10.5281/zenodo.17573993},
+  url = {https://github.com/MichailSemoglou/renoir}
+}
+```
+
+## Academic Context
+
+This package is described in detail in our SoftwareX paper: "renoir: A Python Package for Artist-Specific Analysis and Computational Color Theory Education Using WikiArt"
+
 ## Contributing
 
 Contributions are welcome, especially:
 
 - Additional pedagogical examples
 - Classroom exercises and assignments
+- Educational notebooks
 - Documentation improvements
 - Bug fixes
 
@@ -271,8 +383,23 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 - WikiArt dataset creators
 - HuggingFace Datasets library
-- Students in computational design courses who inspired this tool
+- Students at Tongji University and University of Ioannina whose feedback shaped this tool
+- College of Design and Innovation, Tongji University
+- School of Fine Arts, University of Ioannina
 
 ## Contact
 
-For questions about using this tool in your classroom, please open an issue or contact [m.semoglou@tongji.edu.cn](mailto:m.semoglou@tongji.edu.cn).
+For questions about using this tool in your classroom or research:
+- Email: [m.semoglou@tongji.edu.cn](mailto:m.semoglou@tongji.edu.cn)
+- Issues: [GitHub Issues](https://github.com/MichailSemoglou/renoir/issues)
+
+## What's New in v3.0.0
+
+- **Color Extraction**: K-means clustering for palette extraction
+- **Color Analysis**: Multi-space analysis (RGB, HSV, HSL)
+- **Statistical Metrics**: Diversity, saturation, brightness, temperature
+- **8 Visualization Types**: Comprehensive color visualization suite
+- **3 Jupyter Notebooks**: Complete educational materials
+- **Export Capabilities**: CSS and JSON export formats
+
+See [CHANGELOG](https://github.com/MichailSemoglou/renoir/releases) for full details.
