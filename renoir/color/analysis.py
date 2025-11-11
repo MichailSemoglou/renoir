@@ -107,13 +107,45 @@ class ColorAnalyzer:
         """
         # Normalize RGB to 0-1
         r, g, b = rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0
-        
+
         # Convert using colorsys
-        h, l, s = colorsys.rgb_to_hls(r, l, s)
+        h, l, s = colorsys.rgb_to_hls(r, g, b)
         
         # Convert to standard ranges
         return (h * 360, s * 100, l * 100)
-    
+
+    def hsl_to_rgb(self, hsl: Tuple[float, float, float]) -> Tuple[int, int, int]:
+        """
+        Convert HSL color to RGB.
+
+        Args:
+            hsl: Tuple of (H, S, L) where:
+                H: Hue in degrees (0-360)
+                S: Saturation as percentage (0-100)
+                L: Lightness as percentage (0-100)
+
+        Returns:
+            Tuple of (R, G, B) values (0-255)
+        """
+        # Validate input
+        if not isinstance(hsl, (tuple, list)) or len(hsl) != 3:
+            raise ValueError("HSL must be a tuple of 3 values")
+
+        h, s, l = hsl
+        if not (0 <= h <= 360 and 0 <= s <= 100 and 0 <= l <= 100):
+            raise ValueError("H must be 0-360, S and L must be 0-100")
+
+        # Normalize to 0-1 range
+        h = h / 360.0
+        s = s / 100.0
+        l = l / 100.0
+
+        # Convert using colorsys
+        r, g, b = colorsys.hls_to_rgb(h, l, s)
+
+        # Scale to 0-255
+        return (int(round(r * 255)), int(round(g * 255)), int(round(b * 255)))
+
     def analyze_palette_statistics(
         self, 
         colors: List[Tuple[int, int, int]]
