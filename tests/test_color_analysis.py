@@ -233,7 +233,9 @@ def test_classify_color_temperature(analyzer):
     # Cool colors (hue 120-300)
     assert analyzer.classify_color_temperature((0, 255, 0)) == "cool"  # Green
     assert analyzer.classify_color_temperature((0, 0, 255)) == "cool"  # Blue
-    assert analyzer.classify_color_temperature((75, 0, 130)) == "cool"  # Indigo (hue ~275°)
+    assert (
+        analyzer.classify_color_temperature((75, 0, 130)) == "cool"
+    )  # Indigo (hue ~275°)
 
     # Neutral (low saturation < 10%)
     assert analyzer.classify_color_temperature((128, 128, 128)) == "neutral"  # Gray
