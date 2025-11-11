@@ -70,8 +70,12 @@ def test_hsv_to_rgb(analyzer):
 def test_rgb_hsv_roundtrip(analyzer):
     """Test RGB->HSV->RGB conversion accuracy."""
     test_colors = [
-        (255, 0, 0), (0, 255, 0), (0, 0, 255),
-        (255, 255, 0), (255, 0, 255), (0, 255, 255)
+        (255, 0, 0),
+        (0, 255, 0),
+        (0, 0, 255),
+        (255, 255, 0),
+        (255, 0, 255),
+        (0, 255, 255),
     ]
 
     for rgb in test_colors:
@@ -108,43 +112,43 @@ def test_hsl_to_rgb(analyzer):
 def test_analyze_palette_statistics(analyzer):
     """Test palette statistics analysis."""
     colors = [
-        (255, 0, 0),    # Red
-        (0, 255, 0),    # Green
-        (0, 0, 255),    # Blue
+        (255, 0, 0),  # Red
+        (0, 255, 0),  # Green
+        (0, 0, 255),  # Blue
         (255, 255, 0),  # Yellow
     ]
 
     stats = analyzer.analyze_palette_statistics(colors)
 
     assert isinstance(stats, dict)
-    assert 'mean_hue' in stats
-    assert 'mean_saturation' in stats
-    assert 'mean_value' in stats
-    assert 'std_hue' in stats
-    assert 'std_saturation' in stats
-    assert 'std_value' in stats
+    assert "mean_hue" in stats
+    assert "mean_saturation" in stats
+    assert "mean_value" in stats
+    assert "std_hue" in stats
+    assert "std_saturation" in stats
+    assert "std_value" in stats
 
     # All test colors are fully saturated
-    assert stats['mean_saturation'] == pytest.approx(100, abs=5)
-    assert stats['mean_value'] == pytest.approx(100, abs=5)
+    assert stats["mean_saturation"] == pytest.approx(100, abs=5)
+    assert stats["mean_value"] == pytest.approx(100, abs=5)
 
 
 def test_analyze_palette_statistics_empty(analyzer):
     """Test statistics with empty palette."""
     stats = analyzer.analyze_palette_statistics([])
 
-    assert stats['mean_hue'] == 0
-    assert stats['mean_saturation'] == 0
-    assert stats['mean_value'] == 0
+    assert stats["mean_hue"] == 0
+    assert stats["mean_saturation"] == 0
+    assert stats["mean_value"] == 0
 
 
 def test_calculate_color_diversity(analyzer):
     """Test color diversity calculation."""
     # Diverse palette
     diverse_colors = [
-        (255, 0, 0),    # Red
-        (0, 255, 0),    # Green
-        (0, 0, 255),    # Blue
+        (255, 0, 0),  # Red
+        (0, 255, 0),  # Green
+        (0, 0, 255),  # Blue
         (255, 255, 0),  # Yellow
         (255, 0, 255),  # Magenta
         (0, 255, 255),  # Cyan
@@ -207,69 +211,71 @@ def test_compare_palettes(analyzer):
     comparison = analyzer.compare_palettes(palette1, palette2)
 
     assert isinstance(comparison, dict)
-    assert 'palette1_stats' in comparison
-    assert 'palette2_stats' in comparison
-    assert 'hue_diff' in comparison
-    assert 'saturation_diff' in comparison
-    assert 'brightness_diff' in comparison
-    assert 'diversity_diff' in comparison
+    assert "palette1_stats" in comparison
+    assert "palette2_stats" in comparison
+    assert "hue_diff" in comparison
+    assert "saturation_diff" in comparison
+    assert "brightness_diff" in comparison
+    assert "diversity_diff" in comparison
 
     # Palette1 should have higher brightness
-    assert comparison['brightness_diff'] > 0
+    assert comparison["brightness_diff"] > 0
 
 
 def test_classify_color_temperature(analyzer):
     """Test color temperature classification."""
     # Warm colors
-    assert analyzer.classify_color_temperature((255, 0, 0)) == 'warm'  # Red
-    assert analyzer.classify_color_temperature((255, 165, 0)) == 'warm'  # Orange
-    assert analyzer.classify_color_temperature((255, 255, 0)) == 'neutral'  # Yellow
+    assert analyzer.classify_color_temperature((255, 0, 0)) == "warm"  # Red
+    assert analyzer.classify_color_temperature((255, 165, 0)) == "warm"  # Orange
+    assert analyzer.classify_color_temperature((255, 255, 0)) == "neutral"  # Yellow
 
     # Cool colors
-    assert analyzer.classify_color_temperature((0, 255, 0)) == 'cool'  # Green
-    assert analyzer.classify_color_temperature((0, 0, 255)) == 'cool'  # Blue
-    assert analyzer.classify_color_temperature((128, 0, 128)) == 'cool'  # Purple
+    assert analyzer.classify_color_temperature((0, 255, 0)) == "cool"  # Green
+    assert analyzer.classify_color_temperature((0, 0, 255)) == "cool"  # Blue
+    assert analyzer.classify_color_temperature((128, 0, 128)) == "cool"  # Purple
 
     # Neutral (low saturation)
-    assert analyzer.classify_color_temperature((128, 128, 128)) == 'neutral'  # Gray
-    assert analyzer.classify_color_temperature((200, 200, 200)) == 'neutral'  # Light gray
+    assert analyzer.classify_color_temperature((128, 128, 128)) == "neutral"  # Gray
+    assert (
+        analyzer.classify_color_temperature((200, 200, 200)) == "neutral"
+    )  # Light gray
 
 
 def test_analyze_color_temperature_distribution(analyzer):
     """Test temperature distribution analysis."""
     colors = [
-        (255, 0, 0),     # Warm
-        (255, 165, 0),   # Warm
-        (0, 255, 0),     # Cool
-        (0, 0, 255),     # Cool
-        (128, 128, 128), # Neutral
+        (255, 0, 0),  # Warm
+        (255, 165, 0),  # Warm
+        (0, 255, 0),  # Cool
+        (0, 0, 255),  # Cool
+        (128, 128, 128),  # Neutral
     ]
 
     dist = analyzer.analyze_color_temperature_distribution(colors)
 
     assert isinstance(dist, dict)
-    assert 'warm_count' in dist
-    assert 'cool_count' in dist
-    assert 'neutral_count' in dist
-    assert 'warm_percentage' in dist
-    assert 'cool_percentage' in dist
-    assert 'neutral_percentage' in dist
-    assert 'dominant_temperature' in dist
+    assert "warm_count" in dist
+    assert "cool_count" in dist
+    assert "neutral_count" in dist
+    assert "warm_percentage" in dist
+    assert "cool_percentage" in dist
+    assert "neutral_percentage" in dist
+    assert "dominant_temperature" in dist
 
-    assert dist['warm_count'] == 2
-    assert dist['cool_count'] == 2
-    assert dist['neutral_count'] == 1
-    assert dist['warm_percentage'] == pytest.approx(40, abs=1)
-    assert dist['cool_percentage'] == pytest.approx(40, abs=1)
+    assert dist["warm_count"] == 2
+    assert dist["cool_count"] == 2
+    assert dist["neutral_count"] == 1
+    assert dist["warm_percentage"] == pytest.approx(40, abs=1)
+    assert dist["cool_percentage"] == pytest.approx(40, abs=1)
 
 
 def test_detect_complementary_colors(analyzer):
     """Test complementary color detection."""
     # Red and cyan are complementary
     colors = [
-        (255, 0, 0),     # Red (hue 0)
-        (0, 255, 255),   # Cyan (hue 180)
-        (0, 255, 0),     # Green (not complementary to others)
+        (255, 0, 0),  # Red (hue 0)
+        (0, 255, 255),  # Cyan (hue 180)
+        (0, 255, 0),  # Green (not complementary to others)
     ]
 
     pairs = analyzer.detect_complementary_colors(colors, tolerance=30)
@@ -315,7 +321,7 @@ def test_contrast_ratio_symmetry(analyzer):
 def test_wcag_compliance_check(analyzer):
     """Test WCAG contrast ratio compliance."""
     # Test that method exists
-    assert hasattr(analyzer, 'wcag_compliance_check')
+    assert hasattr(analyzer, "wcag_compliance_check")
 
     # High contrast should pass
     ratio = analyzer.calculate_contrast_ratio((0, 0, 0), (255, 255, 255))

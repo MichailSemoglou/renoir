@@ -14,8 +14,4 @@ from .extraction import ColorExtractor
 from .analysis import ColorAnalyzer
 from .visualization import ColorVisualizer
 
-__all__ = [
-    "ColorExtractor",
-    "ColorAnalyzer",
-    "ColorVisualizer"
-]
+__all__ = ["ColorExtractor", "ColorAnalyzer", "ColorVisualizer"]

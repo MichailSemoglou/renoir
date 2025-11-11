@@ -48,9 +48,7 @@ class ArtistAnalyzer:
             try:
                 print("Loading WikiArt dataset...")
                 self._dataset = load_dataset(
-                    "huggan/wikiart",
-                    split="train",
-                    cache_dir=self.cache_dir
+                    "huggan/wikiart", split="train", cache_dir=self.cache_dir
                 )
                 print(f"✓ Loaded {len(self._dataset)} artworks")
             except Exception as e:
@@ -62,9 +60,7 @@ class ArtistAnalyzer:
         return self._dataset
 
     def extract_artist_works(
-        self,
-        artist_name: str,
-        limit: Optional[int] = None
+        self, artist_name: str, limit: Optional[int] = None
     ) -> List[Dict[str, Any]]:
         """
         Extract all works by a specific artist from WikiArt.
@@ -90,7 +86,7 @@ class ArtistAnalyzer:
         if not artist_name or not isinstance(artist_name, str):
             raise ValueError("artist_name must be a non-empty string")
 
-        if artist_name.strip() == '':
+        if artist_name.strip() == "":
             raise ValueError("artist_name cannot be empty or whitespace")
 
         if limit is not None:
@@ -111,7 +107,7 @@ class ArtistAnalyzer:
         artist_works = []
         try:
             for item in dataset:
-                if item.get('artist', '').lower() == artist_name.lower():
+                if item.get("artist", "").lower() == artist_name.lower():
                     artist_works.append(item)
                     if limit and len(artist_works) >= limit:
                         break
@@ -120,7 +116,9 @@ class ArtistAnalyzer:
 
         if not artist_works:
             print(f"⚠ No works found for artist '{artist_name}'")
-            print(f"  Tip: Check spelling and use lowercase with hyphens (e.g., 'claude-monet')")
+            print(
+                f"  Tip: Check spelling and use lowercase with hyphens (e.g., 'claude-monet')"
+            )
         else:
             print(f"✓ Found {len(artist_works)} works by {artist_name}")
 
@@ -156,7 +154,7 @@ class ArtistAnalyzer:
             if not isinstance(work, dict):
                 raise TypeError(f"Item at index {i} is not a dictionary")
 
-        genres = [work.get('genre', 'Unknown') for work in works]
+        genres = [work.get("genre", "Unknown") for work in works]
         genre_counts = Counter(genres).most_common()
         return genre_counts
 
@@ -191,13 +189,12 @@ class ArtistAnalyzer:
             if not isinstance(work, dict):
                 raise TypeError(f"Item at index {i} is not a dictionary")
 
-        styles = [work.get('style', 'Unknown') for work in works]
+        styles = [work.get("style", "Unknown") for work in works]
         style_counts = Counter(styles).most_common()
         return style_counts
 
     def analyze_temporal_distribution(
-        self,
-        works: List[Dict[str, Any]]
+        self, works: List[Dict[str, Any]]
     ) -> Dict[str, int]:
         """
         Analyze the temporal distribution of works by decade.
@@ -216,7 +213,7 @@ class ArtistAnalyzer:
         """
         decades = {}
         for work in works:
-            date = work.get('date')
+            date = work.get("date")
             if date and isinstance(date, (int, str)):
                 try:
                     year = int(str(date)[:4]) if isinstance(date, str) else date
@@ -244,11 +241,11 @@ class ArtistAnalyzer:
         """
         if not works:
             return {
-                'total_works': 0,
-                'artist': None,
-                'primary_style': None,
-                'primary_genre': None,
-                'date_range': None
+                "total_works": 0,
+                "artist": None,
+                "primary_style": None,
+                "primary_genre": None,
+                "date_range": None,
             }
 
         genres = self.analyze_genres(works)
@@ -257,7 +254,7 @@ class ArtistAnalyzer:
         # Extract date range
         dates = []
         for work in works:
-            date = work.get('date')
+            date = work.get("date")
             if date:
                 try:
                     year = int(str(date)[:4]) if isinstance(date, str) else date
@@ -270,13 +267,13 @@ class ArtistAnalyzer:
             date_range = (min(dates), max(dates))
 
         return {
-            'total_works': len(works),
-            'artist': works[0].get('artist', 'Unknown'),
-            'primary_style': styles[0][0] if styles else None,
-            'primary_genre': genres[0][0] if genres else None,
-            'date_range': date_range,
-            'all_genres': genres,
-            'all_styles': styles
+            "total_works": len(works),
+            "artist": works[0].get("artist", "Unknown"),
+            "primary_style": styles[0][0] if styles else None,
+            "primary_genre": genres[0][0] if genres else None,
+            "date_range": date_range,
+            "all_genres": genres,
+            "all_styles": styles,
         }
 
     def _check_visualization_available(self) -> bool:
@@ -289,6 +286,7 @@ class ArtistAnalyzer:
         try:
             import matplotlib.pyplot as plt
             import seaborn as sns
+
             return True
         except ImportError:
             return False
@@ -298,7 +296,7 @@ class ArtistAnalyzer:
         artist_name: str,
         limit: Optional[int] = None,
         save_path: Optional[str] = None,
-        figsize: tuple = (10, 6)
+        figsize: tuple = (10, 6),
     ) -> None:
         """
         Plot genre distribution for a specific artist as a bar chart.
@@ -337,14 +335,16 @@ class ArtistAnalyzer:
         fig, ax = plt.subplots(figsize=figsize)
         sns.barplot(x=genre_counts, y=genre_names, ax=ax, palette="viridis")
 
-        ax.set_xlabel('Number of Works', fontsize=12)
-        ax.set_ylabel('Genre', fontsize=12)
-        ax.set_title(f'Genre Distribution: {artist_name}', fontsize=14, fontweight='bold')
+        ax.set_xlabel("Number of Works", fontsize=12)
+        ax.set_ylabel("Genre", fontsize=12)
+        ax.set_title(
+            f"Genre Distribution: {artist_name}", fontsize=14, fontweight="bold"
+        )
 
         plt.tight_layout()
 
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Figure saved to {save_path}")
         else:
             plt.show()
@@ -354,7 +354,7 @@ class ArtistAnalyzer:
         artist_name: str,
         limit: Optional[int] = None,
         save_path: Optional[str] = None,
-        figsize: tuple = (10, 6)
+        figsize: tuple = (10, 6),
     ) -> None:
         """
         Plot style distribution for a specific artist as a bar chart.
@@ -393,14 +393,16 @@ class ArtistAnalyzer:
         fig, ax = plt.subplots(figsize=figsize)
         sns.barplot(x=style_counts, y=style_names, ax=ax, palette="mako")
 
-        ax.set_xlabel('Number of Works', fontsize=12)
-        ax.set_ylabel('Style', fontsize=12)
-        ax.set_title(f'Style Distribution: {artist_name}', fontsize=14, fontweight='bold')
+        ax.set_xlabel("Number of Works", fontsize=12)
+        ax.set_ylabel("Style", fontsize=12)
+        ax.set_title(
+            f"Style Distribution: {artist_name}", fontsize=14, fontweight="bold"
+        )
 
         plt.tight_layout()
 
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Figure saved to {save_path}")
         else:
             plt.show()
@@ -410,7 +412,7 @@ class ArtistAnalyzer:
         artist_names: List[str],
         limit: Optional[int] = None,
         save_path: Optional[str] = None,
-        figsize: tuple = (12, 8)
+        figsize: tuple = (12, 8),
     ) -> None:
         """
         Compare genre distributions across multiple artists.
@@ -441,11 +443,7 @@ class ArtistAnalyzer:
             genres = self.analyze_genres(works)
 
             for genre, count in genres:
-                all_data.append({
-                    'Artist': artist_name,
-                    'Genre': genre,
-                    'Count': count
-                })
+                all_data.append({"Artist": artist_name, "Genre": genre, "Count": count})
 
         if not all_data:
             print("No data available for comparison")
@@ -458,19 +456,19 @@ class ArtistAnalyzer:
         fig, ax = plt.subplots(figsize=figsize)
 
         # Pivot data for grouped bars
-        pivot_df = df.pivot(index='Genre', columns='Artist', values='Count').fillna(0)
-        pivot_df.plot(kind='bar', ax=ax, width=0.8)
+        pivot_df = df.pivot(index="Genre", columns="Artist", values="Count").fillna(0)
+        pivot_df.plot(kind="bar", ax=ax, width=0.8)
 
-        ax.set_xlabel('Genre', fontsize=12)
-        ax.set_ylabel('Number of Works', fontsize=12)
-        ax.set_title('Genre Distribution Comparison', fontsize=14, fontweight='bold')
-        ax.legend(title='Artist', bbox_to_anchor=(1.05, 1), loc='upper left')
-        plt.xticks(rotation=45, ha='right')
+        ax.set_xlabel("Genre", fontsize=12)
+        ax.set_ylabel("Number of Works", fontsize=12)
+        ax.set_title("Genre Distribution Comparison", fontsize=14, fontweight="bold")
+        ax.legend(title="Artist", bbox_to_anchor=(1.05, 1), loc="upper left")
+        plt.xticks(rotation=45, ha="right")
 
         plt.tight_layout()
 
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Figure saved to {save_path}")
         else:
             plt.show()
@@ -480,7 +478,7 @@ class ArtistAnalyzer:
         artist_name: str,
         limit: Optional[int] = None,
         save_path: Optional[str] = None,
-        figsize: tuple = (14, 10)
+        figsize: tuple = (14, 10),
     ) -> None:
         """
         Create a comprehensive overview visualization for an artist.
@@ -518,21 +516,28 @@ class ArtistAnalyzer:
         gs = fig.add_gridspec(3, 2, hspace=0.3, wspace=0.3)
 
         # Title
-        fig.suptitle(f'Artist Overview: {artist_name}',
-                    fontsize=16, fontweight='bold', y=0.98)
+        fig.suptitle(
+            f"Artist Overview: {artist_name}", fontsize=16, fontweight="bold", y=0.98
+        )
 
         # Summary text
         ax_summary = fig.add_subplot(gs[0, :])
-        ax_summary.axis('off')
+        ax_summary.axis("off")
         summary_text = f"""
         Total Works: {summary['total_works']}
         Primary Style: {summary['primary_style']}
         Primary Genre: {summary['primary_genre']}
         Date Range: {summary['date_range'][0]}-{summary['date_range'][1] if summary['date_range'] else 'N/A'}
         """
-        ax_summary.text(0.5, 0.5, summary_text,
-                       ha='center', va='center', fontsize=12,
-                       bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.3))
+        ax_summary.text(
+            0.5,
+            0.5,
+            summary_text,
+            ha="center",
+            va="center",
+            fontsize=12,
+            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.3),
+        )
 
         # Genre distribution
         if genres:
@@ -540,9 +545,9 @@ class ArtistAnalyzer:
             genre_names = [g[0] for g in genres[:10]]  # Top 10
             genre_counts = [g[1] for g in genres[:10]]
             sns.barplot(x=genre_counts, y=genre_names, ax=ax_genre, palette="viridis")
-            ax_genre.set_xlabel('Count')
-            ax_genre.set_ylabel('Genre')
-            ax_genre.set_title('Genre Distribution', fontweight='bold')
+            ax_genre.set_xlabel("Count")
+            ax_genre.set_ylabel("Genre")
+            ax_genre.set_title("Genre Distribution", fontweight="bold")
 
         # Style distribution
         if styles:
@@ -550,24 +555,24 @@ class ArtistAnalyzer:
             style_names = [s[0] for s in styles[:10]]  # Top 10
             style_counts = [s[1] for s in styles[:10]]
             sns.barplot(x=style_counts, y=style_names, ax=ax_style, palette="mako")
-            ax_style.set_xlabel('Count')
-            ax_style.set_ylabel('Style')
-            ax_style.set_title('Style Distribution', fontweight='bold')
+            ax_style.set_xlabel("Count")
+            ax_style.set_ylabel("Style")
+            ax_style.set_title("Style Distribution", fontweight="bold")
 
         # Temporal distribution
         if temporal:
             ax_temporal = fig.add_subplot(gs[2, :])
             decades = sorted(temporal.keys())
             counts = [temporal[d] for d in decades]
-            ax_temporal.plot(decades, counts, marker='o', linewidth=2, markersize=8)
+            ax_temporal.plot(decades, counts, marker="o", linewidth=2, markersize=8)
             ax_temporal.fill_between(decades, counts, alpha=0.3)
-            ax_temporal.set_xlabel('Decade')
-            ax_temporal.set_ylabel('Number of Works')
-            ax_temporal.set_title('Temporal Distribution', fontweight='bold')
+            ax_temporal.set_xlabel("Decade")
+            ax_temporal.set_ylabel("Number of Works")
+            ax_temporal.set_title("Temporal Distribution", fontweight="bold")
             ax_temporal.grid(True, alpha=0.3)
 
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Figure saved to {save_path}")
         else:
             plt.show()
@@ -577,7 +582,7 @@ def quick_analysis(
     artist_name: str,
     limit: Optional[int] = None,
     show_summary: bool = True,
-    show_plots: bool = False
+    show_plots: bool = False,
 ) -> List[Dict[str, Any]]:
     """
     Quick function to analyze an artist's works with minimal setup.
@@ -618,8 +623,10 @@ def quick_analysis(
         print(f"- Total works: {summary['total_works']}")
         print(f"- Primary style: {summary['primary_style']}")
         print(f"- Primary genre: {summary['primary_genre']}")
-        if summary['date_range']:
-            print(f"- Date range: {summary['date_range'][0]}-{summary['date_range'][1]}")
+        if summary["date_range"]:
+            print(
+                f"- Date range: {summary['date_range'][0]}-{summary['date_range'][1]}"
+            )
 
     if show_plots:
         analyzer.create_artist_overview(artist_name, limit=limit)

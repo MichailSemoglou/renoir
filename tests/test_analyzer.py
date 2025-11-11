@@ -17,21 +17,21 @@ def test_artist_analyzer_initialization():
 def test_extract_artist_works():
     """Test extracting works for a specific artist."""
     analyzer = ArtistAnalyzer()
-    works = analyzer.extract_artist_works('pierre-auguste-renoir', limit=5)
+    works = analyzer.extract_artist_works("pierre-auguste-renoir", limit=5)
     assert isinstance(works, list)
     assert len(works) > 0
     assert len(works) <= 5
 
     # Check that all works have required keys
     for work in works:
-        assert 'artist' in work
-        assert 'image' in work
+        assert "artist" in work
+        assert "image" in work
 
 
 def test_analyze_genres():
     """Test genre analysis."""
     analyzer = ArtistAnalyzer()
-    works = analyzer.extract_artist_works('pierre-auguste-renoir', limit=10)
+    works = analyzer.extract_artist_works("pierre-auguste-renoir", limit=10)
     genres = analyzer.analyze_genres(works)
 
     assert isinstance(genres, list)
@@ -47,7 +47,7 @@ def test_analyze_genres():
 def test_analyze_styles():
     """Test style analysis."""
     analyzer = ArtistAnalyzer()
-    works = analyzer.extract_artist_works('pierre-auguste-renoir', limit=10)
+    works = analyzer.extract_artist_works("pierre-auguste-renoir", limit=10)
     styles = analyzer.analyze_styles(works)
 
     assert isinstance(styles, list)
@@ -63,7 +63,7 @@ def test_analyze_styles():
 def test_analyze_temporal_distribution():
     """Test temporal distribution analysis."""
     analyzer = ArtistAnalyzer()
-    works = analyzer.extract_artist_works('pierre-auguste-renoir', limit=10)
+    works = analyzer.extract_artist_works("pierre-auguste-renoir", limit=10)
     temporal = analyzer.analyze_temporal_distribution(works)
 
     assert isinstance(temporal, dict)
@@ -77,21 +77,21 @@ def test_analyze_temporal_distribution():
 def test_get_work_summary():
     """Test work summary generation."""
     analyzer = ArtistAnalyzer()
-    works = analyzer.extract_artist_works('pierre-auguste-renoir', limit=10)
+    works = analyzer.extract_artist_works("pierre-auguste-renoir", limit=10)
     summary = analyzer.get_work_summary(works)
 
     assert isinstance(summary, dict)
-    assert 'total_works' in summary
-    assert 'artist' in summary
-    assert 'primary_style' in summary
-    assert 'primary_genre' in summary
-    assert 'date_range' in summary
-    assert summary['total_works'] == len(works)
+    assert "total_works" in summary
+    assert "artist" in summary
+    assert "primary_style" in summary
+    assert "primary_genre" in summary
+    assert "date_range" in summary
+    assert summary["total_works"] == len(works)
 
 
 def test_quick_analysis():
     """Test quick analysis function."""
-    works = quick_analysis('claude-monet', limit=5, show_summary=False)
+    works = quick_analysis("claude-monet", limit=5, show_summary=False)
     assert isinstance(works, list)
     assert len(works) > 0
     assert len(works) <= 5
@@ -109,11 +109,11 @@ def test_visualization_methods_exist():
     analyzer = ArtistAnalyzer()
 
     # Check that visualization methods exist
-    assert hasattr(analyzer, 'plot_genre_distribution')
-    assert hasattr(analyzer, 'plot_style_distribution')
-    assert hasattr(analyzer, 'compare_artists_genres')
-    assert hasattr(analyzer, 'create_artist_overview')
-    assert hasattr(analyzer, '_check_visualization_available')
+    assert hasattr(analyzer, "plot_genre_distribution")
+    assert hasattr(analyzer, "plot_style_distribution")
+    assert hasattr(analyzer, "compare_artists_genres")
+    assert hasattr(analyzer, "create_artist_overview")
+    assert hasattr(analyzer, "_check_visualization_available")
 
 
 def test_visualization_check():
@@ -140,4 +140,4 @@ def test_empty_works_handling():
     assert temporal == {}
 
     summary = analyzer.get_work_summary(empty_works)
-    assert summary['total_works'] == 0
+    assert summary["total_works"] == 0
