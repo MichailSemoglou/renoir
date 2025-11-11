@@ -226,7 +226,9 @@ def test_classify_color_temperature(analyzer):
     # Warm colors (hue 0-60 or 300-360)
     assert analyzer.classify_color_temperature((255, 0, 0)) == "warm"  # Red
     assert analyzer.classify_color_temperature((255, 165, 0)) == "warm"  # Orange
-    assert analyzer.classify_color_temperature((255, 255, 0)) == "warm"  # Yellow (hue ~60)
+    assert (
+        analyzer.classify_color_temperature((255, 255, 0)) == "warm"
+    )  # Yellow (hue ~60)
 
     # Cool colors (hue 120-300)
     assert analyzer.classify_color_temperature((0, 255, 0)) == "cool"  # Green
