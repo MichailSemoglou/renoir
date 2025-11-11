@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="renoir-wikiart",
-    version="3.0.0",
+    version="3.0.1",
     packages=find_packages(exclude=['tests*', 'examples*', 'Research*', 'test_env*', 'Pierre-Auguste Renoir*', 'jose*']),
     python_requires=">=3.8",
     install_requires=[
