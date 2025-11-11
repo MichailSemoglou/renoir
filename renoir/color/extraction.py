@@ -37,7 +37,7 @@ class ColorExtractor:
             print("Install with: pip install scikit-learn")
     
     def extract_dominant_colors(
-        self, 
+        self,
         image: Union[Image.Image, np.ndarray],
         n_colors: int = 5,
         method: str = 'kmeans',
@@ -45,21 +45,28 @@ class ColorExtractor:
     ) -> List[Tuple[int, int, int]]:
         """
         Extract dominant colors from an image using k-means clustering.
-        
+
         This method identifies the most prominent colors in an artwork by
         clustering pixel colors and finding cluster centers. Ideal for
         teaching students about color quantization and computational analysis.
-        
+
         Args:
             image: PIL Image or numpy array of the artwork
             n_colors: Number of dominant colors to extract (default: 5)
             method: Extraction method - 'kmeans' or 'frequency' (default: 'kmeans')
             sample_size: Number of pixels to sample for faster processing
                         None = use all pixels (default: 10000)
-        
+
         Returns:
             List of RGB tuples representing dominant colors, ordered by prominence
-            
+
+        Raises:
+            ValueError: If n_colors is invalid
+            ValueError: If sample_size is invalid
+            ValueError: If method is not recognized
+            TypeError: If image is not PIL Image or numpy array
+            ValueError: If image dimensions are invalid
+
         Example:
             >>> extractor = ColorExtractor()
             >>> from PIL import Image
@@ -68,38 +75,92 @@ class ColorExtractor:
             >>> print(colors)
             [(120, 89, 143), (201, 178, 156), ...]
         """
-        # Convert PIL Image to numpy array if needed
-        if isinstance(image, Image.Image):
-            img_array = np.array(image)
+        # Input validation
+        if not isinstance(n_colors, int):
+            raise ValueError("n_colors must be an integer")
+        if n_colors < 1:
+            raise ValueError("n_colors must be at least 1")
+        if n_colors > 256:
+            raise ValueError("n_colors cannot exceed 256")
+
+        if sample_size is not None:
+            if not isinstance(sample_size, int):
+                raise ValueError("sample_size must be an integer or None")
+            if sample_size < 1:
+                raise ValueError("sample_size must be positive")
+
+        if method not in ['kmeans', 'frequency']:
+            raise ValueError("method must be 'kmeans' or 'frequency'")
+
+        # Validate and convert image
+        try:
+            if isinstance(image, Image.Image):
+                img_array = np.array(image)
+            elif isinstance(image, np.ndarray):
+                img_array = image
+            else:
+                raise TypeError(
+                    "image must be a PIL Image or numpy array, "
+                    f"got {type(image).__name__}"
+                )
+        except Exception as e:
+            raise TypeError(f"Failed to convert image to array: {str(e)}")
+
+        # Validate image dimensions
+        if img_array.ndim not in [2, 3]:
+            raise ValueError(
+                f"Image must be 2D or 3D array, got {img_array.ndim}D"
+            )
+
+        if img_array.ndim == 3:
+            if img_array.shape[-1] not in [3, 4]:
+                raise ValueError(
+                    f"Image must have 3 (RGB) or 4 (RGBA) channels, "
+                    f"got {img_array.shape[-1]}"
+                )
+            # Handle RGBA images by removing alpha channel
+            if img_array.shape[-1] == 4:
+                img_array = img_array[:, :, :3]
         else:
-            img_array = image
-        
-        # Handle RGBA images by removing alpha channel
-        if img_array.shape[-1] == 4:
-            img_array = img_array[:, :, :3]
-        
+            # Grayscale - convert to RGB
+            img_array = np.stack([img_array] * 3, axis=-1)
+
+        # Check image is not empty
+        if img_array.size == 0:
+            raise ValueError("Image is empty")
+
         # Reshape to 2D array of pixels
-        pixels = img_array.reshape(-1, 3)
-        
+        try:
+            pixels = img_array.reshape(-1, 3)
+        except Exception as e:
+            raise ValueError(f"Failed to reshape image: {str(e)}")
+
         # Remove any invalid pixels (e.g., all zeros, all 255s)
         valid_pixels = pixels[~np.all(pixels == 0, axis=1)]
         valid_pixels = valid_pixels[~np.all(valid_pixels == 255, axis=1)]
-        
+
         if len(valid_pixels) == 0:
             print("Warning: No valid pixels found in image")
             return [(0, 0, 0)] * n_colors
-        
+
+        if len(valid_pixels) < n_colors:
+            print(f"Warning: Only {len(valid_pixels)} unique pixels, fewer than requested {n_colors} colors")
+            n_colors = len(valid_pixels)
+
         # Sample pixels for faster processing
         if sample_size and len(valid_pixels) > sample_size:
             indices = np.random.choice(len(valid_pixels), sample_size, replace=False)
             sampled_pixels = valid_pixels[indices]
         else:
             sampled_pixels = valid_pixels
-        
-        if method == 'kmeans' and self.use_sklearn:
-            return self._extract_kmeans(sampled_pixels, n_colors)
-        else:
-            return self._extract_frequency(sampled_pixels, n_colors)
+
+        try:
+            if method == 'kmeans' and self.use_sklearn:
+                return self._extract_kmeans(sampled_pixels, n_colors)
+            else:
+                return self._extract_frequency(sampled_pixels, n_colors)
+        except Exception as e:
+            raise RuntimeError(f"Color extraction failed: {str(e)}")
     
     def _extract_kmeans(
         self, 

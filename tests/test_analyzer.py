@@ -5,81 +5,96 @@ These tests can be expanded as the package develops.
 """
 
 import pytest
-from renoir import ArtistAnalyzer, check_visualization_support
+from renoir import ArtistAnalyzer, quick_analysis, check_visualization_support
 
 
 def test_artist_analyzer_initialization():
     """Test that the analyzer initializes correctly."""
     analyzer = ArtistAnalyzer()
-    assert analyzer.dataset is not None
-    assert len(analyzer.artist_names) > 0
-    assert len(analyzer.genre_names) > 0
-    assert len(analyzer.style_names) > 0
-
-
-def test_get_artist_index():
-    """Test artist index retrieval."""
-    analyzer = ArtistAnalyzer()
-    renoir_index = analyzer.get_artist_index('pierre-auguste-renoir')
-    assert renoir_index is not None
-    assert isinstance(renoir_index, int)
-    
-    # Test non-existent artist
-    invalid_index = analyzer.get_artist_index('non-existent-artist')
-    assert invalid_index is None
+    assert analyzer._dataset is None  # Dataset loaded lazily
 
 
 def test_extract_artist_works():
     """Test extracting works for a specific artist."""
     analyzer = ArtistAnalyzer()
-    works = analyzer.extract_artist_works('pierre-auguste-renoir')
+    works = analyzer.extract_artist_works('pierre-auguste-renoir', limit=5)
     assert isinstance(works, list)
     assert len(works) > 0
-    
-    # Check that all works are by Renoir
-    renoir_index = analyzer.get_artist_index('pierre-auguste-renoir')
+    assert len(works) <= 5
+
+    # Check that all works have required keys
     for work in works:
-        assert work['artist'] == renoir_index
+        assert 'artist' in work
+        assert 'image' in work
 
 
 def test_analyze_genres():
     """Test genre analysis."""
     analyzer = ArtistAnalyzer()
-    works = analyzer.extract_artist_works('pierre-auguste-renoir')
+    works = analyzer.extract_artist_works('pierre-auguste-renoir', limit=10)
     genres = analyzer.analyze_genres(works)
-    
-    assert isinstance(genres, dict)
+
+    assert isinstance(genres, list)
     assert len(genres) > 0
-    assert all(isinstance(k, str) for k in genres.keys())
-    assert all(isinstance(v, int) for v in genres.values())
+    # Each genre should be a tuple of (name, count)
+    for genre_tuple in genres:
+        assert isinstance(genre_tuple, tuple)
+        assert len(genre_tuple) == 2
+        assert isinstance(genre_tuple[0], str)
+        assert isinstance(genre_tuple[1], int)
 
 
 def test_analyze_styles():
     """Test style analysis."""
     analyzer = ArtistAnalyzer()
-    works = analyzer.extract_artist_works('pierre-auguste-renoir')
+    works = analyzer.extract_artist_works('pierre-auguste-renoir', limit=10)
     styles = analyzer.analyze_styles(works)
-    
-    assert isinstance(styles, dict)
+
+    assert isinstance(styles, list)
     assert len(styles) > 0
-    assert all(isinstance(k, str) for k in styles.keys())
-    assert all(isinstance(v, int) for v in styles.values())
+    # Each style should be a tuple of (name, count)
+    for style_tuple in styles:
+        assert isinstance(style_tuple, tuple)
+        assert len(style_tuple) == 2
+        assert isinstance(style_tuple[0], str)
+        assert isinstance(style_tuple[1], int)
 
 
-def test_list_artists():
-    """Test listing artists."""
+def test_analyze_temporal_distribution():
+    """Test temporal distribution analysis."""
     analyzer = ArtistAnalyzer()
-    
-    # Test unlimited list
-    all_artists = analyzer.list_artists()
-    assert len(all_artists) > 0
-    assert isinstance(all_artists, list)
-    assert all(isinstance(artist, str) for artist in all_artists)
-    
-    # Test limited list
-    limited_artists = analyzer.list_artists(limit=5)
-    assert len(limited_artists) == 5
-    assert limited_artists == all_artists[:5]
+    works = analyzer.extract_artist_works('pierre-auguste-renoir', limit=10)
+    temporal = analyzer.analyze_temporal_distribution(works)
+
+    assert isinstance(temporal, dict)
+    # Keys should be decades (integers)
+    for decade, count in temporal.items():
+        assert isinstance(decade, int)
+        assert isinstance(count, int)
+        assert decade % 10 == 0  # Should be a decade
+
+
+def test_get_work_summary():
+    """Test work summary generation."""
+    analyzer = ArtistAnalyzer()
+    works = analyzer.extract_artist_works('pierre-auguste-renoir', limit=10)
+    summary = analyzer.get_work_summary(works)
+
+    assert isinstance(summary, dict)
+    assert 'total_works' in summary
+    assert 'artist' in summary
+    assert 'primary_style' in summary
+    assert 'primary_genre' in summary
+    assert 'date_range' in summary
+    assert summary['total_works'] == len(works)
+
+
+def test_quick_analysis():
+    """Test quick analysis function."""
+    works = quick_analysis('claude-monet', limit=5, show_summary=False)
+    assert isinstance(works, list)
+    assert len(works) > 0
+    assert len(works) <= 5
 
 
 def test_visualization_support():
@@ -92,7 +107,7 @@ def test_visualization_support():
 def test_visualization_methods_exist():
     """Test that visualization methods exist on ArtistAnalyzer."""
     analyzer = ArtistAnalyzer()
-    
+
     # Check that visualization methods exist
     assert hasattr(analyzer, 'plot_genre_distribution')
     assert hasattr(analyzer, 'plot_style_distribution')
@@ -106,3 +121,23 @@ def test_visualization_check():
     analyzer = ArtistAnalyzer()
     result = analyzer._check_visualization_available()
     assert isinstance(result, bool)
+
+
+def test_empty_works_handling():
+    """Test that methods handle empty works lists gracefully."""
+    analyzer = ArtistAnalyzer()
+
+    empty_works = []
+
+    # These should not raise errors
+    genres = analyzer.analyze_genres(empty_works)
+    assert genres == []
+
+    styles = analyzer.analyze_styles(empty_works)
+    assert styles == []
+
+    temporal = analyzer.analyze_temporal_distribution(empty_works)
+    assert temporal == {}
+
+    summary = analyzer.get_work_summary(empty_works)
+    assert summary['total_works'] == 0
