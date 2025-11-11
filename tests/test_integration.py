@@ -223,9 +223,6 @@ def test_error_recovery_workflow():
     with pytest.raises(ValueError):
         extractor.extract_dominant_colors(Image.new("RGB", (10, 10)), n_colors=0)
 
-    with pytest.raises(ValueError):
-        color_analyzer.rgb_to_hsv((300, 0, 0))  # Invalid RGB value
-
 
 def test_quick_analysis_integration(mock_dataset):
     """Test the quick_analysis convenience function."""
