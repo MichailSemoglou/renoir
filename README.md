@@ -15,12 +15,14 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 ## Key Features
 
 ### Artist Analysis
+
 - Extract and analyze works by 100+ artists from WikiArt
 - Built-in visualizations for genre and style distributions
 - Temporal analysis of artistic development
 - Comparative analysis across artists and movements
 
 ### Color Analysis (New in v3.0.0)
+
 - **Color Extraction**: K-means clustering for intelligent palette extraction
 - **Color Space Analysis**: RGB, HSV, and HSL conversions
 - **Statistical Metrics**: Color diversity, saturation, brightness, temperature
@@ -29,6 +31,7 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 - **Export Capabilities**: CSS variables and JSON formats
 
 ### Educational Focus
+
 - Designed specifically for classroom use and student projects
 - Progressive complexity from beginner to advanced
 - Publication-ready visualizations
@@ -336,10 +339,12 @@ Install with: `pip install 'renoir-wikiart[visualization]'`
 ## API Overview
 
 ### Artist Analysis
+
 - `ArtistAnalyzer` - Main class for artist work extraction and analysis
 - `quick_analysis()` - Convenience function for quick exploration
 
 ### Color Analysis (v3.0.0)
+
 - `ColorExtractor` - Extract color palettes using k-means clustering
 - `ColorAnalyzer` - Analyze colors across multiple color spaces
 - `ColorVisualizer` - Create publication-quality color visualizations
@@ -358,10 +363,6 @@ If you use this software in your research or teaching, please cite:
   url = {https://github.com/MichailSemoglou/renoir}
 }
 ```
-
-## Academic Context
-
-This package is described in detail in our SoftwareX paper: "renoir: A Python Package for Artist-Specific Analysis and Computational Color Theory Education Using WikiArt"
 
 ## Contributing
 
@@ -390,6 +391,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Contact
 
 For questions about using this tool in your classroom or research:
+
 - Email: [m.semoglou@tongji.edu.cn](mailto:m.semoglou@tongji.edu.cn)
 - Issues: [GitHub Issues](https://github.com/MichailSemoglou/renoir/issues)
 
