@@ -109,7 +109,10 @@ class ArtistAnalyzer:
             for item in dataset:
                 # Handle cases where artist field might not be a string
                 artist_field = item.get("artist", "")
-                if isinstance(artist_field, str) and artist_field.lower() == artist_name.lower():
+                if (
+                    isinstance(artist_field, str)
+                    and artist_field.lower() == artist_name.lower()
+                ):
                     artist_works.append(item)
                     if limit and len(artist_works) >= limit:
                         break
