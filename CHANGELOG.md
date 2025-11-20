@@ -5,6 +5,20 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.3] - 2025-11-20
+
+### Added
+- New comprehensive Jupyter notebook: "Artist Color Signature Analysis" (04_artist_color_signature.ipynb)
+  - Demonstrates color signature extraction from artist portfolios
+  - Statistical analysis of color usage patterns
+  - Multi-artist comparison visualizations
+  - HSV color space visualization
+  - Educational exercises for computational color theory
+
+### Fixed
+- Artist field type checking in extract_artist_works to handle non-string values in dataset
+- Prevents AttributeError when WikiArt dataset contains integer values in artist field
+
 ## [3.0.2] - 2025-11-11
 
 ### Fixed

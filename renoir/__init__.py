@@ -9,7 +9,7 @@ Version 3.0.0 adds comprehensive color analysis capabilities for teaching
 computational color theory to art and design students.
 """
 
-__version__ = "3.0.2"
+__version__ = "3.0.3"
 __author__ = "Michail Semoglou"
 
 from .analyzer import ArtistAnalyzer, quick_analysis
