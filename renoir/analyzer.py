@@ -103,29 +103,35 @@ class ArtistAnalyzer:
             # Re-raise with more context
             raise RuntimeError(f"Failed to load dataset: {str(e)}")
 
+        # Get artist names mapping from dataset features
+        artist_names = dataset.features["artist"].names if hasattr(dataset.features["artist"], "names") else []
+
+        # Find the target artist's index
+        target_artist_idx = None
+        for idx, name in enumerate(artist_names):
+            if name.lower() == artist_name.lower():
+                target_artist_idx = idx
+                break
+
+        if target_artist_idx is None:
+            print(f"⚠ Artist '{artist_name}' not found in dataset")
+            print(f"  Tip: Check spelling and use lowercase with hyphens (e.g., 'claude-monet')")
+            return []
+
         # Filter for specific artist
         artist_works = []
         try:
             for item in dataset:
-                # Handle cases where artist field might not be a string
-                artist_field = item.get("artist", "")
-                if (
-                    isinstance(artist_field, str)
-                    and artist_field.lower() == artist_name.lower()
-                ):
+                # Artist field is an integer (ClassLabel index)
+                artist_field = item.get("artist")
+                if artist_field == target_artist_idx:
                     artist_works.append(item)
                     if limit and len(artist_works) >= limit:
                         break
         except Exception as e:
             raise RuntimeError(f"Error while filtering artworks: {str(e)}")
 
-        if not artist_works:
-            print(f"⚠ No works found for artist '{artist_name}'")
-            print(
-                f"  Tip: Check spelling and use lowercase with hyphens (e.g., 'claude-monet')"
-            )
-        else:
-            print(f"✓ Found {len(artist_works)} works by {artist_name}")
+        print(f"✓ Found {len(artist_works)} works by {artist_name}")
 
         return artist_works
 
