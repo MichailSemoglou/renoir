@@ -481,3 +481,308 @@ class ColorAnalyzer:
         ratio = (l1 + 0.05) / (l2 + 0.05)
 
         return float(ratio)
+
+    def detect_triadic_harmony(
+        self, colors: List[Tuple[int, int, int]], tolerance: float = 30
+    ) -> List[Tuple[Tuple[int, int, int], Tuple[int, int, int], Tuple[int, int, int]]]:
+        """
+        Detect triadic color harmonies in a palette.
+
+        Triadic harmonies are three colors equally spaced on the color wheel
+        (120° apart). Used by masters like Mondrian and in vibrant designs.
+
+        Args:
+            colors: List of RGB tuples
+            tolerance: Hue difference tolerance in degrees (default: 30)
+
+        Returns:
+            List of triadic color triplets
+
+        Example:
+            >>> analyzer = ColorAnalyzer()
+            >>> colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]  # R, G, B
+            >>> triads = analyzer.detect_triadic_harmony(colors)
+            >>> print(f"Found {len(triads)} triadic harmonies")
+        """
+        triadic_sets = []
+
+        # Convert all to HSV
+        hsv_colors = [(color, self.rgb_to_hsv(color)) for color in colors]
+
+        # Check each triplet
+        for i, (color1, hsv1) in enumerate(hsv_colors):
+            for j, (color2, hsv2) in enumerate(hsv_colors[i + 1 :], i + 1):
+                for color3, hsv3 in hsv_colors[j + 1 :]:
+                    # Calculate hue differences
+                    diff1 = abs(hsv1[0] - hsv2[0])
+                    diff2 = abs(hsv2[0] - hsv3[0])
+                    diff3 = abs(hsv3[0] - hsv1[0])
+
+                    # Normalize to 0-180 range (account for circular nature)
+                    diffs = []
+                    for diff in [diff1, diff2, diff3]:
+                        if diff > 180:
+                            diff = 360 - diff
+                        diffs.append(diff)
+
+                    # Check if all approximately 120° apart
+                    if all(abs(d - 120) <= tolerance for d in diffs):
+                        triadic_sets.append((color1, color2, color3))
+
+        return triadic_sets
+
+    def detect_analogous_harmony(
+        self, colors: List[Tuple[int, int, int]], max_hue_range: float = 60
+    ) -> List[List[Tuple[int, int, int]]]:
+        """
+        Detect analogous color schemes in a palette.
+
+        Analogous colors are adjacent on the color wheel (within 60° typically).
+        Creates harmonious, serene color schemes. Common in nature and landscapes.
+
+        Args:
+            colors: List of RGB tuples
+            max_hue_range: Maximum hue range in degrees (default: 60)
+
+        Returns:
+            List of analogous color groups (groups of 2+ colors)
+
+        Example:
+            >>> analyzer = ColorAnalyzer()
+            >>> # Blues and greens (analogous)
+            >>> colors = [(0, 100, 255), (0, 200, 200), (0, 255, 100)]
+            >>> groups = analyzer.detect_analogous_harmony(colors)
+        """
+        if len(colors) < 2:
+            return []
+
+        # Convert to HSV and sort by hue
+        hsv_colors = [(color, self.rgb_to_hsv(color)) for color in colors]
+        hsv_colors.sort(key=lambda x: x[1][0])  # Sort by hue
+
+        analogous_groups = []
+        current_group = [hsv_colors[0][0]]
+        base_hue = hsv_colors[0][1][0]
+
+        for color, hsv in hsv_colors[1:]:
+            hue = hsv[0]
+            hue_diff = abs(hue - base_hue)
+
+            # Account for circular nature (e.g., 350° and 10° are close)
+            if hue_diff > 180:
+                hue_diff = 360 - hue_diff
+
+            if hue_diff <= max_hue_range:
+                current_group.append(color)
+            else:
+                if len(current_group) >= 2:
+                    analogous_groups.append(current_group)
+                current_group = [color]
+                base_hue = hue
+
+        # Add last group if valid
+        if len(current_group) >= 2:
+            analogous_groups.append(current_group)
+
+        return analogous_groups
+
+    def detect_split_complementary(
+        self, colors: List[Tuple[int, int, int]], tolerance: float = 30
+    ) -> List[Tuple[Tuple[int, int, int], Tuple[int, int, int], Tuple[int, int, int]]]:
+        """
+        Detect split-complementary color schemes.
+
+        Split-complementary uses a base color and two colors adjacent to its
+        complement (instead of the direct complement). Provides high contrast
+        while being more subtle than complementary. Popular in Renaissance art.
+
+        Args:
+            colors: List of RGB tuples
+            tolerance: Hue difference tolerance in degrees (default: 30)
+
+        Returns:
+            List of split-complementary triplets (base, complement1, complement2)
+
+        Example:
+            >>> analyzer = ColorAnalyzer()
+            >>> # Red with blue-green and yellow-green (instead of pure green)
+            >>> colors = [(255, 0, 0), (0, 200, 100), (100, 200, 0)]
+            >>> splits = analyzer.detect_split_complementary(colors)
+        """
+        split_comp_sets = []
+
+        # Convert all to HSV
+        hsv_colors = [(color, self.rgb_to_hsv(color)) for color in colors]
+
+        # For each color, look for two colors ~150° and ~210° away (or ±150°)
+        for i, (base_color, base_hsv) in enumerate(hsv_colors):
+            base_hue = base_hsv[0]
+            complement_hue = (base_hue + 180) % 360
+
+            # Look for colors 30° on either side of complement
+            target_hue1 = (complement_hue - 30) % 360
+            target_hue2 = (complement_hue + 30) % 360
+
+            candidates1 = []
+            candidates2 = []
+
+            for j, (color, hsv) in enumerate(hsv_colors):
+                if i == j:
+                    continue
+
+                hue = hsv[0]
+
+                # Check against target_hue1
+                diff1 = abs(hue - target_hue1)
+                if diff1 > 180:
+                    diff1 = 360 - diff1
+                if diff1 <= tolerance:
+                    candidates1.append((color, hsv))
+
+                # Check against target_hue2
+                diff2 = abs(hue - target_hue2)
+                if diff2 > 180:
+                    diff2 = 360 - diff2
+                if diff2 <= tolerance:
+                    candidates2.append((color, hsv))
+
+            # Create triplets
+            for color1, _ in candidates1:
+                for color2, _ in candidates2:
+                    if color1 != color2:
+                        split_comp_sets.append((base_color, color1, color2))
+
+        return split_comp_sets
+
+    def detect_tetradic_harmony(
+        self, colors: List[Tuple[int, int, int]], tolerance: float = 30
+    ) -> List[
+        Tuple[
+            Tuple[int, int, int],
+            Tuple[int, int, int],
+            Tuple[int, int, int],
+            Tuple[int, int, int],
+        ]
+    ]:
+        """
+        Detect tetradic (double complementary) color harmonies.
+
+        Tetradic uses two complementary pairs, forming a rectangle on the
+        color wheel. Creates rich, diverse palettes. Used in complex
+        compositions and modern art.
+
+        Args:
+            colors: List of RGB tuples
+            tolerance: Hue difference tolerance in degrees (default: 30)
+
+        Returns:
+            List of tetradic color quartets
+
+        Example:
+            >>> analyzer = ColorAnalyzer()
+            >>> # Two complementary pairs
+            >>> colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]
+            >>> tetrads = analyzer.detect_tetradic_harmony(colors)
+        """
+        tetradic_sets = []
+
+        if len(colors) < 4:
+            return []
+
+        # Convert all to HSV
+        hsv_colors = [(color, self.rgb_to_hsv(color)) for color in colors]
+
+        # Check each quartet
+        for i, (c1, hsv1) in enumerate(hsv_colors):
+            for j, (c2, hsv2) in enumerate(hsv_colors[i + 1 :], i + 1):
+                for k, (c3, hsv3) in enumerate(hsv_colors[j + 1 :], j + 1):
+                    for c4, hsv4 in hsv_colors[k + 1 :]:
+                        # Get all hues
+                        hues = sorted([hsv1[0], hsv2[0], hsv3[0], hsv4[0]])
+
+                        # Calculate differences between consecutive hues
+                        diffs = []
+                        for idx in range(4):
+                            diff = hues[(idx + 1) % 4] - hues[idx]
+                            if idx == 3:  # Last to first
+                                diff = (hues[0] + 360) - hues[3]
+                            diffs.append(diff)
+
+                        # For tetradic: should have two pairs of equal angles
+                        # (rectangle on color wheel)
+                        diffs_sorted = sorted(diffs)
+                        if (
+                            abs(diffs_sorted[0] - diffs_sorted[1]) <= tolerance
+                            and abs(diffs_sorted[2] - diffs_sorted[3]) <= tolerance
+                        ):
+                            tetradic_sets.append((c1, c2, c3, c4))
+
+        return tetradic_sets
+
+    def analyze_color_harmony(
+        self, colors: List[Tuple[int, int, int]]
+    ) -> Dict[str, any]:
+        """
+        Comprehensive analysis of color harmonies present in a palette.
+
+        Analyzes all major harmony types and provides statistics.
+        Educational method for teaching color theory in practice.
+
+        Args:
+            colors: List of RGB tuples
+
+        Returns:
+            Dictionary containing:
+                - complementary_pairs: List of complementary color pairs
+                - triadic_sets: List of triadic harmonies
+                - analogous_groups: List of analogous color groups
+                - split_complementary_sets: List of split-complementary schemes
+                - tetradic_sets: List of tetradic harmonies
+                - harmony_score: Overall harmony score (0-1)
+                - dominant_harmony: Most prevalent harmony type
+
+        Example:
+            >>> analyzer = ColorAnalyzer()
+            >>> colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+            >>> analysis = analyzer.analyze_color_harmony(colors)
+            >>> print(f"Dominant harmony: {analysis['dominant_harmony']}")
+        """
+        # Detect all harmony types
+        complementary = self.detect_complementary_colors(colors)
+        triadic = self.detect_triadic_harmony(colors)
+        analogous = self.detect_analogous_harmony(colors)
+        split_comp = self.detect_split_complementary(colors)
+        tetradic = self.detect_tetradic_harmony(colors)
+
+        # Count harmonies
+        harmony_counts = {
+            "complementary": len(complementary),
+            "triadic": len(triadic),
+            "analogous": len(analogous),
+            "split_complementary": len(split_comp),
+            "tetradic": len(tetradic),
+        }
+
+        # Determine dominant harmony
+        dominant = max(harmony_counts, key=harmony_counts.get)
+        if harmony_counts[dominant] == 0:
+            dominant = "none"
+
+        # Calculate harmony score (normalized by palette size)
+        total_harmonies = sum(harmony_counts.values())
+        max_possible = len(colors) * (len(colors) - 1) // 2  # Combinations
+        harmony_score = min(
+            1.0, total_harmonies / max_possible if max_possible > 0 else 0
+        )
+
+        return {
+            "complementary_pairs": complementary,
+            "triadic_sets": triadic,
+            "analogous_groups": analogous,
+            "split_complementary_sets": split_comp,
+            "tetradic_sets": tetradic,
+            "harmony_counts": harmony_counts,
+            "total_harmonies": total_harmonies,
+            "harmony_score": harmony_score,
+            "dominant_harmony": dominant,
+        }
