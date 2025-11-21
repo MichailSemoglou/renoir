@@ -108,7 +108,11 @@ class ArtistAnalyzer:
 
         if has_features:
             # HuggingFace dataset with ClassLabel encoding
-            artist_names = dataset.features["artist"].names if hasattr(dataset.features["artist"], "names") else []
+            artist_names = (
+                dataset.features["artist"].names
+                if hasattr(dataset.features["artist"], "names")
+                else []
+            )
 
             # Find the target artist's index
             target_artist_idx = None
@@ -119,7 +123,9 @@ class ArtistAnalyzer:
 
             if target_artist_idx is None:
                 print(f"⚠ Artist '{artist_name}' not found in dataset")
-                print(f"  Tip: Check spelling and use lowercase with hyphens (e.g., 'claude-monet')")
+                print(
+                    f"  Tip: Check spelling and use lowercase with hyphens (e.g., 'claude-monet')"
+                )
                 return []
 
             # Filter for specific artist by integer index
