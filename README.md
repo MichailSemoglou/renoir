@@ -10,7 +10,7 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 
 `renoir` bridges traditional art history with computational methods, providing accessible tools for art data analysis and color theory education. Unlike computer vision tools focused on algorithmic complexity, it emphasizes pedagogical clarity and visual communication for art and design practitioners and educators.
 
-**Version 3.0.0** adds comprehensive color analysis capabilities specifically designed for teaching computational color theory through art historical examples.
+**Version 3.1.0** adds advanced color harmony detection capabilities, enabling computational analysis of triadic, analogous, split-complementary, and tetradic color schemes in artwork.
 
 ## Key Features
 
@@ -21,12 +21,13 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 - Temporal analysis of artistic development
 - Comparative analysis across artists and movements
 
-### Color Analysis (New in v3.0.0)
+### Color Analysis (v3.0.0+)
 
 - **Color Extraction**: K-means clustering for intelligent palette extraction
 - **Color Space Analysis**: RGB, HSV, and HSL conversions
 - **Statistical Metrics**: Color diversity, saturation, brightness, temperature
 - **Color Relationships**: Complementary detection, WCAG contrast ratios
+- **Color Harmony Detection (v3.1.0)**: Triadic, analogous, split-complementary, tetradic schemes
 - **8 Visualization Types**: Palettes, color wheels, distributions, 3D spaces
 - **Export Capabilities**: CSS variables and JSON formats
 
@@ -121,6 +122,12 @@ print(f"Color Diversity: {diversity:.3f}")
 temp = analyzer.analyze_color_temperature_distribution(colors)
 print(f"Warm: {temp['warm_percentage']:.1f}%")
 print(f"Cool: {temp['cool_percentage']:.1f}%")
+
+# Detect color harmonies (v3.1.0)
+harmony = analyzer.analyze_color_harmony(color_list)
+print(f"Triadic harmonies: {len(harmony['triadic_sets'])}")
+print(f"Analogous groups: {len(harmony['analogous_groups'])}")
+print(f"Dominant harmony: {harmony['dominant_harmony']}")
 ```
 
 ## Advanced Usage
@@ -175,6 +182,14 @@ print(f"HSV: Hue={hsv[0]:.0f}°, Sat={hsv[1]:.0f}%, Val={hsv[2]:.0f}%")
 # Detect complementary colors
 complementary = analyzer.detect_complementary_colors(colors)
 print(f"Complementary pairs: {len(complementary)}")
+
+# Detect triadic harmonies (v3.1.0)
+triadic = analyzer.detect_triadic_harmony(colors)
+print(f"Triadic sets: {len(triadic)}")
+
+# Detect analogous color groups (v3.1.0)
+analogous = analyzer.detect_analogous_harmony(colors)
+print(f"Analogous groups: {len(analogous)}")
 
 # Calculate contrast ratio
 ratio = analyzer.calculate_contrast_ratio((255, 255, 255), (0, 0, 0))
@@ -295,11 +310,13 @@ for rgb in test_colors:
 
 ## Jupyter Notebooks
 
-Three complete educational notebooks are included in `examples/color_analysis/`:
+Five complete educational notebooks are included in `examples/color_analysis/`:
 
 1. **01_color_palette_extraction.ipynb** - Introduction to k-means clustering through art
 2. **02_color_space_analysis.ipynb** - Understanding RGB vs HSV color spaces
 3. **03_comparative_artist_analysis.ipynb** - Comparing artistic movements statistically
+4. **04_artist_color_signature.ipynb** - Identifying unique color signatures of artists
+5. **05_color_harmony_principles.ipynb** - Advanced color harmony detection and analysis (v3.1.0)
 
 ## Dataset Information
 
@@ -358,7 +375,7 @@ If you use this software in your research or teaching, please cite:
   author = {Semoglou, Michail},
   title = {renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt},
   year = {2025},
-  version = {3.0.0},
+  version = {3.1.0},
   doi = {10.5281/zenodo.17573993},
   url = {https://github.com/MichailSemoglou/renoir}
 }
@@ -395,13 +412,22 @@ For questions about using this tool in your classroom or research:
 - Email: [m.semoglou@tongji.edu.cn](mailto:m.semoglou@tongji.edu.cn)
 - Issues: [GitHub Issues](https://github.com/MichailSemoglou/renoir/issues)
 
-## What's New in v3.0.0
+## What's New
+
+### v3.1.0 (Latest)
+
+- **Color Harmony Detection**: Detect triadic, analogous, split-complementary, and tetradic color schemes
+- **5 New Analysis Methods**: Comprehensive harmony analysis for computational color theory
+- **Educational Notebook**: Complete lesson on color harmony principles with interactive examples
+- **Multi-Artist Comparison**: Compare harmony preferences across artistic movements
+
+### v3.0.0
 
 - **Color Extraction**: K-means clustering for palette extraction
 - **Color Analysis**: Multi-space analysis (RGB, HSV, HSL)
 - **Statistical Metrics**: Diversity, saturation, brightness, temperature
 - **8 Visualization Types**: Comprehensive color visualization suite
-- **3 Jupyter Notebooks**: Complete educational materials
+- **Educational Materials**: Complete Jupyter notebooks for teaching
 - **Export Capabilities**: CSS and JSON export formats
 
 See [CHANGELOG](https://github.com/MichailSemoglou/renoir/releases) for full details.
