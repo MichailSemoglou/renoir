@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "renoir-wikiart"
-version = "3.2.1"
+version = "3.2.2"
 description = "A pedagogical tool for analyzing artist-specific works from WikiArt with computational color theory and harmony analysis capabilities"
 readme = "README.md"
 authors = [
