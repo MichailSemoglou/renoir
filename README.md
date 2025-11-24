@@ -5,12 +5,13 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17573993.svg)](https://doi.org/10.5281/zenodo.17573993)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![PyPI](https://img.shields.io/pypi/v/renoir-wikiart.svg)](https://pypi.org/project/renoir-wikiart/)
 
 ## Overview
 
 `renoir` bridges traditional art history with computational methods, providing accessible tools for art data analysis and color theory education. Unlike computer vision tools focused on algorithmic complexity, it emphasizes pedagogical clarity and visual communication for art and design practitioners and educators.
 
-**Version 3.1.0** adds advanced color harmony detection capabilities, enabling computational analysis of triadic, analogous, split-complementary, and tetradic color schemes in artwork.
+**Version 3.2.0** includes a complete 10-lesson curriculum covering color extraction, analysis, harmony detection, psychology, movement evolution, and machine learning classification.
 
 ## Key Features
 
@@ -21,22 +22,22 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 - Temporal analysis of artistic development
 - Comparative analysis across artists and movements
 
-### Color Analysis (v3.0.0+)
+### Color Analysis
 
 - **Color Extraction**: K-means clustering for intelligent palette extraction
 - **Color Space Analysis**: RGB, HSV, and HSL conversions
 - **Statistical Metrics**: Color diversity, saturation, brightness, temperature
 - **Color Relationships**: Complementary detection, WCAG contrast ratios
-- **Color Harmony Detection (v3.1.0)**: Triadic, analogous, split-complementary, tetradic schemes
+- **Color Harmony Detection**: Triadic, analogous, split-complementary, tetradic schemes
 - **8 Visualization Types**: Palettes, color wheels, distributions, 3D spaces
 - **Export Capabilities**: CSS variables and JSON formats
 
 ### Educational Focus
 
+- **10 Complete Jupyter Notebooks** - Progressive curriculum from basics to ML
 - Designed specifically for classroom use and student projects
-- Progressive complexity from beginner to advanced
 - Publication-ready visualizations
-- Comprehensive Jupyter notebook examples
+- WikiArt cheatsheet for quick reference
 - Pure Python with minimal dependencies
 
 ## Applications
@@ -83,7 +84,7 @@ quick_analysis('pierre-auguste-renoir')
 quick_analysis('pierre-auguste-renoir', show_plots=True)
 ```
 
-### Color Palette Extraction (v3.0.0)
+### Color Palette Extraction
 
 ```python
 from renoir import ArtistAnalyzer
@@ -102,7 +103,7 @@ visualizer = ColorVisualizer()
 visualizer.plot_palette(colors, title="Monet's Palette")
 ```
 
-### Color Analysis (v3.0.0)
+### Color Analysis
 
 ```python
 from renoir.color import ColorAnalyzer
@@ -123,12 +124,38 @@ temp = analyzer.analyze_color_temperature_distribution(colors)
 print(f"Warm: {temp['warm_percentage']:.1f}%")
 print(f"Cool: {temp['cool_percentage']:.1f}%")
 
-# Detect color harmonies (v3.1.0)
-harmony = analyzer.analyze_color_harmony(color_list)
-print(f"Triadic harmonies: {len(harmony['triadic_sets'])}")
-print(f"Analogous groups: {len(harmony['analogous_groups'])}")
+# Detect color harmonies
+harmony = analyzer.analyze_color_harmony(colors)
+print(f"Harmony Score: {harmony['harmony_score']:.2f}")
 print(f"Dominant harmony: {harmony['dominant_harmony']}")
 ```
+
+## Jupyter Notebooks - Complete 10-Lesson Curriculum
+
+All notebooks are in `examples/color_analysis/`:
+
+### Fundamentals (Lessons 1-3)
+
+1. **01_color_palette_extraction.ipynb** - Introduction to k-means clustering through art
+2. **02_color_space_analysis.ipynb** - Understanding RGB vs HSV color spaces
+3. **03_comparative_artist_analysis.ipynb** - Comparing artistic movements statistically
+
+### Intermediate (Lessons 4-6)
+
+4. **04_artist_color_signature.ipynb** - Identifying unique color signatures of artists
+5. **05_color_harmony_principles.ipynb** - Advanced color harmony detection and analysis
+6. **06_thematic_color_analysis.ipynb** - Analyzing portraits, landscapes, and still life
+
+### Advanced (Lessons 7-10)
+
+7. **07_color_analysis_pipeline.ipynb** - Building a complete analysis workflow from scratch
+8. **08_movement_color_evolution.ipynb** - Tracing color evolution across art movements
+9. **09_color_psychology.ipynb** - Exploring emotional associations of colors in art
+10. **10_style_classifier.ipynb** - Building a ML classifier with color features
+
+## Documentation
+
+- **[WikiArt Cheatsheet](docs/wikiart_cheatsheet.md)** - Quick reference for all API methods, common artists, genres, styles, and code snippets
 
 ## Advanced Usage
 
@@ -168,7 +195,7 @@ analyzer.create_artist_overview('vincent-van-gogh')
 analyzer.plot_genre_distribution('monet', save_path='monet_genres.png')
 ```
 
-### Color Space Conversions (v3.0.0)
+### Color Space Conversions
 
 ```python
 from renoir.color import ColorAnalyzer
@@ -181,22 +208,19 @@ print(f"HSV: Hue={hsv[0]:.0f}°, Sat={hsv[1]:.0f}%, Val={hsv[2]:.0f}%")
 
 # Detect complementary colors
 complementary = analyzer.detect_complementary_colors(colors)
-print(f"Complementary pairs: {len(complementary)}")
 
-# Detect triadic harmonies (v3.1.0)
+# Detect triadic harmonies
 triadic = analyzer.detect_triadic_harmony(colors)
-print(f"Triadic sets: {len(triadic)}")
 
-# Detect analogous color groups (v3.1.0)
+# Detect analogous color groups
 analogous = analyzer.detect_analogous_harmony(colors)
-print(f"Analogous groups: {len(analogous)}")
 
 # Calculate contrast ratio
 ratio = analyzer.calculate_contrast_ratio((255, 255, 255), (0, 0, 0))
 print(f"Contrast ratio: {ratio:.2f}:1")
 ```
 
-### Advanced Color Visualizations (v3.0.0)
+### Advanced Color Visualizations
 
 ```python
 from renoir.color import ColorVisualizer
@@ -222,7 +246,7 @@ visualizer.compare_palettes(colors1, colors2, labels=("Artist 1", "Artist 2"))
 visualizer.create_artist_color_report(colors, "Claude Monet")
 ```
 
-### Export Color Palettes (v3.0.0)
+### Export Color Palettes
 
 ```python
 from renoir.color import ColorExtractor
@@ -235,88 +259,6 @@ extractor.export_palette_css(colors, 'palette.css', prefix='monet')
 # Export as JSON
 extractor.export_palette_json(colors, 'palette.json')
 ```
-
-## Educational Examples
-
-### Example 1: Teaching K-means Clustering
-
-```python
-from renoir import ArtistAnalyzer
-from renoir.color import ColorExtractor, ColorVisualizer
-
-# Students learn clustering through color extraction
-analyzer = ArtistAnalyzer()
-extractor = ColorExtractor()
-visualizer = ColorVisualizer()
-
-# Get Impressionist works
-works = analyzer.extract_artist_works('claude-monet', limit=5)
-
-# Extract palettes with different cluster sizes
-for n in [3, 5, 10]:
-    colors = extractor.extract_dominant_colors(works[0]['image'], n_colors=n)
-    visualizer.plot_palette(colors, title=f"Monet - {n} Colors")
-```
-
-### Example 2: Comparing Artistic Movements
-
-```python
-from renoir import ArtistAnalyzer
-from renoir.color import ColorExtractor, ColorAnalyzer
-
-# Compare Impressionism vs Expressionism
-impressionists = ['claude-monet', 'pierre-auguste-renoir']
-expressionists = ['edvard-munch', 'ernst-ludwig-kirchner']
-
-def analyze_movement(artists):
-    analyzer = ArtistAnalyzer()
-    extractor = ColorExtractor()
-    color_analyzer = ColorAnalyzer()
-
-    all_colors = []
-    for artist in artists:
-        works = analyzer.extract_artist_works(artist, limit=5)
-        for work in works:
-            colors = extractor.extract_dominant_colors(work['image'], n_colors=5)
-            all_colors.extend(colors)
-
-    return color_analyzer.analyze_palette_statistics(all_colors)
-
-imp_stats = analyze_movement(impressionists)
-exp_stats = analyze_movement(expressionists)
-
-print(f"Impressionism - Saturation: {imp_stats['mean_saturation']:.1f}%")
-print(f"Expressionism - Saturation: {exp_stats['mean_saturation']:.1f}%")
-```
-
-### Example 3: Color Space Education
-
-```python
-from renoir.color import ColorAnalyzer
-
-# Teaching RGB vs HSV
-analyzer = ColorAnalyzer()
-
-test_colors = [
-    (255, 0, 0),    # Red
-    (0, 255, 0),    # Green
-    (0, 0, 255),    # Blue
-]
-
-for rgb in test_colors:
-    hsv = analyzer.rgb_to_hsv(rgb)
-    print(f"RGB{rgb} -> HSV({hsv[0]:.0f}°, {hsv[1]:.0f}%, {hsv[2]:.0f}%)")
-```
-
-## Jupyter Notebooks
-
-Five complete educational notebooks are included in `examples/color_analysis/`:
-
-1. **01_color_palette_extraction.ipynb** - Introduction to k-means clustering through art
-2. **02_color_space_analysis.ipynb** - Understanding RGB vs HSV color spaces
-3. **03_comparative_artist_analysis.ipynb** - Comparing artistic movements statistically
-4. **04_artist_color_signature.ipynb** - Identifying unique color signatures of artists
-5. **05_color_harmony_principles.ipynb** - Advanced color harmony detection and analysis (v3.1.0)
 
 ## Dataset Information
 
@@ -335,6 +277,7 @@ Uses the [WikiArt dataset](https://huggingface.co/datasets/huggan/wikiart) from 
 - Pillow >= 8.0.0
 - numpy >= 1.20.0
 - scikit-learn >= 1.0.0
+- pandas >= 1.3.0
 
 ### Visualization Requirements (Optional)
 
@@ -348,7 +291,7 @@ Install with: `pip install 'renoir-wikiart[visualization]'`
 `renoir` is built on these pedagogical principles:
 
 1. **Cultural Relevance**: Uses art history to teach computational concepts
-2. **Progressive Complexity**: From simple function calls to advanced analysis
+2. **Progressive Complexity**: From simple function calls to advanced ML
 3. **Visual Learning**: Students see immediate, meaningful results
 4. **Real Data**: Works with actual cultural heritage data, not toy examples
 5. **Extensible**: Students can fork and extend for their own projects
@@ -360,7 +303,7 @@ Install with: `pip install 'renoir-wikiart[visualization]'`
 - `ArtistAnalyzer` - Main class for artist work extraction and analysis
 - `quick_analysis()` - Convenience function for quick exploration
 
-### Color Analysis (v3.0.0)
+### Color Analysis
 
 - `ColorExtractor` - Extract color palettes using k-means clustering
 - `ColorAnalyzer` - Analyze colors across multiple color spaces
@@ -375,7 +318,7 @@ If you use this software in your research or teaching, please cite:
   author = {Semoglou, Michail},
   title = {renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt},
   year = {2025},
-  version = {3.1.0},
+  version = {3.2.0},
   doi = {10.5281/zenodo.17573993},
   url = {https://github.com/MichailSemoglou/renoir}
 }
@@ -414,7 +357,18 @@ For questions about using this tool in your classroom or research:
 
 ## What's New
 
-### v3.1.0 (Latest)
+### v3.2.0 (Latest)
+
+- **5 New Educational Notebooks**: Complete 10-lesson curriculum
+  - Thematic Color Analysis (portraits, landscapes, still life)
+  - Building Your Own Color Analysis Pipeline
+  - Artistic Movement Color Evolution (Renaissance to Abstract)
+  - Color Psychology in Art History
+  - Building a Style Classifier with Machine Learning
+- **WikiArt Cheatsheet**: Quick reference documentation for all API methods
+- **Extended Examples**: More code samples and recipes
+
+### v3.1.0
 
 - **Color Harmony Detection**: Detect triadic, analogous, split-complementary, and tetradic color schemes
 - **5 New Analysis Methods**: Comprehensive harmony analysis for computational color theory
