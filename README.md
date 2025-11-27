@@ -25,6 +25,10 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 ### Color Analysis
 
 - **Color Extraction**: K-means clustering for intelligent palette extraction
+- **Color Naming**: Evocative, artist-friendly color names (Burnt Sienna, Prussian Blue, etc.)
+  - 4 naming vocabularies: artist pigments, Resene, Werner's, XKCD
+  - CIEDE2000 perceptually accurate color matching
+  - Color Index names for physical paint matching
 - **Color Space Analysis**: RGB, HSV, and HSL conversions
 - **Statistical Metrics**: Color diversity, saturation, brightness, temperature
 - **Color Relationships**: Complementary detection, WCAG contrast ratios
@@ -34,7 +38,7 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 
 ### Educational Focus
 
-- **10 Complete Jupyter Notebooks** - Progressive curriculum from basics to ML
+- **11 Complete Jupyter Notebooks** - Progressive curriculum from basics to ML
 - Designed specifically for classroom use and student projects
 - Publication-ready visualizations
 - WikiArt cheatsheet for quick reference
@@ -98,9 +102,29 @@ works = analyzer.extract_artist_works('claude-monet', limit=10)
 extractor = ColorExtractor()
 colors = extractor.extract_dominant_colors(works[0]['image'], n_colors=5)
 
-# Visualize
+# Visualize with evocative names
 visualizer = ColorVisualizer()
-visualizer.plot_palette(colors, title="Monet's Palette")
+visualizer.plot_palette(colors, title="Monet's Palette", show_names=True, vocabulary="artist")
+```
+
+### Color Naming
+
+```python
+from renoir.color import ColorNamer
+
+namer = ColorNamer(vocabulary="artist")
+
+# Name a single color
+name = namer.name((255, 87, 51))
+print(name)  # "Burnt Sienna"
+
+# Get detailed information including Color Index name
+result = namer.name((0, 49, 83), return_metadata=True)
+print(f"{result['name']} ({result['ci_name']})")  # "Prussian Blue (PB27)"
+
+# Find closest physical pigment for digital-to-physical matching
+pigment = namer.closest_pigment((100, 150, 220))
+print(f"Paint with: {pigment['name']} ({pigment['ci_name']})")
 ```
 
 ### Color Analysis
@@ -130,7 +154,7 @@ print(f"Harmony Score: {harmony['harmony_score']:.2f}")
 print(f"Dominant harmony: {harmony['dominant_harmony']}")
 ```
 
-## Jupyter Notebooks - Complete 10-Lesson Curriculum
+## Jupyter Notebooks - Complete 11-Lesson Curriculum
 
 All notebooks are in `examples/color_analysis/`:
 
@@ -146,16 +170,18 @@ All notebooks are in `examples/color_analysis/`:
 5. **05_color_harmony_principles.ipynb** - Advanced color harmony detection and analysis
 6. **06_thematic_color_analysis.ipynb** - Analyzing portraits, landscapes, and still life
 
-### Advanced (Lessons 7-10)
+### Advanced (Lessons 7-11)
 
 7. **07_color_analysis_pipeline.ipynb** - Building a complete analysis workflow from scratch
 8. **08_movement_color_evolution.ipynb** - Tracing color evolution across art movements
 9. **09_color_psychology.ipynb** - Exploring emotional associations of colors in art
 10. **10_style_classifier.ipynb** - Building a ML classifier with color features
+11. **11_color_naming.ipynb** - **NEW!** Evocative color naming with artist pigments, XKCD, Werner's, and Resene vocabularies
 
 ## Documentation
 
 - **[WikiArt Cheatsheet](docs/wikiart_cheatsheet.md)** - Quick reference for all API methods, common artists, genres, styles, and code snippets
+- **[Color Naming Implementation](docs/COLOR_NAMING_IMPLEMENTATION.md)** - Technical details of the ColorNamer module
 
 ## Advanced Usage
 

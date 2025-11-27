@@ -40,6 +40,8 @@ class ColorVisualizer:
         figsize: Tuple[int, int] = (12, 2),
         save_path: Optional[str] = None,
         show_hex: bool = True,
+        show_names: bool = False,
+        vocabulary: str = "artist",
     ) -> None:
         """
         Visualize a color palette as horizontal color swatches.
@@ -52,6 +54,9 @@ class ColorVisualizer:
             figsize: Figure size (width, height)
             save_path: Optional path to save the figure
             show_hex: Whether to show hex codes below colors
+            show_names: Whether to show evocative color names (default: False)
+            vocabulary: Color naming vocabulary to use when show_names=True
+                       Options: 'artist', 'resene', 'natural', 'xkcd'
 
         Example:
             >>> from renoir.color import ColorExtractor, ColorVisualizer
@@ -59,10 +64,28 @@ class ColorVisualizer:
             >>> visualizer = ColorVisualizer()
             >>> colors = [(255, 87, 51), (100, 200, 150), (50, 100, 200)]
             >>> visualizer.plot_palette(colors, title="My Palette")
+            >>> # With color names
+            >>> visualizer.plot_palette(colors, show_names=True, vocabulary="artist")
         """
         n_colors = len(colors)
 
+        # Adjust figure height if showing names
+        if show_names:
+            figsize = (figsize[0], figsize[1] + 1)
+
         fig, ax = plt.subplots(figsize=figsize)
+
+        # Load color names if requested
+        color_names = None
+        if show_names:
+            try:
+                from .namer import ColorNamer
+
+                namer = ColorNamer(vocabulary=vocabulary)
+                color_names = namer.name_palette(colors)
+            except ImportError:
+                print("Warning: ColorNamer not available. Showing hex codes only.")
+                color_names = None
 
         # Create color swatches
         for i, color in enumerate(colors):
@@ -75,13 +98,13 @@ class ColorVisualizer:
             )
             ax.add_patch(rect)
 
-            # Add hex code if requested
-            if show_hex:
-                hex_code = "#{:02x}{:02x}{:02x}".format(*color)
-                # Determine text color (black or white) based on brightness
-                brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000
-                text_color = "white" if brightness < 128 else "black"
+            # Determine text color (black or white) based on brightness
+            brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000
+            text_color = "white" if brightness < 128 else "black"
 
+            # Add hex code if requested
+            if show_hex and not show_names:
+                hex_code = "#{:02x}{:02x}{:02x}".format(*color)
                 ax.text(
                     i + 0.5,
                     0.5,
@@ -89,6 +112,26 @@ class ColorVisualizer:
                     ha="center",
                     va="center",
                     fontsize=10,
+                    fontweight="bold",
+                    color=text_color,
+                )
+
+            # Add color names if requested
+            if show_names and color_names:
+                name = color_names[i]
+                # Wrap long names
+                if len(name) > 15:
+                    words = name.split()
+                    mid = len(words) // 2
+                    name = "\n".join([" ".join(words[:mid]), " ".join(words[mid:])])
+
+                ax.text(
+                    i + 0.5,
+                    0.5,
+                    name,
+                    ha="center",
+                    va="center",
+                    fontsize=9,
                     fontweight="bold",
                     color=text_color,
                 )
@@ -104,6 +147,127 @@ class ColorVisualizer:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Palette saved to: {save_path}")
+
+        plt.show()
+
+    def plot_named_palette(
+        self,
+        colors: List[Tuple[int, int, int]],
+        vocabulary: str = "artist",
+        title: Optional[str] = None,
+        figsize: Tuple[int, int] = (12, 4),
+        save_path: Optional[str] = None,
+        show_metadata: bool = False,
+    ) -> None:
+        """
+        Visualize a color palette with evocative color names.
+
+        Creates a rich visualization showing color swatches with their
+        evocative names and optional metadata like Color Index names.
+
+        Args:
+            colors: List of RGB tuples
+            vocabulary: Color naming vocabulary ('artist', 'resene', 'natural', 'xkcd')
+            title: Plot title (auto-generated if None)
+            figsize: Figure size (width, height)
+            save_path: Optional path to save the figure
+            show_metadata: Whether to show additional metadata like CI names
+
+        Example:
+            >>> from renoir.color import ColorExtractor, ColorVisualizer
+            >>> visualizer = ColorVisualizer()
+            >>> colors = [(255, 87, 51), (100, 200, 150), (50, 100, 200)]
+            >>> visualizer.plot_named_palette(colors, vocabulary="artist")
+        """
+        try:
+            from .namer import ColorNamer
+        except ImportError:
+            print("Error: ColorNamer not available")
+            return
+
+        namer = ColorNamer(vocabulary=vocabulary)
+        named_colors = namer.name_palette(colors, return_metadata=True)
+
+        n_colors = len(colors)
+
+        # Auto-generate title if not provided
+        if title is None:
+            title = f"Color Palette ({vocabulary.title()} Names)"
+
+        # Adjust figure height for metadata
+        if show_metadata:
+            figsize = (figsize[0], figsize[1] + 0.5)
+
+        fig, ax = plt.subplots(figsize=figsize)
+
+        # Create color swatches with names
+        for i, (color, metadata) in enumerate(zip(colors, named_colors)):
+            # Normalize to 0-1 for matplotlib
+            normalized_color = tuple(c / 255 for c in color)
+
+            # Draw rectangle
+            rect = patches.Rectangle(
+                (i, 0), 1, 1, facecolor=normalized_color, edgecolor="black", linewidth=2
+            )
+            ax.add_patch(rect)
+
+            # Determine text color based on brightness
+            brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000
+            text_color = "white" if brightness < 128 else "black"
+
+            # Add color name
+            name = metadata["name"]
+            # Wrap long names
+            if len(name) > 15:
+                words = name.split()
+                if len(words) > 1:
+                    mid = len(words) // 2
+                    name = "\n".join([" ".join(words[:mid]), " ".join(words[mid:])])
+
+            y_pos = 0.6 if show_metadata else 0.5
+            ax.text(
+                i + 0.5,
+                y_pos,
+                name,
+                ha="center",
+                va="center",
+                fontsize=9,
+                fontweight="bold",
+                color=text_color,
+            )
+
+            # Add metadata if requested
+            if show_metadata:
+                meta_lines = []
+                if metadata.get("ci_name"):
+                    meta_lines.append(f"CI: {metadata['ci_name']}")
+                if metadata.get("family"):
+                    meta_lines.append(metadata["family"])
+
+                if meta_lines:
+                    meta_text = "\n".join(meta_lines)
+                    ax.text(
+                        i + 0.5,
+                        0.3,
+                        meta_text,
+                        ha="center",
+                        va="center",
+                        fontsize=7,
+                        color=text_color,
+                        style="italic",
+                    )
+
+        ax.set_xlim(0, n_colors)
+        ax.set_ylim(0, 1)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        ax.set_title(title, fontsize=14, fontweight="bold", pad=20)
+
+        plt.tight_layout()
+
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
+            print(f"Named palette saved to: {save_path}")
 
         plt.show()
 

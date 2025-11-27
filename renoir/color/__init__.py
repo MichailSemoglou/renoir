@@ -2,16 +2,18 @@
 Color analysis module for renoir.
 
 This module provides comprehensive color analysis tools for art and design education,
-including color extraction, multi-space analysis, and visualization capabilities.
+including color extraction, multi-space analysis, visualization, and evocative color naming.
 
 Classes:
     ColorExtractor: Extract dominant colors from artwork images
     ColorAnalyzer: Analyze colors across different color spaces
     ColorVisualizer: Create publication-quality color visualizations
+    ColorNamer: Convert colors to evocative, artist-friendly names
 """
 
 from .extraction import ColorExtractor
 from .analysis import ColorAnalyzer
 from .visualization import ColorVisualizer
+from .namer import ColorNamer
 
-__all__ = ["ColorExtractor", "ColorAnalyzer", "ColorVisualizer"]
+__all__ = ["ColorExtractor", "ColorAnalyzer", "ColorVisualizer", "ColorNamer"]

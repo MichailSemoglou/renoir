@@ -1,0 +1,394 @@
+[
+  {
+    "name": "Titanium White",
+    "hex": "#FFFFFF",
+    "rgb": [255, 255, 255],
+    "ci_name": "PW6",
+    "family": "White",
+    "description": "The standard white pigment, opaque and bright"
+  },
+  {
+    "name": "Zinc White",
+    "hex": "#FDFFF5",
+    "rgb": [253, 255, 245],
+    "ci_name": "PW4",
+    "family": "White",
+    "description": "Cool, semi-transparent white"
+  },
+  {
+    "name": "Cadmium Yellow Light",
+    "hex": "#FFE303",
+    "rgb": [255, 227, 3],
+    "ci_name": "PY35",
+    "family": "Yellow",
+    "description": "Bright, opaque warm yellow"
+  },
+  {
+    "name": "Cadmium Yellow Deep",
+    "hex": "#FFA300",
+    "rgb": [255, 163, 0],
+    "ci_name": "PY37",
+    "family": "Yellow",
+    "description": "Rich, warm orange-yellow"
+  },
+  {
+    "name": "Lemon Yellow",
+    "hex": "#FFF44F",
+    "rgb": [255, 244, 79],
+    "ci_name": "PY3",
+    "family": "Yellow",
+    "description": "Cool, greenish yellow"
+  },
+  {
+    "name": "Yellow Ochre",
+    "hex": "#CC7722",
+    "rgb": [204, 119, 34],
+    "ci_name": "PY43",
+    "family": "Yellow",
+    "description": "Earth pigment, warm tan yellow"
+  },
+  {
+    "name": "Raw Sienna",
+    "hex": "#D68A59",
+    "rgb": [214, 138, 89],
+    "ci_name": "PBr7",
+    "family": "Brown",
+    "description": "Warm earth brown with yellow undertones"
+  },
+  {
+    "name": "Burnt Sienna",
+    "hex": "#E97451",
+    "rgb": [233, 116, 81],
+    "ci_name": "PBr7",
+    "family": "Brown",
+    "description": "Warm reddish-brown earth pigment"
+  },
+  {
+    "name": "Raw Umber",
+    "hex": "#826644",
+    "rgb": [130, 102, 68],
+    "ci_name": "PBr7",
+    "family": "Brown",
+    "description": "Cool, greenish earth brown"
+  },
+  {
+    "name": "Burnt Umber",
+    "hex": "#8A3324",
+    "rgb": [138, 51, 36],
+    "ci_name": "PBr7",
+    "family": "Brown",
+    "description": "Deep, warm reddish-brown"
+  },
+  {
+    "name": "Cadmium Orange",
+    "hex": "#FF6103",
+    "rgb": [255, 97, 3],
+    "ci_name": "PO20",
+    "family": "Orange",
+    "description": "Brilliant, opaque orange"
+  },
+  {
+    "name": "Cadmium Red Light",
+    "hex": "#FF033E",
+    "rgb": [255, 3, 62],
+    "ci_name": "PR108",
+    "family": "Red",
+    "description": "Warm, brilliant red with orange undertones"
+  },
+  {
+    "name": "Cadmium Red Deep",
+    "hex": "#B7282E",
+    "rgb": [183, 40, 46],
+    "ci_name": "PR108",
+    "family": "Red",
+    "description": "Deep, warm red"
+  },
+  {
+    "name": "Alizarin Crimson",
+    "hex": "#E32636",
+    "rgb": [227, 38, 54],
+    "ci_name": "PR83",
+    "family": "Red",
+    "description": "Cool, transparent red with blue undertones"
+  },
+  {
+    "name": "Vermilion",
+    "hex": "#E34234",
+    "rgb": [227, 66, 52],
+    "ci_name": "PR106",
+    "family": "Red",
+    "description": "Brilliant orange-red, historic pigment"
+  },
+  {
+    "name": "Rose Madder",
+    "hex": "#E0115F",
+    "rgb": [224, 17, 95],
+    "ci_name": "NR9",
+    "family": "Red",
+    "description": "Transparent, cool pink-red"
+  },
+  {
+    "name": "Venetian Red",
+    "hex": "#C80815",
+    "rgb": [200, 8, 21],
+    "ci_name": "PR101",
+    "family": "Red",
+    "description": "Earth red, less intense than cadmium"
+  },
+  {
+    "name": "Indian Red",
+    "hex": "#CD5C5C",
+    "rgb": [205, 92, 92],
+    "ci_name": "PR101",
+    "family": "Red",
+    "description": "Brownish-red earth pigment"
+  },
+  {
+    "name": "Quinacridone Magenta",
+    "hex": "#8E3A59",
+    "rgb": [142, 58, 89],
+    "ci_name": "PR122",
+    "family": "Violet",
+    "description": "Transparent, cool magenta"
+  },
+  {
+    "name": "Dioxazine Purple",
+    "hex": "#6A0DAD",
+    "rgb": [106, 13, 173],
+    "ci_name": "PV23",
+    "family": "Violet",
+    "description": "Deep, transparent blue-violet"
+  },
+  {
+    "name": "Cobalt Violet",
+    "hex": "#8B00FF",
+    "rgb": [139, 0, 255],
+    "ci_name": "PV14",
+    "family": "Violet",
+    "description": "Delicate, semi-opaque violet"
+  },
+  {
+    "name": "Ultramarine Blue",
+    "hex": "#4166F5",
+    "rgb": [65, 102, 245],
+    "ci_name": "PB29",
+    "family": "Blue",
+    "description": "Warm, intense blue with violet undertones"
+  },
+  {
+    "name": "Cobalt Blue",
+    "hex": "#0047AB",
+    "rgb": [0, 71, 171],
+    "ci_name": "PB28",
+    "family": "Blue",
+    "description": "Pure, medium blue"
+  },
+  {
+    "name": "Cerulean Blue",
+    "hex": "#2A52BE",
+    "rgb": [42, 82, 190],
+    "ci_name": "PB35",
+    "family": "Blue",
+    "description": "Cool, sky blue"
+  },
+  {
+    "name": "Prussian Blue",
+    "hex": "#003153",
+    "rgb": [0, 49, 83],
+    "ci_name": "PB27",
+    "family": "Blue",
+    "description": "Deep, cool blue with green undertones"
+  },
+  {
+    "name": "Phthalo Blue",
+    "hex": "#000F89",
+    "rgb": [0, 15, 137],
+    "ci_name": "PB15",
+    "family": "Blue",
+    "description": "Intense, transparent blue-green"
+  },
+  {
+    "name": "Manganese Blue",
+    "hex": "#03A89E",
+    "rgb": [3, 168, 158],
+    "ci_name": "PB33",
+    "family": "Blue",
+    "description": "Transparent, greenish-blue"
+  },
+  {
+    "name": "Phthalo Green",
+    "hex": "#123524",
+    "rgb": [18, 53, 36],
+    "ci_name": "PG7",
+    "family": "Green",
+    "description": "Intense, transparent blue-green"
+  },
+  {
+    "name": "Viridian",
+    "hex": "#40826D",
+    "rgb": [64, 130, 109],
+    "ci_name": "PG18",
+    "family": "Green",
+    "description": "Cool, transparent blue-green"
+  },
+  {
+    "name": "Chromium Oxide Green",
+    "hex": "#5D7745",
+    "rgb": [93, 119, 69],
+    "ci_name": "PG17",
+    "family": "Green",
+    "description": "Opaque, natural earth green"
+  },
+  {
+    "name": "Sap Green",
+    "hex": "#507D2A",
+    "rgb": [80, 125, 42],
+    "ci_name": "PG8",
+    "family": "Green",
+    "description": "Transparent yellow-green"
+  },
+  {
+    "name": "Hooker's Green",
+    "hex": "#49796B",
+    "rgb": [73, 121, 107],
+    "ci_name": null,
+    "family": "Green",
+    "description": "Dark blue-green mixture"
+  },
+  {
+    "name": "Terre Verte",
+    "hex": "#56614E",
+    "rgb": [86, 97, 78],
+    "ci_name": "PG23",
+    "family": "Green",
+    "description": "Natural earth green, muted"
+  },
+  {
+    "name": "Naples Yellow",
+    "hex": "#FADA5E",
+    "rgb": [250, 218, 94],
+    "ci_name": "PY42",
+    "family": "Yellow",
+    "description": "Opaque, warm pale yellow"
+  },
+  {
+    "name": "Aureolin",
+    "hex": "#FDEE00",
+    "rgb": [253, 238, 0],
+    "ci_name": "PY40",
+    "family": "Yellow",
+    "description": "Transparent, cool bright yellow"
+  },
+  {
+    "name": "Payne's Grey",
+    "hex": "#536878",
+    "rgb": [83, 104, 120],
+    "ci_name": null,
+    "family": "Grey",
+    "description": "Cool, blue-grey mixture"
+  },
+  {
+    "name": "Ivory Black",
+    "hex": "#292421",
+    "rgb": [41, 36, 33],
+    "ci_name": "PBk9",
+    "family": "Black",
+    "description": "Warm black with brown undertones"
+  },
+  {
+    "name": "Lamp Black",
+    "hex": "#1A1110",
+    "rgb": [26, 17, 16],
+    "ci_name": "PBk6",
+    "family": "Black",
+    "description": "Cool, neutral black"
+  },
+  {
+    "name": "Mars Black",
+    "hex": "#0C0B0A",
+    "rgb": [12, 11, 10],
+    "ci_name": "PBk11",
+    "family": "Black",
+    "description": "Opaque, neutral black"
+  },
+  {
+    "name": "Sepia",
+    "hex": "#704214",
+    "rgb": [112, 66, 20],
+    "ci_name": "PBr7",
+    "family": "Brown",
+    "description": "Deep brown, historic ink color"
+  },
+  {
+    "name": "Vandyke Brown",
+    "hex": "#5E2E0C",
+    "rgb": [94, 46, 12],
+    "ci_name": "PBr7",
+    "family": "Brown",
+    "description": "Very dark, transparent brown"
+  },
+  {
+    "name": "Permanent Green Light",
+    "hex": "#7FCD91",
+    "rgb": [127, 205, 145],
+    "ci_name": "PG7",
+    "family": "Green",
+    "description": "Bright, cool green"
+  },
+  {
+    "name": "Olive Green",
+    "hex": "#BAB86C",
+    "rgb": [186, 184, 108],
+    "ci_name": "PY42",
+    "family": "Green",
+    "description": "Muted, yellow-green earth tone"
+  },
+  {
+    "name": "Cobalt Teal",
+    "hex": "#007BA7",
+    "rgb": [0, 123, 167],
+    "ci_name": "PG50",
+    "family": "Blue",
+    "description": "Bright, opaque blue-green"
+  },
+  {
+    "name": "Indigo",
+    "hex": "#4B0082",
+    "rgb": [75, 0, 130],
+    "ci_name": "PB60",
+    "family": "Violet",
+    "description": "Deep blue-violet"
+  },
+  {
+    "name": "Carmine",
+    "hex": "#960018",
+    "rgb": [150, 0, 24],
+    "ci_name": "PR83",
+    "family": "Red",
+    "description": "Deep, cool red"
+  },
+  {
+    "name": "Quinacridone Red",
+    "hex": "#8E3A59",
+    "rgb": [142, 58, 89],
+    "ci_name": "PR209",
+    "family": "Red",
+    "description": "Transparent, warm red"
+  },
+  {
+    "name": "Transparent Red Oxide",
+    "hex": "#8D4E23",
+    "rgb": [141, 78, 35],
+    "ci_name": "PR101",
+    "family": "Brown",
+    "description": "Transparent, warm earth red"
+  },
+  {
+    "name": "Hansa Yellow",
+    "hex": "#E9D66B",
+    "rgb": [233, 214, 107],
+    "ci_name": "PY97",
+    "family": "Yellow",
+    "description": "Bright, transparent yellow"
+  }
+]

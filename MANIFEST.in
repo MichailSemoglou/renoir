@@ -1,0 +1,20 @@
+# Include color vocabulary data files
+include renoir/data/colors/*.json
+
+# Include documentation
+include README.md
+include LICENSE
+include CHANGELOG.md
+include CONTRIBUTING.md
+include CITATION.cff
+
+# Include examples
+recursive-include examples *.py *.ipynb
+
+# Include documentation
+recursive-include docs *.md
+
+# Exclude tests and other development files
+exclude .gitignore
+exclude verify_installation.py
+recursive-exclude tests *

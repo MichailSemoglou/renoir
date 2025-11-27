@@ -2,8 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name="renoir-wikiart",
-    version="3.2.2",
+    version="3.3.0",
     packages=find_packages(exclude=['tests*', 'examples*', 'Research*', 'test_env*', 'Pierre-Auguste Renoir*', 'jose*']),
+    package_data={
+        'renoir': ['data/colors/*.json'],
+    },
+    include_package_data=True,
     python_requires=">=3.8",
     install_requires=[
         "datasets>=2.0.0",

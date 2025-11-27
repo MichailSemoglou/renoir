@@ -1,0 +1,436 @@
+[
+  {
+    "name": "Snow White",
+    "hex": "#FFFAFA",
+    "rgb": [255, 250, 250],
+    "family": "White",
+    "description": "Pure white, like fresh fallen snow"
+  },
+  {
+    "name": "Flake White",
+    "hex": "#FFFEF0",
+    "rgb": [255, 254, 240],
+    "family": "White",
+    "description": "Cream white, like snow beginning to fall"
+  },
+  {
+    "name": "Honey Yellow",
+    "hex": "#F0C420",
+    "rgb": [240, 196, 32],
+    "family": "Yellow",
+    "description": "Yellow of honey"
+  },
+  {
+    "name": "Wax Yellow",
+    "hex": "#F0E130",
+    "rgb": [240, 225, 48],
+    "family": "Yellow",
+    "description": "Yellow of beeswax"
+  },
+  {
+    "name": "Lemon Yellow",
+    "hex": "#FFF44F",
+    "rgb": [255, 244, 79],
+    "family": "Yellow",
+    "description": "Bright yellow of lemon rind"
+  },
+  {
+    "name": "King's Yellow",
+    "hex": "#F7D000",
+    "rgb": [247, 208, 0],
+    "family": "Yellow",
+    "description": "Deep golden yellow"
+  },
+  {
+    "name": "Saffron Yellow",
+    "hex": "#F4C430",
+    "rgb": [244, 196, 48],
+    "family": "Yellow",
+    "description": "Yellow of the saffron crocus"
+  },
+  {
+    "name": "Primrose Yellow",
+    "hex": "#F6DC7D",
+    "rgb": [246, 220, 125],
+    "family": "Yellow",
+    "description": "Pale yellow of primrose flowers"
+  },
+  {
+    "name": "Sulphur Yellow",
+    "hex": "#E8E32E",
+    "rgb": [232, 227, 46],
+    "family": "Yellow",
+    "description": "Greenish yellow of sulphur"
+  },
+  {
+    "name": "Straw Yellow",
+    "hex": "#E4D96F",
+    "rgb": [228, 217, 111],
+    "family": "Yellow",
+    "description": "Yellow of dried straw"
+  },
+  {
+    "name": "Buff Yellow",
+    "hex": "#D8C292",
+    "rgb": [216, 194, 146],
+    "family": "Yellow",
+    "description": "Pale brownish yellow, like buff leather"
+  },
+  {
+    "name": "Gamboge Yellow",
+    "hex": "#E49B0F",
+    "rgb": [228, 155, 15],
+    "family": "Orange",
+    "description": "Deep orange-yellow pigment"
+  },
+  {
+    "name": "Saffron Orange",
+    "hex": "#FF9933",
+    "rgb": [255, 153, 51],
+    "family": "Orange",
+    "description": "Orange with saffron tint"
+  },
+  {
+    "name": "Reddish Orange",
+    "hex": "#FF5349",
+    "rgb": [255, 83, 73],
+    "family": "Orange",
+    "description": "Orange inclining to red"
+  },
+  {
+    "name": "Tile Red",
+    "hex": "#C13E1F",
+    "rgb": [193, 62, 31],
+    "family": "Red",
+    "description": "Red of roof tiles"
+  },
+  {
+    "name": "Brick Red",
+    "hex": "#CB4154",
+    "rgb": [203, 65, 84],
+    "family": "Red",
+    "description": "Red of fired brick"
+  },
+  {
+    "name": "Carmine Red",
+    "hex": "#D70040",
+    "rgb": [215, 0, 64],
+    "family": "Red",
+    "description": "Deep crimson red"
+  },
+  {
+    "name": "Scarlet Red",
+    "hex": "#FF2400",
+    "rgb": [255, 36, 0],
+    "family": "Red",
+    "description": "Brilliant red with orange tint"
+  },
+  {
+    "name": "Vermilion Red",
+    "hex": "#E34234",
+    "rgb": [227, 66, 52],
+    "family": "Red",
+    "description": "Brilliant red-orange pigment"
+  },
+  {
+    "name": "Aurora Red",
+    "hex": "#B3446C",
+    "rgb": [179, 68, 108],
+    "family": "Red",
+    "description": "Red of the dawn sky"
+  },
+  {
+    "name": "Crimson Red",
+    "hex": "#990000",
+    "rgb": [153, 0, 0],
+    "family": "Red",
+    "description": "Deep purplish red"
+  },
+  {
+    "name": "Blood Red",
+    "hex": "#8B0000",
+    "rgb": [139, 0, 0],
+    "family": "Red",
+    "description": "Dark red of blood"
+  },
+  {
+    "name": "Flesh Red",
+    "hex": "#FFC0CB",
+    "rgb": [255, 192, 203],
+    "family": "Pink",
+    "description": "Light pink of human skin"
+  },
+  {
+    "name": "Rose Red",
+    "hex": "#C21E56",
+    "rgb": [194, 30, 86],
+    "family": "Red",
+    "description": "Red of rose petals"
+  },
+  {
+    "name": "Peach Blossom Red",
+    "hex": "#FFB7C5",
+    "rgb": [255, 183, 197],
+    "family": "Pink",
+    "description": "Pink of peach blossoms"
+  },
+  {
+    "name": "Violet Purple",
+    "hex": "#9F00FF",
+    "rgb": [159, 0, 255],
+    "family": "Purple",
+    "description": "Purple of violet flowers"
+  },
+  {
+    "name": "Lavender Purple",
+    "hex": "#B57EDC",
+    "rgb": [181, 126, 220],
+    "family": "Purple",
+    "description": "Pale purple of lavender"
+  },
+  {
+    "name": "Pansy Purple",
+    "hex": "#78184A",
+    "rgb": [120, 24, 74],
+    "family": "Purple",
+    "description": "Deep purple of pansy petals"
+  },
+  {
+    "name": "Imperial Purple",
+    "hex": "#5F1A37",
+    "rgb": [95, 26, 55],
+    "family": "Purple",
+    "description": "Deep royal purple"
+  },
+  {
+    "name": "Prussian Blue",
+    "hex": "#003153",
+    "rgb": [0, 49, 83],
+    "family": "Blue",
+    "description": "Deep blue pigment"
+  },
+  {
+    "name": "Berlin Blue",
+    "hex": "#0A4A7E",
+    "rgb": [10, 74, 126],
+    "family": "Blue",
+    "description": "Deep blue, similar to Prussian"
+  },
+  {
+    "name": "Indigo Blue",
+    "hex": "#4B0082",
+    "rgb": [75, 0, 130],
+    "family": "Blue",
+    "description": "Deep blue dye color"
+  },
+  {
+    "name": "Ultramarine Blue",
+    "hex": "#4166F5",
+    "rgb": [65, 102, 245],
+    "family": "Blue",
+    "description": "Deep blue pigment from lapis lazuli"
+  },
+  {
+    "name": "Sky Blue",
+    "hex": "#87CEEB",
+    "rgb": [135, 206, 235],
+    "family": "Blue",
+    "description": "Light blue of clear sky"
+  },
+  {
+    "name": "Azure Blue",
+    "hex": "#007FFF",
+    "rgb": [0, 127, 255],
+    "family": "Blue",
+    "description": "Bright blue of the sky"
+  },
+  {
+    "name": "Verditer Blue",
+    "hex": "#4FB8E9",
+    "rgb": [79, 184, 233],
+    "family": "Blue",
+    "description": "Pale blue pigment"
+  },
+  {
+    "name": "Greenish Blue",
+    "hex": "#0095B6",
+    "rgb": [0, 149, 182],
+    "family": "Blue",
+    "description": "Blue with green tint"
+  },
+  {
+    "name": "Turquoise Blue",
+    "hex": "#00CED1",
+    "rgb": [0, 206, 209],
+    "family": "Cyan",
+    "description": "Blue-green of turquoise stone"
+  },
+  {
+    "name": "Mountain Green",
+    "hex": "#478778",
+    "rgb": [71, 135, 120],
+    "family": "Green",
+    "description": "Green of mountain forests"
+  },
+  {
+    "name": "Verdigris Green",
+    "hex": "#43B3AE",
+    "rgb": [67, 179, 174],
+    "family": "Green",
+    "description": "Blue-green patina on copper"
+  },
+  {
+    "name": "Emerald Green",
+    "hex": "#50C878",
+    "rgb": [80, 200, 120],
+    "family": "Green",
+    "description": "Bright green of emerald gems"
+  },
+  {
+    "name": "Sap Green",
+    "hex": "#507D2A",
+    "rgb": [80, 125, 42],
+    "family": "Green",
+    "description": "Yellow-green of plant sap"
+  },
+  {
+    "name": "Leek Green",
+    "hex": "#4B8F18",
+    "rgb": [75, 143, 24],
+    "family": "Green",
+    "description": "Green of leek leaves"
+  },
+  {
+    "name": "Grass Green",
+    "hex": "#7CFC00",
+    "rgb": [124, 252, 0],
+    "family": "Green",
+    "description": "Bright green of fresh grass"
+  },
+  {
+    "name": "Olive Green",
+    "hex": "#808000",
+    "rgb": [128, 128, 0],
+    "family": "Green",
+    "description": "Yellow-green of olives"
+  },
+  {
+    "name": "Pistachio Green",
+    "hex": "#93C572",
+    "rgb": [147, 197, 114],
+    "family": "Green",
+    "description": "Pale green of pistachio nuts"
+  },
+  {
+    "name": "Apple Green",
+    "hex": "#8DB600",
+    "rgb": [141, 182, 0],
+    "family": "Green",
+    "description": "Yellow-green of green apples"
+  },
+  {
+    "name": "Duck Green",
+    "hex": "#006A4E",
+    "rgb": [0, 106, 78],
+    "family": "Green",
+    "description": "Dark bluish green"
+  },
+  {
+    "name": "Ash Grey",
+    "hex": "#B2BEB5",
+    "rgb": [178, 190, 181],
+    "family": "Grey",
+    "description": "Grey of wood ash"
+  },
+  {
+    "name": "Smoke Grey",
+    "hex": "#738276",
+    "rgb": [115, 130, 118],
+    "family": "Grey",
+    "description": "Grey of smoke"
+  },
+  {
+    "name": "Pearl Grey",
+    "hex": "#E8E4D8",
+    "rgb": [232, 228, 216],
+    "family": "Grey",
+    "description": "Pale grey with pearl luster"
+  },
+  {
+    "name": "French Grey",
+    "hex": "#BDBDC6",
+    "rgb": [189, 189, 198],
+    "family": "Grey",
+    "description": "Medium cool grey"
+  },
+  {
+    "name": "Liver Brown",
+    "hex": "#534B4F",
+    "rgb": [83, 75, 79],
+    "family": "Brown",
+    "description": "Dark reddish brown"
+  },
+  {
+    "name": "Chestnut Brown",
+    "hex": "#954535",
+    "rgb": [149, 69, 53],
+    "family": "Brown",
+    "description": "Reddish brown of chestnuts"
+  },
+  {
+    "name": "Umber Brown",
+    "hex": "#635147",
+    "rgb": [99, 81, 71],
+    "family": "Brown",
+    "description": "Dark brown earth pigment"
+  },
+  {
+    "name": "Sienna Brown",
+    "hex": "#882D17",
+    "rgb": [136, 45, 23],
+    "family": "Brown",
+    "description": "Reddish brown earth pigment"
+  },
+  {
+    "name": "Ochre Brown",
+    "hex": "#CC7722",
+    "rgb": [204, 119, 34],
+    "family": "Brown",
+    "description": "Yellow-brown earth pigment"
+  },
+  {
+    "name": "Sepia Brown",
+    "hex": "#704214",
+    "rgb": [112, 66, 20],
+    "family": "Brown",
+    "description": "Dark brown of cuttlefish ink"
+  },
+  {
+    "name": "Bistre Brown",
+    "hex": "#3D2B1F",
+    "rgb": [61, 43, 31],
+    "family": "Brown",
+    "description": "Dark brown pigment from soot"
+  },
+  {
+    "name": "Lamp Black",
+    "hex": "#1A1110",
+    "rgb": [26, 17, 16],
+    "family": "Black",
+    "description": "Deep black from lamp soot"
+  },
+  {
+    "name": "Velvet Black",
+    "hex": "#0D0605",
+    "rgb": [13, 6, 5],
+    "family": "Black",
+    "description": "Deep black like velvet"
+  },
+  {
+    "name": "Ink Black",
+    "hex": "#0A0908",
+    "rgb": [10, 9, 8],
+    "family": "Black",
+    "description": "Black of writing ink"
+  }
+]
