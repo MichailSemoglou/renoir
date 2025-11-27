@@ -339,8 +339,7 @@ class ColorNamer:
             or not all(isinstance(c, int) and 0 <= c <= 255 for c in rgb)
         ):
             raise ValueError(
-                "Color must be RGB tuple (0-255) or hex string. "
-                f"Got: {color}"
+                "Color must be RGB tuple (0-255) or hex string. " f"Got: {color}"
             )
 
         # Convert input to Lab
