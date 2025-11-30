@@ -5,6 +5,28 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.1] - 2025-11-30
+
+### Added
+
+- **6 New Educational Notebooks** (Lessons 12-17): Advanced ML and capstone project
+  - 12_art_movement_classification.ipynb - Movement classification with SHAP explainability
+  - 13_palette_generation_vae.ipynb - Variational Autoencoder palette generation
+  - 14_artist_color_dna.ipynb - Artist similarity and color DNA embeddings
+  - 15_clustering_anomaly_detection.ipynb - Unsupervised learning for art analysis
+  - 16_temporal_artist_evolution.ipynb - Tracking artist palette evolution over time
+  - 17_capstone_project.ipynb - Complete AI-powered art analysis platform
+
+### Changed
+
+- Display artwork titles in notebooks using format "Title (Artist)" for better context
+- Updated curriculum from 11 to 17 lessons
+
+### Fixed
+
+- Removed extraneous emoticons from example scripts and notebooks for cleaner output
+- Kept only functional indicators (checkmarks) where appropriate
+
 ## [3.3.0] - 2025-11-27
 
 ### Added

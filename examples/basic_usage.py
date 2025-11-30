@@ -64,19 +64,19 @@ def example_5_visualization_demo():
     
     # Check if visualization is available
     if check_visualization_support():
-        print("\n📊 Creating sample visualizations...")
+        print("\nCreating sample visualizations...")
         print("(Plots will appear in separate windows)")
         
         analyzer = ArtistAnalyzer()
         
         # Demo quick analysis with plots
-        print("\n🎨 Quick analysis with visualizations:")
+        print("\nQuick analysis with visualizations:")
         quick_analysis('pierre-auguste-renoir', show_plots=True)
         
     else:
         print("\n❌ Visualization libraries not installed.")
         print("Install with: pip install 'renoir[visualization]'")
-        print("\n📊 Available visualization methods:")
+        print("\nAvailable visualization methods:")
         analyzer = ArtistAnalyzer()
         viz_methods = [
             'plot_genre_distribution',
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     print("\n" + "=" * 50)
     print("🎉 All examples complete!")
     print("=" * 50)
-    print("\n📚 Next steps:")
+    print("\nNext steps:")
     print("  - Try the visualization_examples.py for more advanced plotting")
     print("  - Explore different artists and create your own analyses")
     print("  - Use renoir in your computational design or digital humanities projects!")

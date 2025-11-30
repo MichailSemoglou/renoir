@@ -11,7 +11,7 @@ from renoir.color import ColorNamer
 
 def main():
     print("\n" + "=" * 70)
-    print("  🎨 Renoir ColorNamer Demo - Evocative Color Naming")
+    print("Renoir ColorNamer Demo - Evocative Color Naming")
     print("=" * 70 + "\n")
 
     # Initialize with artist vocabulary

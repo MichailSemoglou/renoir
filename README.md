@@ -11,7 +11,7 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 
 `renoir` bridges traditional art history with computational methods, providing accessible tools for art data analysis and color theory education. Unlike computer vision tools focused on algorithmic complexity, it emphasizes pedagogical clarity and visual communication for art and design practitioners and educators.
 
-**Version 3.2.0** includes a complete 10-lesson curriculum covering color extraction, analysis, harmony detection, psychology, movement evolution, and machine learning classification.
+**Version 3.3.1** includes a complete 17-lesson curriculum covering color extraction, analysis, harmony detection, psychology, movement evolution, machine learning classification, deep learning, and a capstone project.
 
 ## Key Features
 
@@ -38,7 +38,7 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 
 ### Educational Focus
 
-- **11 Complete Jupyter Notebooks** - Progressive curriculum from basics to ML
+- **17 Complete Jupyter Notebooks** - Progressive curriculum from basics to advanced ML
 - Designed specifically for classroom use and student projects
 - Publication-ready visualizations
 - WikiArt cheatsheet for quick reference
@@ -154,7 +154,7 @@ print(f"Harmony Score: {harmony['harmony_score']:.2f}")
 print(f"Dominant harmony: {harmony['dominant_harmony']}")
 ```
 
-## Jupyter Notebooks - Complete 11-Lesson Curriculum
+## Jupyter Notebooks - Complete 17-Lesson Curriculum
 
 All notebooks are in `examples/color_analysis/`:
 
@@ -176,7 +176,19 @@ All notebooks are in `examples/color_analysis/`:
 8. **08_movement_color_evolution.ipynb** - Tracing color evolution across art movements
 9. **09_color_psychology.ipynb** - Exploring emotional associations of colors in art
 10. **10_style_classifier.ipynb** - Building a ML classifier with color features
-11. **11_color_naming.ipynb** - **NEW!** Evocative color naming with artist pigments, XKCD, Werner's, and Resene vocabularies
+11. **11_color_naming.ipynb** - Evocative color naming with artist pigments, XKCD, Werner's, and Resene vocabularies
+
+### Deep Learning & Embeddings (Lessons 12-16)
+
+12. **12_art_movement_classification.ipynb** - Movement classification with SHAP explainability
+13. **13_palette_generation_vae.ipynb** - Variational Autoencoder palette generation
+14. **14_artist_color_dna.ipynb** - Artist similarity and color DNA embeddings
+15. **15_clustering_anomaly_detection.ipynb** - Unsupervised learning for art analysis
+16. **16_temporal_artist_evolution.ipynb** - Tracking artist palette evolution over time
+
+### Capstone (Lesson 17)
+
+17. **17_capstone_project.ipynb** - Complete AI-powered art intelligence platform
 
 ## Documentation
 
@@ -344,7 +356,7 @@ If you use this software in your research or teaching, please cite:
   author = {Semoglou, Michail},
   title = {renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt},
   year = {2025},
-  version = {3.2.0},
+  version = {3.3.1},
   doi = {10.5281/zenodo.17573993},
   url = {https://github.com/MichailSemoglou/renoir}
 }
@@ -383,15 +395,29 @@ For questions about using this tool in your classroom or research:
 
 ## What's New
 
-### v3.2.0 (Latest)
+### v3.3.1 (Latest)
 
-- **5 New Educational Notebooks**: Complete 10-lesson curriculum
-  - Thematic Color Analysis (portraits, landscapes, still life)
-  - Building Your Own Color Analysis Pipeline
-  - Artistic Movement Color Evolution (Renaissance to Abstract)
-  - Color Psychology in Art History
-  - Building a Style Classifier with Machine Learning
-- **WikiArt Cheatsheet**: Quick reference documentation for all API methods
+- **6 New Educational Notebooks**: Complete 17-lesson curriculum with advanced ML
+  - Art Movement Classification with SHAP Explainability
+  - Variational Autoencoder Palette Generation
+  - Artist Color DNA and Similarity Embeddings
+  - Clustering and Anomaly Detection
+  - Temporal Artist Evolution Analysis
+  - Capstone Project: AI-Powered Art Intelligence Platform
+- **Artwork Titles**: Notebooks now display artwork titles for better context
+- **Code Cleanup**: Removed extraneous emoticons for cleaner output
+
+### v3.3.0
+
+- **ColorNamer Module**: Evocative color naming with CIEDE2000 matching
+  - 4 vocabularies: artist pigments, Resene, Werner's, XKCD
+  - Color Index names for physical paint matching
+- **Color Naming Notebook**: Complete tutorial (Lesson 11)
+
+### v3.2.0
+
+- **5 New Educational Notebooks**: Lessons 6-10
+- **WikiArt Cheatsheet**: Quick reference documentation
 - **Extended Examples**: More code samples and recipes
 
 ### v3.1.0

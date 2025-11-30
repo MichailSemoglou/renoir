@@ -87,7 +87,7 @@ def example_6_classroom_exercise():
         analyzer.create_artist_overview(artist, figsize=(14, 8))
 
 if __name__ == "__main__":
-    print("🎨 Renoir Package - Visualization Examples")
+    print("Renoir Package - Visualization Examples")
     print("These examples demonstrate the visualization capabilities.")
     print("Each plot will open in a new window.\n")
     
