@@ -6,6 +6,7 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyPI](https://img.shields.io/pypi/v/renoir-wikiart.svg)](https://pypi.org/project/renoir-wikiart/)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/renoir-wikiart?period=total&units=INTERNATIONAL_SYSTEM&left_color=GRAY&right_color=MAGENTA&left_text=downloads)](https://pepy.tech/projects/renoir-wikiart)
 
 ## Overview
 
