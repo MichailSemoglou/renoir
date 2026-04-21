@@ -17,3 +17,7 @@ scipy>=1.7.0
 # black>=22.0
 # flake8>=4.0
 # jupyter>=1.0.0
+
+# Documentation dependencies (used by ReadTheDocs)
+furo>=2023.0.0
+sphinx-autodoc-typehints>=1.23.0
