@@ -1,0 +1,50 @@
+{
+  "upload_type": "software",
+  "title": "renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt",
+  "description": "A Python package for teaching computational color theory and data analysis to art and design students. Provides artist-specific work extraction from WikiArt with comprehensive color analysis capabilities including k-means palette extraction, multi-space color analysis (RGB/HSV/LAB), statistical metrics, color harmony detection, historical pigment availability scoring, and publication-quality visualizations. Designed specifically for art and design education with pedagogical clarity and cultural relevance.",
+  "creators": [
+    {
+      "name": "Semoglou, Michail",
+      "affiliation": "Tongji University, College of Design and Innovation; University of Ioannina, School of Fine Arts",
+      "orcid": "0009-0003-3268-5657"
+    }
+  ],
+  "license": "MIT",
+  "version": "3.4.0",
+  "publication_date": "2026-04-21",
+  "keywords": [
+    "Python",
+    "art history",
+    "digital humanities",
+    "computational design",
+    "education",
+    "datasets",
+    "WikiArt",
+    "visual culture",
+    "creative coding",
+    "color theory",
+    "color analysis",
+    "data visualization",
+    "color harmony",
+    "palette extraction"
+  ],
+  "related_identifiers": [
+    {
+      "scheme": "url",
+      "identifier": "https://github.com/MichailSemoglou/renoir",
+      "relation": "isSupplementTo"
+    },
+    {
+      "scheme": "url",
+      "identifier": "https://pypi.org/project/renoir-wikiart/",
+      "relation": "isIdenticalTo"
+    },
+    {
+      "scheme": "doi",
+      "identifier": "10.5281/zenodo.17573993",
+      "relation": "isNewVersionOf"
+    }
+  ],
+  "language": "eng",
+  "access_right": "open"
+}
