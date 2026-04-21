@@ -5,17 +5,18 @@ This package provides simple functions for extracting and analyzing works by
 specific artists from the WikiArt dataset, designed for teaching computational
 design and digital humanities courses.
 
-Version 3.0.0 adds comprehensive color analysis capabilities for teaching
-computational color theory to art and design students.
+Version 3.4.0 adds PromptGenerator for GenAI colour prompt workflows and
+cross-vocabulary colour name translation (translate() / translate_all_vocabularies()),
+alongside security hardening, reproducibility fixes, and expanded test coverage.
 """
 
-__version__ = "3.0.3"
+__version__ = "3.4.0"
 __author__ = "Michail Semoglou"
 
 from .analyzer import ArtistAnalyzer, quick_analysis
 
 # Color analysis module (new in v3.0.0)
-from .color import ColorExtractor, ColorAnalyzer, ColorVisualizer
+from .color import ColorExtractor, ColorAnalyzer, ColorVisualizer, PromptGenerator
 
 __all__ = [
     "ArtistAnalyzer",
@@ -23,6 +24,7 @@ __all__ = [
     "ColorExtractor",
     "ColorAnalyzer",
     "ColorVisualizer",
+    "PromptGenerator",
 ]
 
 # Make visualization capabilities easily discoverable

@@ -576,3 +576,253 @@ class ColorNamer:
             "ci_names": ci_count,
             "file": self._VOCABULARIES[self.vocabulary],
         }
+
+    def translate(
+        self,
+        color_name: str,
+        from_vocabulary: Optional[str] = None,
+        to_vocabulary: str = "xkcd",
+        k: int = 3,
+    ) -> Dict:
+        """
+        Translate a colour name from one vocabulary to another.
+
+        Creates a "colour Rosetta Stone" by finding the perceptually closest
+        names in the target vocabulary via CIEDE2000 matching in Lab space.
+
+        Args:
+            color_name: Name of the colour to translate (case-insensitive)
+            from_vocabulary: Source vocabulary. If None, uses current vocabulary.
+            to_vocabulary: Target vocabulary name.
+            k: Number of closest matches to return (default: 3).
+
+        Returns:
+            Dictionary containing:
+                - source_name: Original colour name
+                - source_vocabulary: Source vocabulary
+                - source_rgb: RGB of the source colour
+                - translations: List of dicts with name, rgb, hex, distance
+                - target_vocabulary: Target vocabulary name
+
+        Raises:
+            ValueError: If colour name not found or vocabulary is invalid.
+
+        Example:
+            >>> namer = ColorNamer(vocabulary="werner")
+            >>> result = namer.translate("Gamboge Yellow", to_vocabulary="xkcd")
+            >>> for t in result['translations']:
+            ...     print(f"  {t['name']} (ΔE={t['distance']:.1f})")
+        """
+        src_vocab = from_vocabulary or self.vocabulary
+
+        # Validate vocabularies
+        if src_vocab not in self._VOCABULARIES:
+            raise ValueError(f"Unknown source vocabulary '{src_vocab}'")
+        if to_vocabulary not in self._VOCABULARIES:
+            raise ValueError(f"Unknown target vocabulary '{to_vocabulary}'")
+
+        # Save state
+        original_vocab = self.vocabulary
+        original_colors = self._colors
+
+        try:
+            # Load source vocabulary and find the colour
+            self.vocabulary = src_vocab
+            self._colors = None
+            src_colors = self._load_colors()
+
+            source = None
+            for c in src_colors:
+                if c["name"].lower() == color_name.lower():
+                    source = c
+                    break
+
+            if source is None:
+                available = [c["name"] for c in src_colors]
+                raise ValueError(
+                    f"Colour '{color_name}' not found in {src_vocab} vocabulary. "
+                    f"Available: {', '.join(available[:10])}..."
+                )
+
+            source_rgb = tuple(source["rgb"])
+            source_lab = self._rgb_to_lab(source_rgb)
+
+            # Load target vocabulary and find k closest
+            self.vocabulary = to_vocabulary
+            self._colors = None
+            tgt_colors = self._load_colors()
+
+            scored = []
+            for c in tgt_colors:
+                tgt_rgb = tuple(c["rgb"])
+                tgt_lab = self._rgb_to_lab(tgt_rgb)
+                dist = self._ciede2000(source_lab, tgt_lab)
+                scored.append(
+                    {
+                        "name": c["name"],
+                        "rgb": tgt_rgb,
+                        "hex": c.get("hex", self._rgb_to_hex(tgt_rgb)),
+                        "distance": round(dist, 3),
+                    }
+                )
+
+            scored.sort(key=lambda x: x["distance"])
+
+            return {
+                "source_name": source["name"],
+                "source_vocabulary": src_vocab,
+                "source_rgb": source_rgb,
+                "translations": scored[:k],
+                "target_vocabulary": to_vocabulary,
+            }
+
+        finally:
+            self.vocabulary = original_vocab
+            self._colors = original_colors
+
+    def translate_all_vocabularies(
+        self,
+        color_name: str,
+        from_vocabulary: Optional[str] = None,
+        k: int = 1,
+    ) -> Dict:
+        """
+        Translate a colour name to all other vocabularies at once.
+
+        Args:
+            color_name: Name of the colour to translate
+            from_vocabulary: Source vocabulary. If None, uses current.
+            k: Number of matches per vocabulary (default: 1)
+
+        Returns:
+            Dictionary mapping vocabulary names to translation results.
+
+        Example:
+            >>> namer = ColorNamer(vocabulary="artist")
+            >>> result = namer.translate_all_vocabularies("Prussian Blue")
+            >>> for vocab, trans in result.items():
+            ...     print(f"  {vocab}: {trans['translations'][0]['name']}")
+        """
+        src_vocab = from_vocabulary or self.vocabulary
+        all_vocabs = [v for v in self.available_vocabularies() if v != src_vocab]
+
+        results = {}
+        for vocab in all_vocabs:
+            results[vocab] = self.translate(
+                color_name, from_vocabulary=src_vocab, to_vocabulary=vocab, k=k
+            )
+
+        return results
+
+    def historical_pigment_probability(
+        self,
+        color: Union[Tuple[int, int, int], str],
+        year: int,
+        temperature: float = 15.0,
+        top_k: int = 5,
+    ) -> List[Dict]:
+        """
+        Estimate probability of historical pigments for a colour at a given date.
+
+        Uses Bayesian reasoning: P(pigment|colour,date) is proportional to
+        perceptual match (CIEDE2000) multiplied by historical availability.
+
+        Pigments with year_introduced/year_discontinued fields in the artist
+        vocabulary are used. Pigments without date fields are assumed always
+        available.
+
+        Args:
+            color: RGB tuple or hex string
+            year: Year to evaluate pigment availability
+            temperature: Softmax temperature for perceptual match (lower = stricter).
+                         Default 15.0 gives reasonable discrimination.
+            top_k: Number of top pigments to return (default: 5)
+
+        Returns:
+            List of dicts sorted by probability, each containing:
+                - name: Pigment name
+                - ci_name: Color Index name (if available)
+                - rgb: RGB tuple
+                - probability: Normalised probability (0–1)
+                - ciede2000: Raw CIEDE2000 distance
+                - available: Whether pigment was available at given year
+
+        Example:
+            >>> namer = ColorNamer()
+            >>> results = namer.historical_pigment_probability((0, 50, 200), year=1780)
+            >>> for r in results:
+            ...     print(f"  {r['name']}: prob={r['probability']:.3f}, available={r['available']}")
+        """
+        # Convert hex to RGB if needed
+        if isinstance(color, str):
+            rgb = self._hex_to_rgb(color)
+        else:
+            rgb = color
+
+        input_lab = self._rgb_to_lab(rgb)
+
+        # Save state and switch to artist vocabulary
+        original_vocab = self.vocabulary
+        original_colors = self._colors
+
+        try:
+            self.vocabulary = "artist"
+            self._colors = None
+            pigments = self._load_colors()
+
+            scored = []
+            for p in pigments:
+                p_rgb = tuple(p["rgb"])
+                p_lab = self._rgb_to_lab(p_rgb)
+                distance = self._ciede2000(input_lab, p_lab)
+
+                # Historical availability
+                introduced = p.get("year_introduced")
+                discontinued = p.get("year_discontinued")
+
+                available = True
+                if introduced is not None and year < introduced:
+                    available = False
+                if discontinued is not None and year > discontinued:
+                    available = False
+
+                # Perceptual match score (softmax-style)
+                match_score = np.exp(-distance / temperature)
+
+                # Historical prior: 1.0 if available, 0.01 if not (small epsilon)
+                historical_prior = 1.0 if available else 0.01
+
+                raw_score = match_score * historical_prior
+
+                scored.append(
+                    {
+                        "name": p["name"],
+                        "ci_name": p.get("ci_name"),
+                        "rgb": p_rgb,
+                        "raw_score": raw_score,
+                        "ciede2000": round(distance, 3),
+                        "available": available,
+                    }
+                )
+
+            # Normalise to probabilities
+            total = sum(s["raw_score"] for s in scored)
+            if total > 0:
+                for s in scored:
+                    s["probability"] = round(s["raw_score"] / total, 6)
+            else:
+                for s in scored:
+                    s["probability"] = 0.0
+
+            # Sort by probability descending
+            scored.sort(key=lambda x: x["probability"], reverse=True)
+
+            # Clean up and return top_k
+            for s in scored:
+                del s["raw_score"]
+
+            return scored[:top_k]
+
+        finally:
+            self.vocabulary = original_vocab
+            self._colors = original_colors

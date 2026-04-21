@@ -5,6 +5,9 @@ This module provides tools for extracting dominant colors from artworks
 using k-means clustering and other computational methods.
 """
 
+import json
+import os
+
 import numpy as np
 from typing import List, Dict, Tuple, Optional, Union
 from PIL import Image
@@ -16,6 +19,18 @@ try:
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
+
+
+def _validate_export_filename(filename: str) -> None:
+    """Raise ValueError if filename contains path-traversal components."""
+    # Block explicit '..' traversal in the raw filename
+    if ".." in filename.replace("\\", "/").split("/"):
+        raise ValueError(
+            "filename must not contain path traversal components ('..')."
+        )
+    # Block null bytes
+    if "\x00" in filename:
+        raise ValueError("filename must not contain null bytes.")
 
 
 class ColorExtractor:
@@ -43,6 +58,8 @@ class ColorExtractor:
         n_colors: int = 5,
         method: str = "kmeans",
         sample_size: Optional[int] = 10000,
+        random_state: int = 42,
+        filter_extremes: bool = True,
     ) -> List[Tuple[int, int, int]]:
         """
         Extract dominant colors from an image using k-means clustering.
@@ -57,6 +74,12 @@ class ColorExtractor:
             method: Extraction method - 'kmeans' or 'frequency' (default: 'kmeans')
             sample_size: Number of pixels to sample for faster processing
                         None = use all pixels (default: 10000)
+            random_state: Random seed for reproducible pixel sampling and k-means
+                         clustering (default: 42)
+            filter_extremes: Whether to remove pure black (0,0,0) and pure white
+                            (255,255,255) pixels before clustering. Set to False
+                            when analysing artworks where true black or white are
+                            meaningful (default: True)
 
         Returns:
             List of RGB tuples representing dominant colors, ordered by prominence
@@ -135,8 +158,11 @@ class ColorExtractor:
             raise ValueError(f"Failed to reshape image: {str(e)}")
 
         # Remove any invalid pixels (e.g., all zeros, all 255s)
-        valid_pixels = pixels[~np.all(pixels == 0, axis=1)]
-        valid_pixels = valid_pixels[~np.all(valid_pixels == 255, axis=1)]
+        if filter_extremes:
+            valid_pixels = pixels[~np.all(pixels == 0, axis=1)]
+            valid_pixels = valid_pixels[~np.all(valid_pixels == 255, axis=1)]
+        else:
+            valid_pixels = pixels
 
         if len(valid_pixels) == 0:
             print("Warning: No valid pixels found in image")
@@ -150,21 +176,22 @@ class ColorExtractor:
 
         # Sample pixels for faster processing
         if sample_size and len(valid_pixels) > sample_size:
-            indices = np.random.choice(len(valid_pixels), sample_size, replace=False)
+            rng = np.random.RandomState(random_state)
+            indices = rng.choice(len(valid_pixels), sample_size, replace=False)
             sampled_pixels = valid_pixels[indices]
         else:
             sampled_pixels = valid_pixels
 
         try:
             if method == "kmeans" and self.use_sklearn:
-                return self._extract_kmeans(sampled_pixels, n_colors)
+                return self._extract_kmeans(sampled_pixels, n_colors, random_state)
             else:
                 return self._extract_frequency(sampled_pixels, n_colors)
         except Exception as e:
-            raise RuntimeError(f"Color extraction failed: {str(e)}")
+            raise RuntimeError(f"Color extraction failed: {str(e)}") from e
 
     def _extract_kmeans(
-        self, pixels: np.ndarray, n_colors: int
+        self, pixels: np.ndarray, n_colors: int, random_state: int = 42
     ) -> List[Tuple[int, int, int]]:
         """
         Extract colors using k-means clustering.
@@ -172,12 +199,13 @@ class ColorExtractor:
         Args:
             pixels: Array of pixel RGB values
             n_colors: Number of clusters/colors to extract
+            random_state: Random seed for reproducible clustering
 
         Returns:
             List of RGB tuples ordered by cluster size
         """
         # Perform k-means clustering
-        kmeans = KMeans(n_clusters=n_colors, random_state=42, n_init=10)
+        kmeans = KMeans(n_clusters=n_colors, random_state=random_state, n_init=10)
         kmeans.fit(pixels)
 
         # Get cluster centers (dominant colors)
@@ -369,6 +397,8 @@ class ColorExtractor:
             >>> colors = [(255, 87, 51), (100, 200, 150)]
             >>> extractor.export_palette_css(colors, 'palette.css')
         """
+        _validate_export_filename(filename)
+
         with open(filename, "w") as f:
             f.write(":root {\n")
             for i, color in enumerate(colors, 1):
@@ -392,7 +422,7 @@ class ColorExtractor:
             >>> colors = [(255, 87, 51), (100, 200, 150)]
             >>> extractor.export_palette_json(colors, 'palette.json')
         """
-        import json
+        _validate_export_filename(filename)
 
         palette_dict = self.palette_to_dict(colors)
 

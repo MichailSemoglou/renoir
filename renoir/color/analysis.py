@@ -10,6 +10,13 @@ from typing import List, Dict, Tuple, Optional, Union
 from collections import Counter
 import colorsys
 
+try:
+    from scipy.optimize import linear_sum_assignment
+
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
+
 
 class ColorAnalyzer:
     """
@@ -785,4 +792,348 @@ class ColorAnalyzer:
             "total_harmonies": total_harmonies,
             "harmony_score": harmony_score,
             "dominant_harmony": dominant,
+        }
+
+    def _get_namer(self):
+        """Lazy-load a ColorNamer instance for CIEDE2000 calculations."""
+        if not hasattr(self, "_namer"):
+            from .namer import ColorNamer
+
+            self._namer = ColorNamer()
+        return self._namer
+
+    def palette_earth_movers_distance(
+        self,
+        palette1: List[Tuple[Tuple[int, int, int], float]],
+        palette2: List[Tuple[Tuple[int, int, int], float]],
+    ) -> float:
+        """
+        Calculate Palette Earth Mover's Distance (PEMD) between two palettes.
+
+        Uses CIEDE2000 as the perceptual ground distance and colour proportions
+        as weights, solved via optimal transport. This provides a structurally
+        aware comparison that accounts for both colour similarity and proportion
+        differences.
+
+        Args:
+            palette1: List of (RGB tuple, proportion) pairs.
+                      Proportions should sum to 1.0.
+            palette2: List of (RGB tuple, proportion) pairs.
+                      Proportions should sum to 1.0.
+
+        Returns:
+            PEMD distance (lower = more similar). Scale depends on CIEDE2000
+            units (typically 0–100+, where <2 is imperceptible).
+
+        Raises:
+            ImportError: If scipy is not installed.
+            ValueError: If palettes are empty.
+
+        Example:
+            >>> analyzer = ColorAnalyzer()
+            >>> p1 = [((255, 0, 0), 0.6), ((0, 0, 255), 0.4)]
+            >>> p2 = [((250, 10, 5), 0.5), ((10, 0, 250), 0.5)]
+            >>> dist = analyzer.palette_earth_movers_distance(p1, p2)
+            >>> print(f"PEMD: {dist:.2f}")
+        """
+        if not SCIPY_AVAILABLE:
+            raise ImportError(
+                "scipy is required for PEMD. Install with: pip install scipy"
+            )
+
+        if not palette1 or not palette2:
+            raise ValueError("Both palettes must be non-empty")
+
+        namer = self._get_namer()
+        n = len(palette1)
+        m = len(palette2)
+
+        # Build cost matrix using CIEDE2000
+        cost_matrix = np.zeros((n, m))
+        for i, (c1, _) in enumerate(palette1):
+            lab1 = namer._rgb_to_lab(c1)
+            for j, (c2, _) in enumerate(palette2):
+                lab2 = namer._rgb_to_lab(c2)
+                cost_matrix[i, j] = namer._ciede2000(lab1, lab2)
+
+        # Extract weights
+        w1 = np.array([w for _, w in palette1], dtype=float)
+        w2 = np.array([w for _, w in palette2], dtype=float)
+
+        # Normalise weights
+        w1 = w1 / w1.sum()
+        w2 = w2 / w2.sum()
+
+        # Expand to balanced assignment problem:
+        # Discretise weights into N units using largest-remainder method so
+        # totals are guaranteed equal and no positive weight is zeroed out.
+        resolution = max(n, m) * 10  # granularity
+
+        def _largest_remainder(weights: np.ndarray, total: int) -> np.ndarray:
+            raw = weights * total
+            floors = np.floor(raw).astype(int)
+            # Guarantee at least 1 unit for every positive weight
+            floors = np.where((weights > 0) & (floors == 0), 1, floors)
+            remainder = total - floors.sum()
+            if remainder > 0:
+                fracs = raw - np.floor(raw)
+                # Indices sorted by descending fractional part
+                order = np.argsort(-fracs)
+                for idx in order[:remainder]:
+                    floors[idx] += 1
+            elif remainder < 0:
+                # Over-allocated (can happen when forced minimums push sum above total)
+                fracs = raw - np.floor(raw)
+                order = np.argsort(fracs)  # smallest fracs donated first
+                for idx in order[:-remainder]:
+                    if floors[idx] > 1:
+                        floors[idx] -= 1
+            return floors
+
+        counts1 = _largest_remainder(w1, resolution)
+        counts2 = _largest_remainder(w2, resolution)
+
+        # Ensure the two totals agree (off-by-one possible when forced minimums kick in)
+        diff = int(counts1.sum()) - int(counts2.sum())
+        if diff > 0:
+            counts2[np.argmax(w2)] += diff
+        elif diff < 0:
+            counts1[np.argmax(w1)] += -diff
+
+        total = int(counts1.sum())
+        if total == 0:
+            return 0.0
+
+        # Build expanded cost matrix
+        expanded_cost = np.zeros((total, total))
+        row_idx = 0
+        for i, c1_count in enumerate(counts1):
+            col_idx = 0
+            for j, c2_count in enumerate(counts2):
+                expanded_cost[row_idx : row_idx + c1_count, col_idx : col_idx + c2_count] = (
+                    cost_matrix[i, j]
+                )
+                col_idx += c2_count
+            row_idx += c1_count
+
+        row_ind, col_ind = linear_sum_assignment(expanded_cost)
+        return float(expanded_cost[row_ind, col_ind].sum() / total)
+
+    def calculate_color_complexity(
+        self,
+        colors: List[Tuple[int, int, int]],
+        proportions: Optional[List[float]] = None,
+        weights: Optional[Dict[str, float]] = None,
+    ) -> Dict:
+        """
+        Calculate the Colour Complexity Index (CCI) for a palette.
+
+        A multi-dimensional information-theoretic measure combining:
+        - Hue entropy (spread across the colour wheel)
+        - Perceptual spread (mean pairwise CIEDE2000 distance)
+        - Proportion evenness (1 - Gini coefficient)
+        - Harmony penalty (lower complexity if colours follow harmony rules)
+
+        Args:
+            colors: List of RGB tuples
+            proportions: Optional list of colour proportions (should sum to 1).
+                         If None, equal proportions are assumed.
+            weights: Optional dict of component weights with keys:
+                     'hue_entropy', 'perceptual_spread', 'proportion_evenness',
+                     'harmony_penalty'. Defaults to equal weighting.
+
+        Returns:
+            Dictionary containing:
+                - cci: Composite Colour Complexity Index (0-1)
+                - hue_entropy: Normalised hue entropy (0-1)
+                - perceptual_spread: Normalised mean pairwise CIEDE2000 (0-1)
+                - proportion_evenness: 1 - Gini coefficient (0-1)
+                - harmony_penalty: Harmony score (0-1, subtracted)
+                - components: Dict of weighted sub-scores
+
+        Example:
+            >>> analyzer = ColorAnalyzer()
+            >>> mondrian = [(255, 0, 0), (0, 0, 255), (255, 255, 0),
+            ...             (255, 255, 255), (0, 0, 0)]
+            >>> result = analyzer.calculate_color_complexity(mondrian)
+            >>> print(f"CCI: {result['cci']:.3f}")
+        """
+        if len(colors) < 2:
+            return {
+                "cci": 0.0,
+                "hue_entropy": 0.0,
+                "perceptual_spread": 0.0,
+                "proportion_evenness": 0.0,
+                "harmony_penalty": 0.0,
+                "components": {},
+            }
+
+        default_weights = {
+            "hue_entropy": 0.3,
+            "perceptual_spread": 0.3,
+            "proportion_evenness": 0.2,
+            "harmony_penalty": 0.2,
+        }
+        w = weights if weights else default_weights
+
+        # 1. Hue entropy (reuse existing method, already normalised 0–1)
+        hue_entropy = self.calculate_color_diversity(colors)
+
+        # 2. Perceptual spread: mean pairwise CIEDE2000, normalised
+        namer = self._get_namer()
+        labs = [namer._rgb_to_lab(c) for c in colors]
+        distances = []
+        for i in range(len(labs)):
+            for j in range(i + 1, len(labs)):
+                distances.append(namer._ciede2000(labs[i], labs[j]))
+
+        mean_distance = float(np.mean(distances)) if distances else 0.0
+        # Normalise: CIEDE2000 of 100 is extreme; cap at 100
+        perceptual_spread = min(1.0, mean_distance / 100.0)
+
+        # 3. Proportion evenness (1 - Gini coefficient)
+        if proportions is None:
+            proportions = [1.0 / len(colors)] * len(colors)
+        props = np.array(sorted(proportions), dtype=float)
+        n = len(props)
+        if props.sum() == 0:
+            gini = 0.0
+        else:
+            index = np.arange(1, n + 1)
+            gini = (2 * np.sum(index * props) - (n + 1) * np.sum(props)) / (
+                n * np.sum(props)
+            )
+        proportion_evenness = 1.0 - gini
+
+        # 4. Harmony penalty
+        harmony = self.analyze_color_harmony(colors)
+        harmony_score = harmony["harmony_score"]
+
+        # Composite CCI
+        cci = (
+            w.get("hue_entropy", 0.3) * hue_entropy
+            + w.get("perceptual_spread", 0.3) * perceptual_spread
+            + w.get("proportion_evenness", 0.2) * proportion_evenness
+            - w.get("harmony_penalty", 0.2) * harmony_score
+        )
+        cci = max(0.0, min(1.0, cci))
+
+        return {
+            "cci": float(cci),
+            "hue_entropy": float(hue_entropy),
+            "perceptual_spread": float(perceptual_spread),
+            "proportion_evenness": float(proportion_evenness),
+            "harmony_penalty": float(harmony_score),
+            "components": {
+                "hue_entropy_weighted": float(
+                    w.get("hue_entropy", 0.3) * hue_entropy
+                ),
+                "perceptual_spread_weighted": float(
+                    w.get("perceptual_spread", 0.3) * perceptual_spread
+                ),
+                "proportion_evenness_weighted": float(
+                    w.get("proportion_evenness", 0.2) * proportion_evenness
+                ),
+                "harmony_penalty_weighted": float(
+                    w.get("harmony_penalty", 0.2) * harmony_score
+                ),
+            },
+        }
+
+    def colour_provenance_score(
+        self,
+        colors: List[Tuple[int, int, int]],
+        year: int,
+        proportions: Optional[List[float]] = None,
+    ) -> Dict:
+        """
+        Calculate Colour Provenance Score (CPS) for a palette and attributed date.
+
+        Estimates how consistent a palette is with historically available pigments
+        at the given date. Low scores may indicate anachronistic colour usage.
+
+        Requires the artist_pigments vocabulary with historical date fields.
+
+        Args:
+            colors: List of RGB tuples from the artwork
+            year: Attributed year of the artwork
+            proportions: Optional colour proportions. If None, equal weights used.
+
+        Returns:
+            Dictionary containing:
+                - score: Overall provenance score (0–1, higher = more consistent)
+                - per_color: List of per-colour assessments
+                - flagged: Colours flagged as potentially anachronistic
+
+        Example:
+            >>> analyzer = ColorAnalyzer()
+            >>> colors = [(0, 50, 200), (255, 0, 0), (255, 255, 0)]
+            >>> result = analyzer.colour_provenance_score(colors, year=1780)
+            >>> print(f"Provenance: {result['score']:.2f}")
+            >>> for flag in result['flagged']:
+            ...     print(f"  ⚠ {flag['color']}: {flag['reason']}")
+        """
+        from .namer import ColorNamer
+
+        namer = ColorNamer(vocabulary="artist")
+
+        if not colors:
+            raise ValueError("colors must not be empty")
+
+        if proportions is None:
+            proportions = [1.0 / len(colors)] * len(colors)
+
+        if len(proportions) != len(colors):
+            raise ValueError(
+                f"proportions length ({len(proportions)}) must match "
+                f"colors length ({len(colors)})"
+            )
+
+        per_color = []
+        flagged = []
+
+        for i, (color, weight) in enumerate(zip(colors, proportions)):
+            result = namer.historical_pigment_probability(color, year)
+
+            # Best match probability
+            best = result[0] if result else None
+            prob = best["probability"] if best else 0.0
+
+            entry = {
+                "color": color,
+                "weight": weight,
+                "probability": prob,
+                "best_pigment": best["name"] if best else "Unknown",
+                "available_pigments": len(result),
+            }
+            per_color.append(entry)
+
+            # Flag if no pigments available or very low probability
+            if prob < 0.1:
+                flagged.append(
+                    {
+                        "color": color,
+                        "reason": (
+                            f"No historically plausible pigment match for year {year}. "
+                            f"Best match: {best['name']} (prob: {prob:.3f})"
+                            if best
+                            else f"No pigments available for year {year}"
+                        ),
+                    }
+                )
+
+        # Weighted overall score
+        total_weight = sum(proportions)
+        if total_weight > 0:
+            score = sum(
+                e["probability"] * e["weight"] for e in per_color
+            ) / total_weight
+        else:
+            score = 0.0
+
+        return {
+            "score": float(score),
+            "year": year,
+            "per_color": per_color,
+            "flagged": flagged,
         }
