@@ -41,6 +41,11 @@
     },
     {
       "scheme": "doi",
+      "identifier": "10.5281/zenodo.19675349",
+      "relation": "isIdenticalTo"
+    },
+    {
+      "scheme": "doi",
       "identifier": "10.5281/zenodo.17573993",
       "relation": "isNewVersionOf"
     }

@@ -28,6 +28,9 @@ keywords:
 license: MIT
 identifiers:
   - type: doi
+    value: 10.5281/zenodo.19675349
+    description: "Zenodo DOI for v3.4.0"
+  - type: doi
     value: 10.5281/zenodo.17573993
     description: "Zenodo DOI for v3.0.0"
   - type: doi
@@ -42,5 +45,5 @@ preferred-citation:
       orcid: "https://orcid.org/0009-0003-3268-5657"
   version: 3.4.0
   date-released: 2026-04-21
-  doi: 10.5281/zenodo.17573993
+  doi: 10.5281/zenodo.19675349
   url: "https://github.com/MichailSemoglou/renoir"
