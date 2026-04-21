@@ -46,6 +46,9 @@ Thumbs.db
 **/.ipynb_checkpoints
 **/*-checkpoint.ipynb
 
+# Docs build output (regenerate locally with: cd docs && make html)
+docs/_build/
+
 # Testing
 .pytest_cache/
 .coverage
@@ -83,3 +86,22 @@ mapping.py
 renoir_dataset.py
 verify.py
 wikiart_data_structure_Claude.py
+
+# XAIxArts 2026 conference artefact (not submitted)
+xaixarts2026/
+
+# Internal planning and strategy documents (not for public repo)
+WOW_ROADMAP.md
+SUBMISSION_STRATEGY.md
+HONEST_REVIEW.md
+ROADMAP_SOFTWAREX.md
+COMPETITIVE_LANDSCAPE.md
+softwarex_paper/
+
+# Graphical abstract / pedagogical arc — generator scripts and generated artefacts
+create_graphical_abstract.py
+create_pedagogical_arc.py
+renoir_graphical_abstract.pdf
+renoir_graphical_abstract.png
+renoir_pedagogical_arc.pdf
+renoir_pedagogical_arc.png

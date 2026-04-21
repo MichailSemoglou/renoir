@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
 title: "renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt"
-version: 3.0.0
-date-released: 2025-11-10
+version: 3.4.0
+date-released: 2026-04-21
 authors:
   - family-names: Semoglou
     given-names: Michail
@@ -40,7 +40,7 @@ preferred-citation:
     - family-names: Semoglou
       given-names: Michail
       orcid: "https://orcid.org/0009-0003-3268-5657"
-  version: 3.0.0
-  date-released: 2025-11-10
+  version: 3.4.0
+  date-released: 2026-04-21
   doi: 10.5281/zenodo.17573993
   url: "https://github.com/MichailSemoglou/renoir"
