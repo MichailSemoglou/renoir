@@ -289,3 +289,130 @@ def test_extraction_methods_available():
 
     assert len(colors_kmeans) == 3
     assert len(colors_freq) == 3
+
+
+# ---------------------------------------------------------------------------
+# Validator tests
+# ---------------------------------------------------------------------------
+
+def test_validate_export_filename_path_traversal():
+    """Path-traversal filenames must be rejected."""
+    from renoir.color.extraction import _validate_export_filename
+
+    with pytest.raises(ValueError, match="path traversal"):
+        _validate_export_filename("../evil.css")
+
+    with pytest.raises(ValueError, match="path traversal"):
+        _validate_export_filename("foo/../../etc/passwd")
+
+
+def test_validate_export_filename_null_byte():
+    """Null bytes in filenames must be rejected."""
+    from renoir.color.extraction import _validate_export_filename
+
+    with pytest.raises(ValueError, match="null bytes"):
+        _validate_export_filename("palette\x00.css")
+
+
+def test_validate_export_filename_valid_paths():
+    """Normal filenames and absolute paths must be accepted."""
+    from renoir.color.extraction import _validate_export_filename
+
+    # Should not raise
+    _validate_export_filename("palette.css")
+    _validate_export_filename("output/palette.json")
+    _validate_export_filename(os.path.join(tempfile.gettempdir(), "palette.css"))
+
+
+# ---------------------------------------------------------------------------
+# Input validation edge cases
+# ---------------------------------------------------------------------------
+
+def test_extract_dominant_colors_invalid_n_colors_type(extractor, sample_image):
+    """Non-integer n_colors must raise ValueError."""
+    with pytest.raises(ValueError):
+        extractor.extract_dominant_colors(sample_image, n_colors=2.5)
+
+
+def test_extract_dominant_colors_n_colors_zero(extractor, sample_image):
+    """n_colors < 1 must raise ValueError."""
+    with pytest.raises(ValueError):
+        extractor.extract_dominant_colors(sample_image, n_colors=0)
+
+
+def test_extract_dominant_colors_n_colors_too_large(extractor, sample_image):
+    """n_colors > 256 must raise ValueError."""
+    with pytest.raises(ValueError):
+        extractor.extract_dominant_colors(sample_image, n_colors=257)
+
+
+def test_extract_dominant_colors_invalid_sample_size_type(extractor, sample_image):
+    """Non-integer sample_size must raise ValueError."""
+    with pytest.raises(ValueError):
+        extractor.extract_dominant_colors(sample_image, sample_size=1.5)
+
+
+def test_extract_dominant_colors_sample_size_zero(extractor, sample_image):
+    """sample_size < 1 must raise ValueError."""
+    with pytest.raises(ValueError):
+        extractor.extract_dominant_colors(sample_image, sample_size=0)
+
+
+def test_extract_dominant_colors_invalid_method(extractor, sample_image):
+    """Unknown method must raise ValueError."""
+    with pytest.raises(ValueError):
+        extractor.extract_dominant_colors(sample_image, method="unknown")
+
+
+def test_extract_dominant_colors_invalid_image_type(extractor):
+    """Non-image input must raise TypeError."""
+    with pytest.raises(TypeError):
+        extractor.extract_dominant_colors("not_an_image")
+
+
+def test_extract_dominant_colors_wrong_channels(extractor):
+    """Image with 2 channels must raise ValueError."""
+    bad_img = np.zeros((10, 10, 2), dtype=np.uint8)
+    with pytest.raises(ValueError):
+        extractor.extract_dominant_colors(bad_img)
+
+
+def test_extract_dominant_colors_grayscale(extractor):
+    """2D (grayscale) numpy array must be handled gracefully."""
+    gray = np.full((20, 20), 128, dtype=np.uint8)
+    colors = extractor.extract_dominant_colors(gray, n_colors=1)
+    assert len(colors) == 1
+
+
+def test_extract_dominant_colors_all_black(extractor):
+    """All-black image triggers the 'no valid pixels' warning path."""
+    black = np.zeros((10, 10, 3), dtype=np.uint8)
+    colors = extractor.extract_dominant_colors(black, n_colors=3)
+    # Should return fallback colors, not raise
+    assert len(colors) == 3
+
+
+def test_extract_dominant_colors_fewer_pixels_than_n_colors(extractor):
+    """Image with fewer unique pixels than n_colors triggers warning and clamps."""
+    tiny = np.array([[[100, 150, 200]]], dtype=np.uint8)  # 1 pixel
+    colors = extractor.extract_dominant_colors(tiny, n_colors=5, filter_extremes=False)
+    assert len(colors) >= 1
+
+
+def test_extract_dominant_colors_filter_extremes_false(extractor):
+    """filter_extremes=False keeps pure black/white pixels."""
+    img = np.zeros((10, 10, 3), dtype=np.uint8)
+    img[0:5, :] = 255  # half white
+    colors = extractor.extract_dominant_colors(img, n_colors=2, filter_extremes=False)
+    assert len(colors) == 2
+
+
+# ---------------------------------------------------------------------------
+# check_color_extraction_support helper
+# ---------------------------------------------------------------------------
+
+def test_check_color_extraction_support():
+    """check_color_extraction_support must return a bool."""
+    from renoir.color.extraction import check_color_extraction_support
+    result = check_color_extraction_support()
+    assert isinstance(result, bool)

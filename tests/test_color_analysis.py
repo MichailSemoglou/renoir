@@ -330,3 +330,69 @@ def test_wcag_compliance_check(analyzer):
     # Low contrast should fail
     ratio = analyzer.calculate_contrast_ratio((200, 200, 200), (210, 210, 210))
     assert ratio < 4.5
+
+
+# --- Tests for new WOW features ---
+
+
+class TestPaletteEarthMoversDistance:
+    """Tests for PEMD."""
+
+    def test_identical_palettes(self, analyzer):
+        p = [((255, 0, 0), 0.5), ((0, 255, 0), 0.5)]
+        result = analyzer.palette_earth_movers_distance(p, p)
+        assert result == pytest.approx(0, abs=0.1)
+
+    def test_different_palettes(self, analyzer):
+        p1 = [((255, 0, 0), 1.0)]
+        p2 = [((0, 0, 255), 1.0)]
+        result = analyzer.palette_earth_movers_distance(p1, p2)
+        assert result > 0
+
+    def test_symmetry(self, analyzer):
+        p1 = [((255, 0, 0), 0.5), ((0, 255, 0), 0.5)]
+        p2 = [((0, 0, 255), 0.5), ((255, 255, 0), 0.5)]
+        d1 = analyzer.palette_earth_movers_distance(p1, p2)
+        d2 = analyzer.palette_earth_movers_distance(p2, p1)
+        assert d1 == pytest.approx(d2, abs=0.1)
+
+    def test_empty_palette(self, analyzer):
+        with pytest.raises(ValueError):
+            analyzer.palette_earth_movers_distance([], [((255, 0, 0), 1.0)])
+
+
+class TestColorComplexityIndex:
+    """Tests for CCI."""
+
+    def test_single_color(self, analyzer):
+        result = analyzer.calculate_color_complexity([(255, 0, 0)])
+        assert isinstance(result, dict)
+        assert "cci" in result
+        assert 0 <= result["cci"] <= 1
+
+    def test_diverse_palette_higher(self, analyzer):
+        simple = [(255, 0, 0), (250, 5, 5)]
+        diverse = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]
+        c_simple = analyzer.calculate_color_complexity(simple)
+        c_diverse = analyzer.calculate_color_complexity(diverse)
+        assert c_diverse["cci"] > c_simple["cci"]
+
+    def test_empty_palette(self, analyzer):
+        result = analyzer.calculate_color_complexity([])
+        assert isinstance(result, dict)
+
+
+class TestColourProvenanceScore:
+    """Tests for CPS."""
+
+    def test_historical_palette(self, analyzer):
+        # Pre-modern pigments should score well for year 1600
+        palette = [(255, 0, 0), (0, 0, 255)]  # red, blue
+        result = analyzer.colour_provenance_score(palette, 1600)
+        assert isinstance(result, dict)
+        assert "score" in result
+        assert 0 <= result["score"] <= 1
+
+    def test_empty_palette(self, analyzer):
+        with pytest.raises(ValueError, match="colors must not be empty"):
+            analyzer.colour_provenance_score([], 1800)

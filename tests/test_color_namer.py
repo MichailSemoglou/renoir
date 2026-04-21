@@ -381,5 +381,61 @@ class TestIntegrationWithExtractor:
         assert all(isinstance(name, str) for name in names)
 
 
+class TestCrossVocabularyTranslation:
+    """Tests for translate() and translate_all_vocabularies()."""
+
+    def test_translate_basic(self):
+        namer = ColorNamer(vocabulary="artist")
+        result = namer.translate("Cadmium Yellow Light", to_vocabulary="xkcd", k=3)
+        assert isinstance(result, dict)
+        assert "translations" in result
+        assert len(result["translations"]) <= 3
+
+    def test_translate_unknown_name(self):
+        namer = ColorNamer(vocabulary="artist")
+        with pytest.raises(ValueError):
+            namer.translate("NonexistentColor123", to_vocabulary="xkcd")
+
+    def test_translate_all_vocabularies(self):
+        namer = ColorNamer(vocabulary="artist")
+        result = namer.translate_all_vocabularies("Cadmium Yellow Light", k=1)
+        assert isinstance(result, dict)
+        assert len(result) >= 2
+
+    def test_translate_preserves_state(self):
+        namer = ColorNamer(vocabulary="artist")
+        namer.translate("Cadmium Yellow Light", to_vocabulary="xkcd")
+        assert namer.vocabulary == "artist"
+
+
+class TestHistoricalPigmentProbability:
+    """Tests for historical_pigment_probability()."""
+
+    def test_basic_probability(self):
+        namer = ColorNamer(vocabulary="artist")
+        result = namer.historical_pigment_probability((255, 0, 0), 1800)
+        assert isinstance(result, list)
+        assert len(result) > 0
+        assert all("name" in r and "probability" in r for r in result)
+        # All probabilities should be non-negative
+        assert all(r["probability"] >= 0 for r in result)
+
+    def test_ancient_date(self):
+        namer = ColorNamer(vocabulary="artist")
+        result = namer.historical_pigment_probability((255, 0, 0), 1200, top_k=100)
+        assert isinstance(result, list)
+        # Modern pigments should have low probability for ancient dates
+        unavailable = [r for r in result if not r.get("available", True)]
+        assert len(unavailable) > 0, "Expected some pigments to be unavailable in 1200"
+        assert all(r["probability"] <= 0.05 for r in unavailable), (
+            "Unavailable pigments should have near-zero probability for year 1200"
+        )
+
+    def test_preserves_state(self):
+        namer = ColorNamer(vocabulary="xkcd")
+        namer.historical_pigment_probability((255, 0, 0), 1800)
+        assert namer.vocabulary == "xkcd"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

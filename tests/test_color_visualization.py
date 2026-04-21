@@ -231,3 +231,134 @@ def test_many_colors(visualizer, cleanup_plots):
 
     visualizer.plot_color_wheel(many_colors)
     plt.close()
+
+
+# ---------------------------------------------------------------------------
+# show_names=True path in plot_palette (lines 74, 81-88)
+# ---------------------------------------------------------------------------
+
+def test_plot_palette_with_names(visualizer, sample_colors, cleanup_plots):
+    """Test palette plotting with color names enabled."""
+    visualizer.plot_palette(sample_colors, show_names=True, vocabulary="artist")
+    plt.close()
+
+
+# ---------------------------------------------------------------------------
+# plot_named_palette (lines 182-272)
+# ---------------------------------------------------------------------------
+
+def test_plot_named_palette(visualizer, sample_colors, cleanup_plots):
+    """Test named palette visualization."""
+    visualizer.plot_named_palette(sample_colors, vocabulary="artist")
+    plt.close()
+
+
+def test_plot_named_palette_with_metadata(visualizer, sample_colors, cleanup_plots):
+    """Test named palette with metadata display."""
+    visualizer.plot_named_palette(
+        sample_colors, vocabulary="artist", show_metadata=True
+    )
+    plt.close()
+
+
+def test_plot_named_palette_save(visualizer, sample_colors, cleanup_plots):
+    """Test named palette with save_path."""
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+        save_path = f.name
+
+    try:
+        visualizer.plot_named_palette(sample_colors, save_path=save_path)
+        assert os.path.exists(save_path)
+    finally:
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        plt.close()
+
+
+# ---------------------------------------------------------------------------
+# save_path branches for plot_hsv_distribution and plot_3d_rgb_space
+# (lines 445-446, 501-502)
+# ---------------------------------------------------------------------------
+
+def test_plot_hsv_distribution_save(visualizer, sample_colors, cleanup_plots):
+    """Test HSV distribution with save."""
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+        save_path = f.name
+
+    try:
+        visualizer.plot_hsv_distribution(sample_colors, save_path=save_path)
+        assert os.path.exists(save_path)
+    finally:
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        plt.close()
+
+
+def test_plot_3d_rgb_space_save(visualizer, sample_colors, cleanup_plots):
+    """Test 3D RGB space with save."""
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+        save_path = f.name
+
+    try:
+        visualizer.plot_3d_rgb_space(sample_colors, save_path=save_path)
+        assert os.path.exists(save_path)
+    finally:
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        plt.close()
+
+
+# ---------------------------------------------------------------------------
+# plot_temperature_distribution (lines 582-630)
+# ---------------------------------------------------------------------------
+
+def test_plot_temperature_distribution(visualizer, sample_colors, cleanup_plots):
+    """Test colour temperature distribution chart."""
+    visualizer.plot_temperature_distribution(sample_colors)
+    plt.close()
+
+
+def test_plot_temperature_distribution_save(visualizer, sample_colors, cleanup_plots):
+    """Test colour temperature distribution with save."""
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+        save_path = f.name
+
+    try:
+        visualizer.plot_temperature_distribution(sample_colors, save_path=save_path)
+        assert os.path.exists(save_path)
+    finally:
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        plt.close()
+
+
+# ---------------------------------------------------------------------------
+# create_artist_color_report save_path (lines 716-717)
+# ---------------------------------------------------------------------------
+
+def test_create_artist_color_report_save(visualizer, sample_colors, cleanup_plots):
+    """Test comprehensive colour report with save."""
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+        save_path = f.name
+
+    try:
+        visualizer.create_artist_color_report(
+            sample_colors, artist_name="Test Artist", save_path=save_path
+        )
+        assert os.path.exists(save_path)
+    finally:
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        plt.close()
+
+
+# ---------------------------------------------------------------------------
+# check_visualization_support in visualization.py (lines 729-741)
+# ---------------------------------------------------------------------------
+
+def test_check_visualization_support_module():
+    """check_visualization_support from visualization.py must return True when
+    matplotlib is available (which it is, since we're running these tests)."""
+    from renoir.color.visualization import check_visualization_support
+    result = check_visualization_support()
+    assert result is True
