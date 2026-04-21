@@ -7,12 +7,14 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyPI](https://img.shields.io/pypi/v/renoir-wikiart.svg)](https://pypi.org/project/renoir-wikiart/)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/renoir-wikiart?period=total&units=INTERNATIONAL_SYSTEM&left_color=GRAY&right_color=MAGENTA&left_text=downloads)](https://pepy.tech/projects/renoir-wikiart)
+[![Tests](https://github.com/MichailSemoglou/renoir/actions/workflows/tests.yml/badge.svg)](https://github.com/MichailSemoglou/renoir/actions/workflows/tests.yml)
+[![Documentation](https://readthedocs.org/projects/renoir-wikiart/badge/?version=latest)](https://renoir-wikiart.readthedocs.io)
 
 ## Overview
 
 `renoir` bridges traditional art history with computational methods, providing accessible tools for art data analysis and color theory education. Unlike computer vision tools focused on algorithmic complexity, it emphasizes pedagogical clarity and visual communication for art and design practitioners and educators.
 
-**Version 3.3.1** includes a complete 17-lesson curriculum covering color extraction, analysis, harmony detection, psychology, movement evolution, machine learning classification, deep learning, and a capstone project.
+**Version 3.4.0** includes a complete 17-lesson curriculum covering color extraction, analysis, harmony detection, psychology, movement evolution, machine learning classification, deep learning, and a capstone project — plus novel algorithmic features including `PromptGenerator` for generative AI colour workflows, cross-vocabulary colour name translation, palette comparison, historical pigment attribution, colour complexity measurement, and provenance scoring.
 
 ## Key Features
 
@@ -36,6 +38,15 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 - **Color Harmony Detection**: Triadic, analogous, split-complementary, tetradic schemes
 - **8 Visualization Types**: Palettes, color wheels, distributions, 3D spaces
 - **Export Capabilities**: CSS variables and JSON formats
+
+### Advanced Colour Metrics
+
+- **Palette Earth Mover's Distance (PEMD)**: Perceptual optimal-transport distance between palettes using CIEDE2000 as ground metric
+- **Colour Complexity Index (CCI)**: Information-theoretic measure combining hue entropy, perceptual spread, proportion evenness, and harmony
+- **Historical Pigment Probability (HPP)**: Bayesian estimation of which historical pigments could produce a given colour at a given date
+- **Colour Provenance Score (CPS)**: Anomaly detection for anachronistic palettes in art-historical attribution
+- **Cross-Vocabulary Colour Translation**: Map colour names across Werner's, artist pigments, Resene, and XKCD vocabularies via CIEDE2000
+- **GenAI Colour Prompt Generation**: Convert colour analysis into structured prompts for DALL-E, Midjourney, and Stable Diffusion
 
 ### Educational Focus
 
@@ -196,6 +207,88 @@ All notebooks are in `examples/color_analysis/`:
 - **[WikiArt Cheatsheet](docs/wikiart_cheatsheet.md)** - Quick reference for all API methods, common artists, genres, styles, and code snippets
 - **[Color Naming Implementation](docs/COLOR_NAMING_IMPLEMENTATION.md)** - Technical details of the ColorNamer module
 
+## Advanced Colour Metrics: Examples
+
+### Palette Comparison (PEMD)
+
+```python
+from renoir.color import ColorAnalyzer
+
+analyzer = ColorAnalyzer()
+
+# Two palettes as (color, proportion) pairs
+palette1 = [((255, 87, 51), 0.4), ((0, 49, 83), 0.6)]
+palette2 = [((240, 90, 55), 0.5), ((10, 55, 90), 0.5)]
+
+distance = analyzer.palette_earth_movers_distance(palette1, palette2)
+print(f"Perceptual palette distance: {distance:.2f}")
+```
+
+### Colour Complexity Index
+
+```python
+colors = [(255, 87, 51), (0, 49, 83), (34, 139, 34), (255, 215, 0)]
+proportions = [0.3, 0.3, 0.2, 0.2]
+
+result = analyzer.calculate_color_complexity(colors, proportions=proportions)
+print(f"Complexity Index: {result['cci']:.3f}")
+```
+
+### Historical Pigment Probability
+
+```python
+from renoir.color import ColorNamer
+
+namer = ColorNamer(vocabulary="artist")
+
+# What pigments could produce this blue in 1665 (Vermeer's era)?
+pigments = namer.historical_pigment_probability((0, 49, 83), year=1665)
+for p in pigments:
+    print(f"{p['name']}: {p['probability']:.2%}")
+```
+
+### Cross-Vocabulary Translation
+
+```python
+namer = ColorNamer(vocabulary="artist")
+
+# Translate an artist pigment name to XKCD vocabulary
+result = namer.translate("Cadmium Yellow Light", to_vocabulary="xkcd")
+print(result)  # Closest XKCD equivalents
+
+# Translate across all vocabularies at once
+all_translations = namer.translate_all_vocabularies("Prussian Blue")
+```
+
+### Colour Provenance Score
+
+```python
+colors = [(0, 49, 83), (255, 215, 0), (139, 69, 19)]
+score = analyzer.colour_provenance_score(colors, year=1700)
+print(f"Provenance score: {score['score']:.2f}")
+print(f"Flagged: {score['flagged']}")
+```
+
+### GenAI Colour Prompts
+
+```python
+from renoir.color import PromptGenerator
+
+generator = PromptGenerator(vocabulary="artist")
+
+colors = [(255, 87, 51), (0, 49, 83), (34, 139, 34)]
+prompt = generator.generate(
+    colors,
+    style="impressionist",
+    mood="serene",
+    target_model="midjourney"
+)
+print(prompt)
+
+# Generate variations
+variations = generator.generate_variation_prompts(colors, n=3)
+```
+
 ## Advanced Usage
 
 ### Artist Work Extraction
@@ -317,6 +410,7 @@ Uses the [WikiArt dataset](https://huggingface.co/datasets/huggan/wikiart) from 
 - numpy >= 1.20.0
 - scikit-learn >= 1.0.0
 - pandas >= 1.3.0
+- scipy >= 1.7.0 (for PEMD optimal transport)
 
 ### Visualization Requirements (Optional)
 
@@ -345,19 +439,21 @@ Install with: `pip install 'renoir-wikiart[visualization]'`
 ### Color Analysis
 
 - `ColorExtractor` - Extract color palettes using k-means clustering
-- `ColorAnalyzer` - Analyze colors across multiple color spaces
+- `ColorAnalyzer` - Analyze colors across multiple color spaces (includes PEMD, CCI, CPS)
+- `ColorNamer` - Perceptual color naming, cross-vocabulary translation, historical pigment probability
 - `ColorVisualizer` - Create publication-quality color visualizations
+- `PromptGenerator` - Generate structured colour prompts for generative AI models
 
 ## Citation
 
 If you use this software in your research or teaching, please cite:
 
 ```bibtex
-@software{semoglou2025renoir,
+@software{semoglou2026renoir,
   author = {Semoglou, Michail},
   title = {renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt},
-  year = {2025},
-  version = {3.3.1},
+  year = {2026},
+  version = {3.4.0},
   doi = {10.5281/zenodo.17573993},
   url = {https://github.com/MichailSemoglou/renoir}
 }
@@ -396,45 +492,4 @@ For questions about using this tool in your classroom or research:
 
 ## What's New
 
-### v3.3.1 (Latest)
-
-- **6 New Educational Notebooks**: Complete 17-lesson curriculum with advanced ML
-  - Art Movement Classification with SHAP Explainability
-  - Variational Autoencoder Palette Generation
-  - Artist Color DNA and Similarity Embeddings
-  - Clustering and Anomaly Detection
-  - Temporal Artist Evolution Analysis
-  - Capstone Project: AI-Powered Art Intelligence Platform
-- **Artwork Titles**: Notebooks now display artwork titles for better context
-- **Code Cleanup**: Removed extraneous emoticons for cleaner output
-
-### v3.3.0
-
-- **ColorNamer Module**: Evocative color naming with CIEDE2000 matching
-  - 4 vocabularies: artist pigments, Resene, Werner's, XKCD
-  - Color Index names for physical paint matching
-- **Color Naming Notebook**: Complete tutorial (Lesson 11)
-
-### v3.2.0
-
-- **5 New Educational Notebooks**: Lessons 6-10
-- **WikiArt Cheatsheet**: Quick reference documentation
-- **Extended Examples**: More code samples and recipes
-
-### v3.1.0
-
-- **Color Harmony Detection**: Detect triadic, analogous, split-complementary, and tetradic color schemes
-- **5 New Analysis Methods**: Comprehensive harmony analysis for computational color theory
-- **Educational Notebook**: Complete lesson on color harmony principles with interactive examples
-- **Multi-Artist Comparison**: Compare harmony preferences across artistic movements
-
-### v3.0.0
-
-- **Color Extraction**: K-means clustering for palette extraction
-- **Color Analysis**: Multi-space analysis (RGB, HSV, HSL)
-- **Statistical Metrics**: Diversity, saturation, brightness, temperature
-- **8 Visualization Types**: Comprehensive color visualization suite
-- **Educational Materials**: Complete Jupyter notebooks for teaching
-- **Export Capabilities**: CSS and JSON export formats
-
-See [CHANGELOG](https://github.com/MichailSemoglou/renoir/releases) for full details.
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.

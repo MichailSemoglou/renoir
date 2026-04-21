@@ -5,6 +5,38 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-04-21
+
+### Added
+
+- **PromptGenerator module** (`renoir/color/prompt.py`) — Generate descriptive colour prompts for
+  generative AI workflows from extracted palettes
+- **`translate()` / `translate_all_vocabularies()`** methods in `ColorNamer` — Cross-vocabulary
+  colour name translation (artist ↔ resene ↔ natural ↔ xkcd)
+- **Palette Earth Mover's Distance** (`ColorAnalyzer.palette_earth_movers_distance()`) — Optimal-
+  transport perceptual distance between palettes using CIEDE2000 as ground metric
+- **Colour Complexity Index** (`ColorAnalyzer.calculate_color_complexity()`) — Information-theoretic
+  measure combining hue entropy, perceptual spread, proportion evenness, and harmony
+- **Historical Pigment Probability** (`ColorNamer.historical_pigment_probability()`) — Bayesian
+  estimation of which historical pigments could produce a colour at a given date; all 49 pigments
+  in `artist_pigments.json` carry `year_introduced` fields
+- **Colour Provenance Score** (`ColorAnalyzer.colour_provenance_score()`) — Weighted pigment-
+  probability score per palette with anachronism flagging
+
+### Fixed
+
+- `_validate_export_filename` rewritten to use path-component inspection instead of
+  `os.path.commonpath`, resolving false-positive rejections for `/tmp/` and other
+  out-of-cwd export paths (Windows drive-letter compatibility included)
+- Restored `np.random.RandomState` (MT19937) for reproducible pixel sampling in
+  `extract_dominant_colors`, matching the documented `random_state` contract
+
+### Changed
+
+- Test coverage raised from 77 % to 85 % with 27 new parametrised test cases covering
+  validation edge-cases, grayscale/all-black images, named-palette visualisations,
+  temperature-distribution charts, and save-path branches
+
 ## [3.3.1] - 2025-11-30
 
 ### Added
@@ -91,7 +123,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated test expectations to match actual implementation behavior
 - Applied black formatting to entire codebase for consistency
 
-## [3.0.1] - 2025-01-11
+## [3.0.1]
 
 ### Added
 
@@ -185,33 +217,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## Release Notes
-
-### Version 3.0.1 (Latest)
-
-This release focuses on production readiness and SoftwareX journal compliance:
-
-- **Robust Error Handling**: All public methods now validate inputs and provide clear error messages
-- **Comprehensive Testing**: 85 test functions ensure reliability
-- **Complete Documentation**: All notebooks and examples are fully functional
-- **CI/CD Pipeline**: Automated testing on every push
-- **Production Ready**: Suitable for classroom use and research applications
-
-### Version 3.0.0
-
-Major feature release adding comprehensive color analysis capabilities. This version transforms renoir from a simple data extraction tool into a complete educational platform for teaching computational color theory through art historical examples.
-
-### Version 2.0.0
-
-Added visualization capabilities, making the package more suitable for educational demonstrations and presentations.
-
-### Version 1.0.0
-
-Initial public release with basic artist analysis functionality.
-
----
-
 ## Upgrade Guide
+
+### From 3.3.x to 3.4.0
+
+No breaking changes. New imports available:
+
+- `from renoir.color import PromptGenerator`
+
+New `ColorNamer` methods: `translate()`, `translate_all_vocabularies()`, `historical_pigment_probability()`
+
+New `ColorAnalyzer` methods: `palette_earth_movers_distance()`, `calculate_color_complexity()`, `colour_provenance_score()`
 
 ### From 3.0.0 to 3.0.1
 
@@ -235,6 +251,6 @@ Visualization features are optional. Install with `pip install 'renoir-wikiart[v
 
 - [PyPI Package](https://pypi.org/project/renoir-wikiart/)
 - [GitHub Repository](https://github.com/MichailSemoglou/renoir)
-- [Documentation](https://github.com/MichailSemoglou/renoir#readme)
+- [Documentation](https://renoir-wikiart.readthedocs.io)
 - [Issue Tracker](https://github.com/MichailSemoglou/renoir/issues)
 - [Zenodo DOI](https://doi.org/10.5281/zenodo.17573993)

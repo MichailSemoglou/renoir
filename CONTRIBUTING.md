@@ -51,6 +51,23 @@ pytest tests/
 - Include usage examples in docstrings
 - Consider pedagogical context in documentation
 
+### Building the Docs Locally
+
+The `docs/_build/` directory is git-ignored and must be generated locally — never commit it.
+
+```bash
+# Install doc dependencies
+pip install -e ".[dev]"
+
+# Build HTML docs
+cd docs
+make html
+# Output is in docs/_build/html/index.html
+
+# Or, from the repo root:
+sphinx-build -b html docs docs/_build/html
+```
+
 ## Submitting Changes
 
 1. Commit your changes:
