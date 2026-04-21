@@ -124,7 +124,5 @@ class TestPaletteKeywords:
 
     def test_keywords_muted(self):
         gen = PromptGenerator()
-        keywords = gen.palette_to_prompt_keywords(
-            [(180, 170, 165), (160, 155, 150)]
-        )
+        keywords = gen.palette_to_prompt_keywords([(180, 170, 165), (160, 155, 150)])
         assert "muted" in keywords

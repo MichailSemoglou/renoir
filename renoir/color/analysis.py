@@ -910,9 +910,9 @@ class ColorAnalyzer:
         for i, c1_count in enumerate(counts1):
             col_idx = 0
             for j, c2_count in enumerate(counts2):
-                expanded_cost[row_idx : row_idx + c1_count, col_idx : col_idx + c2_count] = (
-                    cost_matrix[i, j]
-                )
+                expanded_cost[
+                    row_idx : row_idx + c1_count, col_idx : col_idx + c2_count
+                ] = cost_matrix[i, j]
                 col_idx += c2_count
             row_idx += c1_count
 
@@ -1025,9 +1025,7 @@ class ColorAnalyzer:
             "proportion_evenness": float(proportion_evenness),
             "harmony_penalty": float(harmony_score),
             "components": {
-                "hue_entropy_weighted": float(
-                    w.get("hue_entropy", 0.3) * hue_entropy
-                ),
+                "hue_entropy_weighted": float(w.get("hue_entropy", 0.3) * hue_entropy),
                 "perceptual_spread_weighted": float(
                     w.get("perceptual_spread", 0.3) * perceptual_spread
                 ),
@@ -1125,9 +1123,9 @@ class ColorAnalyzer:
         # Weighted overall score
         total_weight = sum(proportions)
         if total_weight > 0:
-            score = sum(
-                e["probability"] * e["weight"] for e in per_color
-            ) / total_weight
+            score = (
+                sum(e["probability"] * e["weight"] for e in per_color) / total_weight
+            )
         else:
             score = 0.0
 

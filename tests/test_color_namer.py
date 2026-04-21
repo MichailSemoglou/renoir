@@ -427,9 +427,9 @@ class TestHistoricalPigmentProbability:
         # Modern pigments should have low probability for ancient dates
         unavailable = [r for r in result if not r.get("available", True)]
         assert len(unavailable) > 0, "Expected some pigments to be unavailable in 1200"
-        assert all(r["probability"] <= 0.05 for r in unavailable), (
-            "Unavailable pigments should have near-zero probability for year 1200"
-        )
+        assert all(
+            r["probability"] <= 0.05 for r in unavailable
+        ), "Unavailable pigments should have near-zero probability for year 1200"
 
     def test_preserves_state(self):
         namer = ColorNamer(vocabulary="xkcd")

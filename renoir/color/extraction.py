@@ -25,9 +25,7 @@ def _validate_export_filename(filename: str) -> None:
     """Raise ValueError if filename contains path-traversal components."""
     # Block explicit '..' traversal in the raw filename
     if ".." in filename.replace("\\", "/").split("/"):
-        raise ValueError(
-            "filename must not contain path traversal components ('..')."
-        )
+        raise ValueError("filename must not contain path traversal components ('..').")
     # Block null bytes
     if "\x00" in filename:
         raise ValueError("filename must not contain null bytes.")

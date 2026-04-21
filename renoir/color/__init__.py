@@ -17,4 +17,10 @@ from .visualization import ColorVisualizer
 from .namer import ColorNamer
 from .prompt import PromptGenerator
 
-__all__ = ["ColorAnalyzer", "ColorExtractor", "ColorNamer", "ColorVisualizer", "PromptGenerator"]
+__all__ = [
+    "ColorAnalyzer",
+    "ColorExtractor",
+    "ColorNamer",
+    "ColorVisualizer",
+    "PromptGenerator",
+]

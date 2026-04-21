@@ -237,6 +237,7 @@ def test_many_colors(visualizer, cleanup_plots):
 # show_names=True path in plot_palette (lines 74, 81-88)
 # ---------------------------------------------------------------------------
 
+
 def test_plot_palette_with_names(visualizer, sample_colors, cleanup_plots):
     """Test palette plotting with color names enabled."""
     visualizer.plot_palette(sample_colors, show_names=True, vocabulary="artist")
@@ -246,6 +247,7 @@ def test_plot_palette_with_names(visualizer, sample_colors, cleanup_plots):
 # ---------------------------------------------------------------------------
 # plot_named_palette (lines 182-272)
 # ---------------------------------------------------------------------------
+
 
 def test_plot_named_palette(visualizer, sample_colors, cleanup_plots):
     """Test named palette visualization."""
@@ -280,6 +282,7 @@ def test_plot_named_palette_save(visualizer, sample_colors, cleanup_plots):
 # (lines 445-446, 501-502)
 # ---------------------------------------------------------------------------
 
+
 def test_plot_hsv_distribution_save(visualizer, sample_colors, cleanup_plots):
     """Test HSV distribution with save."""
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
@@ -312,6 +315,7 @@ def test_plot_3d_rgb_space_save(visualizer, sample_colors, cleanup_plots):
 # plot_temperature_distribution (lines 582-630)
 # ---------------------------------------------------------------------------
 
+
 def test_plot_temperature_distribution(visualizer, sample_colors, cleanup_plots):
     """Test colour temperature distribution chart."""
     visualizer.plot_temperature_distribution(sample_colors)
@@ -336,6 +340,7 @@ def test_plot_temperature_distribution_save(visualizer, sample_colors, cleanup_p
 # create_artist_color_report save_path (lines 716-717)
 # ---------------------------------------------------------------------------
 
+
 def test_create_artist_color_report_save(visualizer, sample_colors, cleanup_plots):
     """Test comprehensive colour report with save."""
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
@@ -356,9 +361,11 @@ def test_create_artist_color_report_save(visualizer, sample_colors, cleanup_plot
 # check_visualization_support in visualization.py (lines 729-741)
 # ---------------------------------------------------------------------------
 
+
 def test_check_visualization_support_module():
     """check_visualization_support from visualization.py must return True when
     matplotlib is available (which it is, since we're running these tests)."""
     from renoir.color.visualization import check_visualization_support
+
     result = check_visualization_support()
     assert result is True

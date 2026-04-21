@@ -168,11 +168,36 @@ def test_empty_works_handling():
 # --- Tests using mock data (no dataset download) ---
 
 MOCK_WORKS = [
-    {"artist": "claude-monet", "genre": "landscape", "style": "Impressionism", "date": 1872},
-    {"artist": "claude-monet", "genre": "landscape", "style": "Impressionism", "date": 1880},
-    {"artist": "claude-monet", "genre": "portrait", "style": "Impressionism", "date": 1875},
-    {"artist": "claude-monet", "genre": "landscape", "style": "Realism", "date": "1868"},
-    {"artist": "claude-monet", "genre": "cityscape", "style": "Impressionism", "date": 1899},
+    {
+        "artist": "claude-monet",
+        "genre": "landscape",
+        "style": "Impressionism",
+        "date": 1872,
+    },
+    {
+        "artist": "claude-monet",
+        "genre": "landscape",
+        "style": "Impressionism",
+        "date": 1880,
+    },
+    {
+        "artist": "claude-monet",
+        "genre": "portrait",
+        "style": "Impressionism",
+        "date": 1875,
+    },
+    {
+        "artist": "claude-monet",
+        "genre": "landscape",
+        "style": "Realism",
+        "date": "1868",
+    },
+    {
+        "artist": "claude-monet",
+        "genre": "cityscape",
+        "style": "Impressionism",
+        "date": 1899,
+    },
 ]
 
 
@@ -302,7 +327,9 @@ class TestExtractArtistWorksWithMock:
 class TestLoadDatasetFailure:
     def test_load_dataset_runtime_error(self):
         analyzer = ArtistAnalyzer()
-        with patch("renoir.analyzer.load_dataset", side_effect=Exception("network error")):
+        with patch(
+            "renoir.analyzer.load_dataset", side_effect=Exception("network error")
+        ):
             with pytest.raises(RuntimeError, match="Failed to load"):
                 analyzer.extract_artist_works("monet")
 
@@ -320,6 +347,8 @@ class TestQuickAnalysis:
         analyzer = ArtistAnalyzer()
         analyzer._dataset = MOCK_WORKS
         with patch("renoir.analyzer.ArtistAnalyzer", return_value=analyzer):
-            works = quick_analysis("claude-monet", limit=3, show_summary=True, show_plots=False)
+            works = quick_analysis(
+                "claude-monet", limit=3, show_summary=True, show_plots=False
+            )
             assert isinstance(works, list)
             assert len(works) == 3

@@ -295,6 +295,7 @@ def test_extraction_methods_available():
 # Validator tests
 # ---------------------------------------------------------------------------
 
+
 def test_validate_export_filename_path_traversal():
     """Path-traversal filenames must be rejected."""
     from renoir.color.extraction import _validate_export_filename
@@ -327,6 +328,7 @@ def test_validate_export_filename_valid_paths():
 # ---------------------------------------------------------------------------
 # Input validation edge cases
 # ---------------------------------------------------------------------------
+
 
 def test_extract_dominant_colors_invalid_n_colors_type(extractor, sample_image):
     """Non-integer n_colors must raise ValueError."""
@@ -411,8 +413,10 @@ def test_extract_dominant_colors_filter_extremes_false(extractor):
 # check_color_extraction_support helper
 # ---------------------------------------------------------------------------
 
+
 def test_check_color_extraction_support():
     """check_color_extraction_support must return a bool."""
     from renoir.color.extraction import check_color_extraction_support
+
     result = check_color_extraction_support()
     assert isinstance(result, bool)
