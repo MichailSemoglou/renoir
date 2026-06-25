@@ -3,7 +3,7 @@ message: "If you use this software, please cite it as below."
 type: software
 title: "renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt"
 version: 3.4.1
-date-released: 2026-04-21
+date-released: 2026-06-26
 authors:
   - family-names: Semoglou
     given-names: Michail
@@ -44,6 +44,6 @@ preferred-citation:
       given-names: Michail
       orcid: "https://orcid.org/0009-0003-3268-5657"
   version: 3.4.1
-  date-released: 2026-04-21
+  date-released: 2026-06-26
   doi: 10.5281/zenodo.19675349
   url: "https://github.com/MichailSemoglou/renoir"
