@@ -99,7 +99,7 @@ class ColorVisualizer:
             ax.add_patch(rect)
 
             # Determine text color (black or white) based on brightness
-            brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000
+            brightness = self._calculate_brightness(color)
             text_color = "white" if brightness < 128 else "black"
 
             # Add hex code if requested
@@ -716,6 +716,422 @@ class ColorVisualizer:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Color report saved to: {save_path}")
 
+        plt.show()
+
+    # ------------------------------------------------------------------
+    # Paper-figure methods (added v3.4.0)
+    # ------------------------------------------------------------------
+
+    def _calculate_brightness(self, rgb: Tuple[int, int, int]) -> float:
+        """Return perceptual brightness (ITU-R BT.601 luma) for an RGB triplet."""
+        return 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]
+
+    def plot_historical_pigment_probability(
+        self,
+        color: Tuple[int, int, int],
+        year: int,
+        results: Optional[List[Dict]] = None,
+        top_k: int = 5,
+        figsize: Tuple[float, float] = (10.0, 4.5),
+        save_path: Optional[str] = None,
+    ) -> None:
+        """
+        Visualise Historical Pigment Probability (HPP) output for one colour.
+
+        Shows the input colour alongside the ranked candidate pigments returned
+        by :meth:`~renoir.color.namer.ColorNamer.historical_pigment_probability`,
+        with swatch, Colour Index name, year of introduction, probability bar,
+        and availability flag for each candidate.
+
+        Args:
+            color: Input RGB colour tuple, e.g. ``(28, 62, 145)``.
+            year: Historical year against which availability is assessed.
+            results: Pre-computed HPP output (list of dicts).  If ``None`` the
+                method calls :class:`~renoir.color.namer.ColorNamer` internally.
+            top_k: Number of candidate pigments to display (default 5).
+            figsize: Figure dimensions ``(width, height)`` in inches.
+            save_path: File path for saving (PNG at 300 dpi or PDF).
+        """
+        from .namer import ColorNamer
+
+        if results is None:
+            namer = ColorNamer()
+            results = namer.historical_pigment_probability(color, year, top_k=top_k)
+
+        k = len(results)
+        r, g, b = color
+        hex_str = f"#{r:02X}{g:02X}{b:02X}"
+        brightness = self._calculate_brightness(color)
+        input_fg = "white" if brightness < 140 else "#111111"
+
+        fig, axes = plt.subplots(
+            1, k + 1,
+            figsize=figsize,
+            gridspec_kw=dict(
+                width_ratios=[1.5] + [1.0] * k,
+                wspace=0.04,
+                left=0.01, right=0.99, top=0.88, bottom=0.06,
+            ),
+        )
+        fig.patch.set_facecolor("white")
+        fig.suptitle(
+            "Historical Pigment Probability",
+            fontsize=10, fontweight="bold", y=0.96, color="#1A1A1A",
+        )
+
+        # ── Input panel ──────────────────────────────────────────────────
+        ax_in = axes[0]
+        ax_in.set_xlim(0, 1)
+        ax_in.set_ylim(0, 1)
+        ax_in.set_xticks([])
+        ax_in.set_yticks([])
+        for sp in ax_in.spines.values():
+            sp.set_edgecolor("#CCCCCC")
+            sp.set_linewidth(0.8)
+        ax_in.set_facecolor(f"#{r:02X}{g:02X}{b:02X}")
+        ax_in.text(
+            0.5, 0.60, hex_str,
+            transform=ax_in.transAxes, ha="center", va="center",
+            fontsize=9, fontweight="bold", color=input_fg,
+        )
+        ax_in.text(
+            0.5, 0.40, str(year),
+            transform=ax_in.transAxes, ha="center", va="center",
+            fontsize=9, color=input_fg, alpha=0.85,
+        )
+        ax_in.text(
+            0.5, 0.20, "Input colour",
+            transform=ax_in.transAxes, ha="center", va="center",
+            fontsize=7.5, color=input_fg, fontstyle="italic", alpha=0.75,
+        )
+
+        # ── Candidate panels ─────────────────────────────────────────────
+        max_prob = max(c["probability"] for c in results) if results else 1.0
+        _ACTIVE_COL = "#2D6A9F"
+        _INACTIVE_COL = "#AAAAAA"
+
+        for idx, cand in enumerate(results):
+            ax = axes[idx + 1]
+            ax.set_xlim(0, 1)
+            ax.set_ylim(0, 1)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            for sp in ax.spines.values():
+                sp.set_edgecolor("#DDDDDD")
+                sp.set_linewidth(0.7)
+            ax.set_facecolor("white")
+
+            cr, cg, cb = cand["rgb"]
+            cand_hex = f"#{cr:02X}{cg:02X}{cb:02X}"
+            cand_bright = self._calculate_brightness(cand["rgb"])
+            cand_fg = "white" if cand_bright < 140 else "#111111"
+            available = cand.get("available", True)
+            yr_intro = cand.get("year_introduced")
+
+            # Top 50 % → colour swatch
+            ax.add_patch(patches.Rectangle(
+                (0, 0.50), 1, 0.50, facecolor=cand_hex, linewidth=0,
+            ))
+
+            # Pigment name (centred in swatch)
+            ax.text(
+                0.5, 0.66, cand["name"],
+                ha="center", va="center", fontsize=7.0, fontweight="bold",
+                color=cand_fg, multialignment="center",
+            )
+
+            # CI name
+            ci = cand.get("ci_name") or ""
+            ax.text(
+                0.5, 0.44, ci,
+                ha="center", va="top", fontsize=6.5, color="#555555",
+            )
+
+            # Year introduced
+            if yr_intro is not None:
+                yr_label = "antiquity" if yr_intro <= 0 else f"est. {yr_intro}"
+            else:
+                yr_label = "date unknown"
+            ax.text(
+                0.5, 0.34, yr_label,
+                ha="center", va="top", fontsize=6.0, color="#888888",
+            )
+
+            # Probability bar
+            bar_y, bar_h = 0.17, 0.07
+            ax.add_patch(patches.Rectangle(
+                (0.05, bar_y), 0.90, bar_h, facecolor="#E0E0E0", linewidth=0,
+            ))
+            fill_w = 0.90 * (cand["probability"] / max_prob)
+            bar_col = _ACTIVE_COL if available else _INACTIVE_COL
+            ax.add_patch(patches.Rectangle(
+                (0.05, bar_y), fill_w, bar_h, facecolor=bar_col, linewidth=0,
+            ))
+
+            # Probability value
+            ax.text(
+                0.5, bar_y - 0.03, f"p = {cand['probability']:.3f}",
+                ha="center", va="top", fontsize=6.0, color="#555555",
+            )
+
+            # Availability badge
+            badge_col = "#2E7D32" if available else "#B71C1C"
+            badge_txt = "Available" if available else "Not yet available"
+            ax.text(
+                0.5, 0.04, badge_txt,
+                ha="center", va="bottom", fontsize=6.0,
+                fontweight="bold", color=badge_col,
+            )
+
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
+            print(f"HPP figure saved: {save_path}")
+        plt.show()
+
+    def plot_pemd_comparison(
+        self,
+        pairs: List[Tuple[List, List]],
+        labels: Optional[List[Tuple[str, str]]] = None,
+        pemd_values: Optional[List[float]] = None,
+        figsize: Tuple[float, float] = (9.0, 4.0),
+        save_path: Optional[str] = None,
+    ) -> None:
+        """
+        Visualise Palette Earth Mover's Distance (PEMD) for one or more palette pairs.
+
+        Each pair is shown as two proportional colour strips with the PEMD value
+        annotated between them.  Accepts pre-computed PEMD values or computes
+        them internally.
+
+        Args:
+            pairs: List of ``(palette1, palette2)`` tuples.  Each palette is a
+                list of ``((R, G, B), proportion)`` tuples.
+            labels: List of ``(label1, label2)`` strings for each pair.
+            pemd_values: Pre-computed PEMD floats, one per pair.  If ``None``
+                values are computed internally (requires scipy).
+            figsize: Figure dimensions ``(width, height)`` in inches.
+            save_path: File path for saving (PNG at 300 dpi or PDF).
+        """
+        from .analysis import ColorAnalyzer
+
+        n_pairs = len(pairs)
+        if labels is None:
+            labels = [
+                (f"Palette A ({i + 1})", f"Palette B ({i + 1})")
+                for i in range(n_pairs)
+            ]
+
+        # Validate and compute missing PEMD values
+        if pemd_values is not None and len(pemd_values) != n_pairs:
+            raise ValueError(
+                f"pemd_values has {len(pemd_values)} entries but pairs has {n_pairs}."
+            )
+        analyzer = ColorAnalyzer()
+        computed: List[Optional[float]] = (
+            list(pemd_values) if pemd_values is not None else [None] * n_pairs
+        )
+        for i, (p1, p2) in enumerate(pairs):
+            if computed[i] is None:
+                computed[i] = analyzer.palette_earth_movers_distance(p1, p2)
+
+        fig = plt.figure(figsize=figsize, facecolor="white")
+        fig.suptitle(
+            "Palette Earth Mover's Distance (PEMD)",
+            fontsize=10, fontweight="bold", y=0.97, color="#1A1A1A",
+        )
+
+        # Each pair: 2 strip rows (strip1, strip2), gap between pairs
+        gs = plt.GridSpec(
+            n_pairs * 2, 1,
+            hspace=0.20,
+            left=0.15, right=0.88, top=0.88, bottom=0.05,
+        )
+
+        def _draw_strip(ax: "plt.Axes", palette: List, label: str) -> None:
+            ax.set_xlim(0, 1)
+            ax.set_ylim(0, 1)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            for sp in ax.spines.values():
+                sp.set_edgecolor("#CCCCCC")
+                sp.set_linewidth(0.6)
+            ax.set_facecolor("white")
+            total_w = sum(prop for _, prop in palette) or 1.0
+            x = 0.0
+            for rgb, prop in palette:
+                seg_w = prop / total_w
+                rr, gg, bb = rgb
+                bright = self._calculate_brightness(rgb)
+                seg_fg = "white" if bright < 140 else "#111111"
+                ax.add_patch(patches.Rectangle(
+                    (x, 0), seg_w, 1,
+                    facecolor=f"#{rr:02X}{gg:02X}{bb:02X}", linewidth=0,
+                ))
+                if seg_w > 0.10:
+                    ax.text(
+                        x + seg_w / 2, 0.5,
+                        f"#{rr:02X}{gg:02X}{bb:02X}",
+                        ha="center", va="center", fontsize=8, color=seg_fg,
+                    )
+                x += seg_w
+            ax.text(
+                -0.02, 0.5, label,
+                transform=ax.transAxes, ha="right", va="center",
+                fontsize=8, color="#333333",
+            )
+
+        for pair_idx, (p1, p2) in enumerate(pairs):
+            lbl1, lbl2 = labels[pair_idx]
+            pemd_val = computed[pair_idx]
+            ax1 = fig.add_subplot(gs[pair_idx * 2, 0])
+            ax2 = fig.add_subplot(gs[pair_idx * 2 + 1, 0])
+            _draw_strip(ax1, p1, lbl1)
+            _draw_strip(ax2, p2, lbl2)
+
+            # PEMD annotation to the right of both strips
+            ax1_pos = ax1.get_position()
+            ax2_pos = ax2.get_position()
+            mid_y = (ax1_pos.y0 + ax2_pos.y1) / 2
+            fig.text(
+                0.895, mid_y,
+                f"PEMD\n{pemd_val:.2f}",
+                ha="left", va="center", fontsize=8.5, fontweight="bold",
+                color="white",
+                bbox=dict(
+                    boxstyle="round,pad=0.35",
+                    facecolor="#1A1A1A", edgecolor="none",
+                ),
+            )
+
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
+            print(f"PEMD figure saved: {save_path}")
+        plt.show()
+
+    def plot_cross_vocabulary_naming(
+        self,
+        colors: List[Tuple[int, int, int]],
+        vocabulary_labels: Optional[Dict[str, str]] = None,
+        figsize: Optional[Tuple[float, float]] = None,
+        save_path: Optional[str] = None,
+    ) -> None:
+        """
+        Visualise how a palette is named across all four colour vocabularies.
+
+        Creates a grid with vocabularies in rows and colours in columns.
+        Each cell shows the matched colour swatch and the name from that
+        vocabulary (CIEDE2000 nearest-neighbour match).
+
+        Args:
+            colors: List of RGB tuples to name.
+            vocabulary_labels: Optional mapping of vocabulary key to display
+                label.  Defaults to standard vocabulary names.
+            figsize: Figure dimensions ``(width, height)`` in inches.
+                Auto-sized when ``None``.
+            save_path: File path for saving (PNG at 300 dpi or PDF).
+        """
+        from .namer import ColorNamer
+
+        _VOCABS = ["artist", "resene", "natural", "xkcd"]
+        if vocabulary_labels is None:
+            vocabulary_labels = {
+                "artist": "Artist pigments",
+                "resene": "Resene",
+                "natural": "Werner's Nomenclature",
+                "xkcd": "xkcd",
+            }
+
+        # Gather names + matched RGB for each vocabulary
+        vocab_data: Dict[str, List[Dict]] = {}
+        for v in _VOCABS:
+            namer = ColorNamer(vocabulary=v)
+            vocab_data[v] = namer.name_palette(colors, return_metadata=True)
+
+        n_colors = len(colors)
+        n_vocabs = len(_VOCABS)
+
+        if figsize is None:
+            figsize = (9.5, max(3.0, 0.85 * n_vocabs + 1.0))
+
+        fig, axes = plt.subplots(
+            n_vocabs, n_colors,
+            figsize=figsize,
+            squeeze=False,
+            gridspec_kw=dict(
+                wspace=0.04, hspace=0.06,
+                left=0.16, right=0.99, top=0.88, bottom=0.06,
+            ),
+        )
+        fig.patch.set_facecolor("white")
+        fig.suptitle(
+            "Cross-vocabulary colour naming",
+            fontsize=10, fontweight="bold", y=0.96, color="#1A1A1A",
+        )
+
+        # Column headers: input colour hex
+        for col_idx, rgb in enumerate(colors):
+            rr, gg, bb = rgb
+            axes[0, col_idx].set_title(
+                f"#{rr:02X}{gg:02X}{bb:02X}",
+                fontsize=7.5, color="#444444", pad=3,
+            )
+
+        # Row labels: vocabulary names
+        for row_idx, v in enumerate(_VOCABS):
+            axes[row_idx, 0].set_ylabel(
+                vocabulary_labels[v],
+                fontsize=7.5, color="#333333",
+                rotation=0, ha="right", va="center",
+                labelpad=4,
+            )
+
+        # Cells
+        for row_idx, v in enumerate(_VOCABS):
+            for col_idx, rgb in enumerate(colors):
+                ax = axes[row_idx, col_idx]
+                ax.set_xlim(0, 1)
+                ax.set_ylim(0, 1)
+                ax.set_xticks([])
+                ax.set_yticks([])
+                for sp in ax.spines.values():
+                    sp.set_edgecolor("#E0E0E0")
+                    sp.set_linewidth(0.6)
+
+                meta = vocab_data[v][col_idx]
+                if isinstance(meta, dict):
+                    name_str = meta.get("name", "—")
+                    mr, mg, mb = meta.get("rgb", rgb)
+                else:
+                    name_str = str(meta)
+                    mr, mg, mb = rgb
+
+                # Left half: input colour
+                ax.add_patch(patches.Rectangle(
+                    (0, 0), 0.5, 1,
+                    facecolor=f"#{rgb[0]:02X}{rgb[1]:02X}{rgb[2]:02X}",
+                    linewidth=0,
+                ))
+                # Right half: matched colour from vocabulary
+                ax.add_patch(patches.Rectangle(
+                    (0.5, 0), 0.5, 1,
+                    facecolor=f"#{mr:02X}{mg:02X}{mb:02X}",
+                    linewidth=0,
+                ))
+                # Vertical divider
+                ax.axvline(0.5, color="white", linewidth=0.8)
+
+                # Name label below cell
+                bright_match = self._calculate_brightness((mr, mg, mb))
+                txt_col = "white" if bright_match < 140 else "#1A1A1A"
+                ax.text(
+                    0.75, 0.5, name_str,
+                    ha="center", va="center", fontsize=5.5,
+                    color=txt_col, multialignment="center",
+                )
+
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
+            print(f"Cross-vocabulary figure saved: {save_path}")
         plt.show()
 
 

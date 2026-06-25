@@ -802,6 +802,8 @@ class ColorNamer:
                         "raw_score": raw_score,
                         "ciede2000": round(distance, 3),
                         "available": available,
+                        "year_introduced": p.get("year_introduced"),
+                        "year_discontinued": p.get("year_discontinued"),
                     }
                 )
 
