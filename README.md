@@ -2,9 +2,9 @@
 
 A computational tool for analyzing artist-specific works from WikiArt with comprehensive color analysis capabilities. Designed for teaching computational color theory and data analysis to art and design students through culturally meaningful examples.
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17573993.svg)](https://doi.org/10.5281/zenodo.17573993)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19675349.svg)](https://doi.org/10.5281/zenodo.19675349)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![PyPI](https://img.shields.io/pypi/v/renoir-wikiart.svg)](https://pypi.org/project/renoir-wikiart/)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/renoir-wikiart?period=total&units=INTERNATIONAL_SYSTEM&left_color=GRAY&right_color=MAGENTA&left_text=downloads)](https://pepy.tech/projects/renoir-wikiart)
 [![Tests](https://github.com/MichailSemoglou/renoir/actions/workflows/tests.yml/badge.svg)](https://github.com/MichailSemoglou/renoir/actions/workflows/tests.yml)
@@ -12,47 +12,45 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 
 ## Overview
 
-`renoir` bridges traditional art history with computational methods, providing accessible tools for art data analysis and color theory education. Unlike computer vision tools focused on algorithmic complexity, it emphasizes pedagogical clarity and visual communication for art and design practitioners and educators.
-
-**Version 3.4.0** includes a complete 17-lesson curriculum covering color extraction, analysis, harmony detection, psychology, movement evolution, machine learning classification, deep learning, and a capstone project — plus novel algorithmic features including `PromptGenerator` for generative AI colour workflows, cross-vocabulary colour name translation, palette comparison, historical pigment attribution, colour complexity measurement, and provenance scoring.
+`renoir` is a pedagogical Python package for computational colour analysis of artworks from WikiArt. Its primary contributions are four interpretable metrics designed for art-historical reasoning: Palette Earth Mover's Distance for perceptual palette comparison, Colour Complexity Index combining information-theoretic and perceptual measures, Historical Pigment Probability for dating-aware Bayesian pigment attribution, and Colour Provenance Score for detecting anachronistic palettes. These sit alongside a complete 17-lesson curriculum, four colour naming vocabularies, and a PromptGenerator module for generative AI workflows, designed to take art and design students from k-means basics through machine learning using a culturally meaningful dataset.
 
 ## Key Features
 
-### Artist Analysis
+### Artist analysis
 
-- Extract and analyze works by 100+ artists from WikiArt
-- Built-in visualizations for genre and style distributions
+- Extract and analyse works by 100+ artists from WikiArt
+- Built-in visualisations for genre and style distributions
 - Temporal analysis of artistic development
 - Comparative analysis across artists and movements
 
-### Color Analysis
-
-- **Color Extraction**: K-means clustering for intelligent palette extraction
-- **Color Naming**: Evocative, artist-friendly color names (Burnt Sienna, Prussian Blue, etc.)
-  - 4 naming vocabularies: artist pigments, Resene, Werner's, XKCD
-  - CIEDE2000 perceptually accurate color matching
-  - Color Index names for physical paint matching
-- **Color Space Analysis**: RGB, HSV, and HSL conversions
-- **Statistical Metrics**: Color diversity, saturation, brightness, temperature
-- **Color Relationships**: Complementary detection, WCAG contrast ratios
-- **Color Harmony Detection**: Triadic, analogous, split-complementary, tetradic schemes
-- **8 Visualization Types**: Palettes, color wheels, distributions, 3D spaces
-- **Export Capabilities**: CSS variables and JSON formats
-
-### Advanced Colour Metrics
+### Advanced colour metrics
 
 - **Palette Earth Mover's Distance (PEMD)**: Perceptual optimal-transport distance between palettes using CIEDE2000 as ground metric
 - **Colour Complexity Index (CCI)**: Information-theoretic measure combining hue entropy, perceptual spread, proportion evenness, and harmony
 - **Historical Pigment Probability (HPP)**: Bayesian estimation of which historical pigments could produce a given colour at a given date
 - **Colour Provenance Score (CPS)**: Anomaly detection for anachronistic palettes in art-historical attribution
-- **Cross-Vocabulary Colour Translation**: Map colour names across Werner's, artist pigments, Resene, and XKCD vocabularies via CIEDE2000
-- **GenAI Colour Prompt Generation**: Convert colour analysis into structured prompts for DALL-E, Midjourney, and Stable Diffusion
+- **Cross-vocabulary colour translation**: Map colour names across Werner's, artist pigments, Resene, and XKCD vocabularies via CIEDE2000
+- **GenAI colour prompt generation**: Convert colour analysis into structured prompts for DALL-E, Midjourney, and Stable Diffusion
 
-### Educational Focus
+### Colour analysis
 
-- **17 Complete Jupyter Notebooks** - Progressive curriculum from basics to advanced ML
+- **Colour extraction**: K-means clustering for intelligent palette extraction
+- **Colour naming**: Evocative, artist-friendly colour names (Burnt Sienna, Prussian Blue, etc.)
+  - 4 naming vocabularies: artist pigments, Resene, Werner's, XKCD
+  - CIEDE2000 perceptually accurate colour matching
+  - Colour Index names for physical paint matching
+- **Colour space analysis**: RGB, HSV, and HSL conversions
+- **Statistical metrics**: Colour diversity, saturation, brightness, temperature
+- **Colour relationships**: Complementary detection, WCAG contrast ratios
+- **Colour harmony detection**: Triadic, analogous, split-complementary, tetradic schemes
+- **8 visualisation types**: Palettes, colour wheels, distributions, 3D spaces
+- **Export capabilities**: CSS variables and JSON formats
+
+### Educational focus
+
+- **17 complete Jupyter notebooks** -- Progressive curriculum from basics to advanced ML
 - Designed specifically for classroom use and student projects
-- Publication-ready visualizations
+- Publication-ready visualisations
 - WikiArt cheatsheet for quick reference
 - Pure Python with minimal dependencies
 
@@ -404,7 +402,7 @@ Uses the [WikiArt dataset](https://huggingface.co/datasets/huggan/wikiart) from 
 
 ### Core Requirements
 
-- Python 3.8+
+- Python 3.9+
 - datasets >= 2.0.0
 - Pillow >= 8.0.0
 - numpy >= 1.20.0
@@ -453,7 +451,7 @@ If you use this software in your research or teaching, please cite:
   author = {Semoglou, Michail},
   title = {renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt},
   year = {2026},
-  version = {3.4.0},
+  version = {3.4.1},
   doi = {10.5281/zenodo.17573993},
   url = {https://github.com/MichailSemoglou/renoir}
 }
@@ -479,9 +477,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 - WikiArt dataset creators
 - HuggingFace Datasets library
-- Students at Tongji University and University of Ioannina whose feedback shaped this tool
-- College of Design and Innovation, Tongji University
-- School of Fine Arts, University of Ioannina
+- Students at Tongji University, College of Design and Innovation, whose feedback shaped this tool
 
 ## Contact
 

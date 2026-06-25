@@ -10,7 +10,7 @@ cross-vocabulary colour name translation (translate() / translate_all_vocabulari
 alongside security hardening, reproducibility fixes, and expanded test coverage.
 """
 
-__version__ = "3.4.0"
+__version__ = "3.4.1"
 __author__ = "Michail Semoglou"
 
 from .analyzer import ArtistAnalyzer, quick_analysis

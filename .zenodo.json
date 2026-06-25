@@ -5,12 +5,12 @@
   "creators": [
     {
       "name": "Semoglou, Michail",
-      "affiliation": "Tongji University, College of Design and Innovation; University of Ioannina, School of Fine Arts",
+      "affiliation": "Tongji University, College of Design and Innovation",
       "orcid": "0009-0003-3268-5657"
     }
   ],
   "license": "MIT",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "publication_date": "2026-04-21",
   "keywords": [
     "Python",
