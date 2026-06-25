@@ -5,6 +5,30 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.1] - 2026-06-26
+
+### Added
+
+- **`ColorVisualizer.plot_historical_pigment_probability()`** — publication-quality panel figure
+  for HPP output: colour swatch, Colour Index name, year of introduction, probability bar, and
+  availability badge per candidate pigment.
+- **`ColorVisualizer.plot_pemd_comparison()`** — visualizes Palette Earth Mover's Distance for
+  one or more palette pairs as proportional colour strips with PEMD values annotated between them.
+- **`ColorVisualizer.plot_cross_vocabulary_naming()`** — comparative figure displaying colour name
+  translations across multiple vocabularies (Munsell, ISCC-NBS, historical pigment names, etc.).
+- `historical_pigment_probability()` results now include `year_introduced` and `year_discontinued`
+  fields per candidate pigment.
+
+### Fixed
+
+- **Brightness calculation in `plot_palette()`** — ITU-R BT.601 luma formula was accidentally
+  divided by 1000 due to a line-wrap artifact, producing incorrect text contrast on dark swatches.
+  Resolved by delegating to the new shared `_calculate_brightness()` helper.
+
+### Removed
+
+- `verify_installation.py` script and its CI job removed; coverage is provided by the test suite.
+
 ## [3.4.0] - 2026-04-21
 
 ### Added
