@@ -73,6 +73,9 @@ test_visualization.py
 # Virtual environment (for testing)
 test_env/
 
+# Writing profiles (personal, not for public distribution)
+paper/m-semoglou.json
+
 # Old scripts (not part of package)
 analyze_renoir_images.py
 analyze_renoir_images_Gemini.py
@@ -97,6 +100,8 @@ HONEST_REVIEW.md
 ROADMAP_SOFTWAREX.md
 COMPETITIVE_LANDSCAPE.md
 softwarex_paper/
+jose_paper/
+references/
 
 # Graphical abstract / pedagogical arc — generator scripts and generated artefacts
 create_graphical_abstract.py

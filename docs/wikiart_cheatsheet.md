@@ -18,12 +18,14 @@ visualizer = ColorVisualizer()
 ## Loading Data
 
 ### Load Full Dataset
+
 ```python
 dataset = artist_analyzer.load_dataset()
 print(f"Total artworks: {len(dataset)}")  # ~81,000 artworks
 ```
 
 ### Extract Artist Works
+
 ```python
 works = artist_analyzer.extract_artist_works('claude-monet', limit=20)
 for work in works:
@@ -37,15 +39,16 @@ for work in works:
 
 ## Dataset Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `image` | PIL.Image | The artwork image |
-| `title` | str | Artwork title |
-| `artist` | int | Artist index (use `features['artist'].names`) |
-| `genre` | int | Genre index (portrait, landscape, etc.) |
-| `style` | int | Style/movement index |
+| Field    | Type      | Description                                   |
+| -------- | --------- | --------------------------------------------- |
+| `image`  | PIL.Image | The artwork image                             |
+| `title`  | str       | Artwork title                                 |
+| `artist` | int       | Artist index (use `features['artist'].names`) |
+| `genre`  | int       | Genre index (portrait, landscape, etc.)       |
+| `style`  | int       | Style/movement index                          |
 
 ### Decode Indices
+
 ```python
 # Get artist names
 artist_names = dataset.features['artist'].names
@@ -65,6 +68,7 @@ style_name = style_names[work['style']]
 ## Color Extraction
 
 ### Extract Dominant Colors
+
 ```python
 # Returns list of RGB tuples
 palette = color_extractor.extract_dominant_colors(
@@ -75,6 +79,7 @@ palette = color_extractor.extract_dominant_colors(
 ```
 
 ### Convert Colors
+
 ```python
 # RGB to HEX
 hex_color = color_extractor.rgb_to_hex((255, 128, 64))
@@ -94,6 +99,7 @@ rgb = color_analyzer.hsv_to_rgb((30, 75, 100))
 ## Color Analysis
 
 ### Palette Statistics
+
 ```python
 stats = color_analyzer.analyze_palette_statistics(palette)
 # Returns:
@@ -109,6 +115,7 @@ stats = color_analyzer.analyze_palette_statistics(palette)
 ```
 
 ### Temperature Distribution
+
 ```python
 temp = color_analyzer.analyze_color_temperature_distribution(palette)
 # Returns:
@@ -124,6 +131,7 @@ temp = color_analyzer.analyze_color_temperature_distribution(palette)
 ```
 
 ### Diversity & Scores
+
 ```python
 diversity = color_analyzer.calculate_color_diversity(palette)    # 0-1
 saturation = color_analyzer.calculate_saturation_score(palette)  # 0-100
@@ -131,6 +139,7 @@ brightness = color_analyzer.calculate_brightness_score(palette)  # 0-100
 ```
 
 ### Color Harmony
+
 ```python
 harmony = color_analyzer.analyze_color_harmony(palette)
 # Returns:
@@ -154,6 +163,7 @@ harmony = color_analyzer.analyze_color_harmony(palette)
 ```
 
 ### Temperature Classification
+
 ```python
 temp = color_analyzer.classify_color_temperature((R, G, B))
 # Returns: 'warm', 'cool', or 'neutral'
@@ -164,6 +174,7 @@ temp = color_analyzer.classify_color_temperature((R, G, B))
 ## Visualization
 
 ### Plot Palette
+
 ```python
 visualizer.plot_palette(
     palette,
@@ -172,6 +183,7 @@ visualizer.plot_palette(
 ```
 
 ### Plot Color Wheel
+
 ```python
 visualizer.plot_color_wheel(
     palette,
@@ -183,57 +195,57 @@ visualizer.plot_color_wheel(
 
 ## Common Artists (Sample)
 
-| Artist ID | Name |
-|-----------|------|
-| `claude-monet` | Claude Monet |
-| `vincent-van-gogh` | Vincent van Gogh |
+| Artist ID               | Name                  |
+| ----------------------- | --------------------- |
+| `claude-monet`          | Claude Monet          |
+| `vincent-van-gogh`      | Vincent van Gogh      |
 | `pierre-auguste-renoir` | Pierre-Auguste Renoir |
-| `pablo-picasso` | Pablo Picasso |
-| `edgar-degas` | Edgar Degas |
-| `paul-cezanne` | Paul Cézanne |
-| `henri-matisse` | Henri Matisse |
-| `edvard-munch` | Edvard Munch |
-| `wassily-kandinsky` | Wassily Kandinsky |
-| `rembrandt` | Rembrandt |
-| `johannes-vermeer` | Johannes Vermeer |
-| `gustave-klimt` | Gustav Klimt |
-| `frida-kahlo` | Frida Kahlo |
-| `salvador-dali` | Salvador Dalí |
-| `jackson-pollock` | Jackson Pollock |
-| `mark-rothko` | Mark Rothko |
+| `pablo-picasso`         | Pablo Picasso         |
+| `edgar-degas`           | Edgar Degas           |
+| `paul-cezanne`          | Paul Cézanne          |
+| `henri-matisse`         | Henri Matisse         |
+| `edvard-munch`          | Edvard Munch          |
+| `wassily-kandinsky`     | Wassily Kandinsky     |
+| `rembrandt`             | Rembrandt             |
+| `johannes-vermeer`      | Johannes Vermeer      |
+| `gustave-klimt`         | Gustav Klimt          |
+| `frida-kahlo`           | Frida Kahlo           |
+| `salvador-dali`         | Salvador Dalí         |
+| `jackson-pollock`       | Jackson Pollock       |
+| `mark-rothko`           | Mark Rothko           |
 
 ---
 
 ## Common Genres
 
-| Genre | Description |
-|-------|-------------|
-| `portrait` | Human subjects |
-| `landscape` | Natural scenes |
-| `still-life` | Arranged objects |
-| `genre-painting` | Daily life scenes |
-| `religious-painting` | Religious subjects |
+| Genre                   | Description         |
+| ----------------------- | ------------------- |
+| `portrait`              | Human subjects      |
+| `landscape`             | Natural scenes      |
+| `still-life`            | Arranged objects    |
+| `genre-painting`        | Daily life scenes   |
+| `religious-painting`    | Religious subjects  |
 | `mythological-painting` | Mythological scenes |
-| `nude-painting-nu` | Figure studies |
-| `cityscape` | Urban scenes |
-| `marina` | Seascapes |
-| `flower-painting` | Floral subjects |
+| `nude-painting-nu`      | Figure studies      |
+| `cityscape`             | Urban scenes        |
+| `marina`                | Seascapes           |
+| `flower-painting`       | Floral subjects     |
 
 ---
 
 ## Common Styles/Movements
 
-| Style | Period |
-|-------|--------|
-| `renaissance` | 1400-1600 |
-| `baroque` | 1600-1750 |
-| `romanticism` | 1780-1850 |
-| `realism` | 1840-1880 |
-| `impressionism` | 1860-1890 |
-| `post-impressionism` | 1886-1905 |
-| `expressionism` | 1905-1920 |
-| `cubism` | 1907-1920s |
-| `surrealism` | 1920s-1950s |
+| Style                    | Period      |
+| ------------------------ | ----------- |
+| `renaissance`            | 1400-1600   |
+| `baroque`                | 1600-1750   |
+| `romanticism`            | 1780-1850   |
+| `realism`                | 1840-1880   |
+| `impressionism`          | 1860-1890   |
+| `post-impressionism`     | 1886-1905   |
+| `expressionism`          | 1905-1920   |
+| `cubism`                 | 1907-1920s  |
+| `surrealism`             | 1920s-1950s |
 | `abstract-expressionism` | 1940s-1960s |
 
 ---
@@ -268,32 +280,33 @@ impressionist_works = extract_by_style(dataset, 'impressionism', limit=30)
 
 ## HSV Color Reference
 
-| Hue Range | Color |
-|-----------|-------|
-| 0-30 | Red/Orange |
-| 30-60 | Orange/Yellow |
-| 60-90 | Yellow/Yellow-Green |
-| 90-150 | Green |
-| 150-210 | Cyan/Blue-Green |
-| 210-270 | Blue/Purple |
-| 270-330 | Purple/Magenta |
-| 330-360 | Magenta/Red |
+| Hue Range | Color               |
+| --------- | ------------------- |
+| 0-30      | Red/Orange          |
+| 30-60     | Orange/Yellow       |
+| 60-90     | Yellow/Yellow-Green |
+| 90-150    | Green               |
+| 150-210   | Cyan/Blue-Green     |
+| 210-270   | Blue/Purple         |
+| 270-330   | Purple/Magenta      |
+| 330-360   | Magenta/Red         |
 
 ---
 
 ## Color Temperature Reference
 
-| Temperature | Hue Range |
-|-------------|-----------|
-| **Warm** | 0-60° and 300-360° (reds, oranges, yellows) |
-| **Cool** | 150-270° (blues, greens, purples) |
-| **Neutral** | 60-150° or desaturated colors |
+| Temperature | Hue Range                                   |
+| ----------- | ------------------------------------------- |
+| **Warm**    | 0-60° and 300-360° (reds, oranges, yellows) |
+| **Cool**    | 150-270° (blues, greens, purples)           |
+| **Neutral** | 60-150° or desaturated colors               |
 
 ---
 
 ## Quick Recipes
 
 ### Analyze an Artist's Color Signature
+
 ```python
 works = artist_analyzer.extract_artist_works('claude-monet', limit=15)
 all_colors = []
@@ -311,6 +324,7 @@ print(f"Harmony Score: {harmony['harmony_score']:.2f}")
 ```
 
 ### Compare Two Artists
+
 ```python
 def get_artist_stats(artist_id, n_works=10):
     works = artist_analyzer.extract_artist_works(artist_id, limit=n_works)
@@ -351,4 +365,4 @@ pip install renoir-wikiart[dev]
 
 ---
 
-*Renoir Package v3.1.3 - Educational tool for art color analysis*
+_Renoir Package v3.4.0 - Educational tool for art colour analysis_
