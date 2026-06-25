@@ -765,18 +765,25 @@ class ColorVisualizer:
         input_fg = "white" if brightness < 140 else "#111111"
 
         fig, axes = plt.subplots(
-            1, k + 1,
+            1,
+            k + 1,
             figsize=figsize,
             gridspec_kw=dict(
                 width_ratios=[1.5] + [1.0] * k,
                 wspace=0.04,
-                left=0.01, right=0.99, top=0.88, bottom=0.06,
+                left=0.01,
+                right=0.99,
+                top=0.88,
+                bottom=0.06,
             ),
         )
         fig.patch.set_facecolor("white")
         fig.suptitle(
             "Historical Pigment Probability",
-            fontsize=10, fontweight="bold", y=0.96, color="#1A1A1A",
+            fontsize=10,
+            fontweight="bold",
+            y=0.96,
+            color="#1A1A1A",
         )
 
         # ── Input panel ──────────────────────────────────────────────────
@@ -790,19 +797,38 @@ class ColorVisualizer:
             sp.set_linewidth(0.8)
         ax_in.set_facecolor(f"#{r:02X}{g:02X}{b:02X}")
         ax_in.text(
-            0.5, 0.60, hex_str,
-            transform=ax_in.transAxes, ha="center", va="center",
-            fontsize=9, fontweight="bold", color=input_fg,
+            0.5,
+            0.60,
+            hex_str,
+            transform=ax_in.transAxes,
+            ha="center",
+            va="center",
+            fontsize=9,
+            fontweight="bold",
+            color=input_fg,
         )
         ax_in.text(
-            0.5, 0.40, str(year),
-            transform=ax_in.transAxes, ha="center", va="center",
-            fontsize=9, color=input_fg, alpha=0.85,
+            0.5,
+            0.40,
+            str(year),
+            transform=ax_in.transAxes,
+            ha="center",
+            va="center",
+            fontsize=9,
+            color=input_fg,
+            alpha=0.85,
         )
         ax_in.text(
-            0.5, 0.20, "Input colour",
-            transform=ax_in.transAxes, ha="center", va="center",
-            fontsize=7.5, color=input_fg, fontstyle="italic", alpha=0.75,
+            0.5,
+            0.20,
+            "Input colour",
+            transform=ax_in.transAxes,
+            ha="center",
+            va="center",
+            fontsize=7.5,
+            color=input_fg,
+            fontstyle="italic",
+            alpha=0.75,
         )
 
         # ── Candidate panels ─────────────────────────────────────────────
@@ -829,22 +855,39 @@ class ColorVisualizer:
             yr_intro = cand.get("year_introduced")
 
             # Top 50 % → colour swatch
-            ax.add_patch(patches.Rectangle(
-                (0, 0.50), 1, 0.50, facecolor=cand_hex, linewidth=0,
-            ))
+            ax.add_patch(
+                patches.Rectangle(
+                    (0, 0.50),
+                    1,
+                    0.50,
+                    facecolor=cand_hex,
+                    linewidth=0,
+                )
+            )
 
             # Pigment name (centred in swatch)
             ax.text(
-                0.5, 0.66, cand["name"],
-                ha="center", va="center", fontsize=7.0, fontweight="bold",
-                color=cand_fg, multialignment="center",
+                0.5,
+                0.66,
+                cand["name"],
+                ha="center",
+                va="center",
+                fontsize=7.0,
+                fontweight="bold",
+                color=cand_fg,
+                multialignment="center",
             )
 
             # CI name
             ci = cand.get("ci_name") or ""
             ax.text(
-                0.5, 0.44, ci,
-                ha="center", va="top", fontsize=6.5, color="#555555",
+                0.5,
+                0.44,
+                ci,
+                ha="center",
+                va="top",
+                fontsize=6.5,
+                color="#555555",
             )
 
             # Year introduced
@@ -853,34 +896,61 @@ class ColorVisualizer:
             else:
                 yr_label = "date unknown"
             ax.text(
-                0.5, 0.34, yr_label,
-                ha="center", va="top", fontsize=6.0, color="#888888",
+                0.5,
+                0.34,
+                yr_label,
+                ha="center",
+                va="top",
+                fontsize=6.0,
+                color="#888888",
             )
 
             # Probability bar
             bar_y, bar_h = 0.17, 0.07
-            ax.add_patch(patches.Rectangle(
-                (0.05, bar_y), 0.90, bar_h, facecolor="#E0E0E0", linewidth=0,
-            ))
+            ax.add_patch(
+                patches.Rectangle(
+                    (0.05, bar_y),
+                    0.90,
+                    bar_h,
+                    facecolor="#E0E0E0",
+                    linewidth=0,
+                )
+            )
             fill_w = 0.90 * (cand["probability"] / max_prob)
             bar_col = _ACTIVE_COL if available else _INACTIVE_COL
-            ax.add_patch(patches.Rectangle(
-                (0.05, bar_y), fill_w, bar_h, facecolor=bar_col, linewidth=0,
-            ))
+            ax.add_patch(
+                patches.Rectangle(
+                    (0.05, bar_y),
+                    fill_w,
+                    bar_h,
+                    facecolor=bar_col,
+                    linewidth=0,
+                )
+            )
 
             # Probability value
             ax.text(
-                0.5, bar_y - 0.03, f"p = {cand['probability']:.3f}",
-                ha="center", va="top", fontsize=6.0, color="#555555",
+                0.5,
+                bar_y - 0.03,
+                f"p = {cand['probability']:.3f}",
+                ha="center",
+                va="top",
+                fontsize=6.0,
+                color="#555555",
             )
 
             # Availability badge
             badge_col = "#2E7D32" if available else "#B71C1C"
             badge_txt = "Available" if available else "Not yet available"
             ax.text(
-                0.5, 0.04, badge_txt,
-                ha="center", va="bottom", fontsize=6.0,
-                fontweight="bold", color=badge_col,
+                0.5,
+                0.04,
+                badge_txt,
+                ha="center",
+                va="bottom",
+                fontsize=6.0,
+                fontweight="bold",
+                color=badge_col,
             )
 
         if save_path:
@@ -917,8 +987,7 @@ class ColorVisualizer:
         n_pairs = len(pairs)
         if labels is None:
             labels = [
-                (f"Palette A ({i + 1})", f"Palette B ({i + 1})")
-                for i in range(n_pairs)
+                (f"Palette A ({i + 1})", f"Palette B ({i + 1})") for i in range(n_pairs)
             ]
 
         # Validate and compute missing PEMD values
@@ -937,14 +1006,21 @@ class ColorVisualizer:
         fig = plt.figure(figsize=figsize, facecolor="white")
         fig.suptitle(
             "Palette Earth Mover's Distance (PEMD)",
-            fontsize=10, fontweight="bold", y=0.97, color="#1A1A1A",
+            fontsize=10,
+            fontweight="bold",
+            y=0.97,
+            color="#1A1A1A",
         )
 
         # Each pair: 2 strip rows (strip1, strip2), gap between pairs
         gs = plt.GridSpec(
-            n_pairs * 2, 1,
+            n_pairs * 2,
+            1,
             hspace=0.20,
-            left=0.15, right=0.88, top=0.88, bottom=0.05,
+            left=0.15,
+            right=0.88,
+            top=0.88,
+            bottom=0.05,
         )
 
         def _draw_strip(ax: "plt.Axes", palette: List, label: str) -> None:
@@ -963,21 +1039,35 @@ class ColorVisualizer:
                 rr, gg, bb = rgb
                 bright = self._calculate_brightness(rgb)
                 seg_fg = "white" if bright < 140 else "#111111"
-                ax.add_patch(patches.Rectangle(
-                    (x, 0), seg_w, 1,
-                    facecolor=f"#{rr:02X}{gg:02X}{bb:02X}", linewidth=0,
-                ))
+                ax.add_patch(
+                    patches.Rectangle(
+                        (x, 0),
+                        seg_w,
+                        1,
+                        facecolor=f"#{rr:02X}{gg:02X}{bb:02X}",
+                        linewidth=0,
+                    )
+                )
                 if seg_w > 0.10:
                     ax.text(
-                        x + seg_w / 2, 0.5,
+                        x + seg_w / 2,
+                        0.5,
                         f"#{rr:02X}{gg:02X}{bb:02X}",
-                        ha="center", va="center", fontsize=8, color=seg_fg,
+                        ha="center",
+                        va="center",
+                        fontsize=8,
+                        color=seg_fg,
                     )
                 x += seg_w
             ax.text(
-                -0.02, 0.5, label,
-                transform=ax.transAxes, ha="right", va="center",
-                fontsize=8, color="#333333",
+                -0.02,
+                0.5,
+                label,
+                transform=ax.transAxes,
+                ha="right",
+                va="center",
+                fontsize=8,
+                color="#333333",
             )
 
         for pair_idx, (p1, p2) in enumerate(pairs):
@@ -993,13 +1083,18 @@ class ColorVisualizer:
             ax2_pos = ax2.get_position()
             mid_y = (ax1_pos.y0 + ax2_pos.y1) / 2
             fig.text(
-                0.895, mid_y,
+                0.895,
+                mid_y,
                 f"PEMD\n{pemd_val:.2f}",
-                ha="left", va="center", fontsize=8.5, fontweight="bold",
+                ha="left",
+                va="center",
+                fontsize=8.5,
+                fontweight="bold",
                 color="white",
                 bbox=dict(
                     boxstyle="round,pad=0.35",
-                    facecolor="#1A1A1A", edgecolor="none",
+                    facecolor="#1A1A1A",
+                    edgecolor="none",
                 ),
             )
 
@@ -1054,18 +1149,26 @@ class ColorVisualizer:
             figsize = (9.5, max(3.0, 0.85 * n_vocabs + 1.0))
 
         fig, axes = plt.subplots(
-            n_vocabs, n_colors,
+            n_vocabs,
+            n_colors,
             figsize=figsize,
             squeeze=False,
             gridspec_kw=dict(
-                wspace=0.04, hspace=0.06,
-                left=0.16, right=0.99, top=0.88, bottom=0.06,
+                wspace=0.04,
+                hspace=0.06,
+                left=0.16,
+                right=0.99,
+                top=0.88,
+                bottom=0.06,
             ),
         )
         fig.patch.set_facecolor("white")
         fig.suptitle(
             "Cross-vocabulary colour naming",
-            fontsize=10, fontweight="bold", y=0.96, color="#1A1A1A",
+            fontsize=10,
+            fontweight="bold",
+            y=0.96,
+            color="#1A1A1A",
         )
 
         # Column headers: input colour hex
@@ -1073,15 +1176,20 @@ class ColorVisualizer:
             rr, gg, bb = rgb
             axes[0, col_idx].set_title(
                 f"#{rr:02X}{gg:02X}{bb:02X}",
-                fontsize=7.5, color="#444444", pad=3,
+                fontsize=7.5,
+                color="#444444",
+                pad=3,
             )
 
         # Row labels: vocabulary names
         for row_idx, v in enumerate(_VOCABS):
             axes[row_idx, 0].set_ylabel(
                 vocabulary_labels[v],
-                fontsize=7.5, color="#333333",
-                rotation=0, ha="right", va="center",
+                fontsize=7.5,
+                color="#333333",
+                rotation=0,
+                ha="right",
+                va="center",
                 labelpad=4,
             )
 
@@ -1106,17 +1214,25 @@ class ColorVisualizer:
                     mr, mg, mb = rgb
 
                 # Left half: input colour
-                ax.add_patch(patches.Rectangle(
-                    (0, 0), 0.5, 1,
-                    facecolor=f"#{rgb[0]:02X}{rgb[1]:02X}{rgb[2]:02X}",
-                    linewidth=0,
-                ))
+                ax.add_patch(
+                    patches.Rectangle(
+                        (0, 0),
+                        0.5,
+                        1,
+                        facecolor=f"#{rgb[0]:02X}{rgb[1]:02X}{rgb[2]:02X}",
+                        linewidth=0,
+                    )
+                )
                 # Right half: matched colour from vocabulary
-                ax.add_patch(patches.Rectangle(
-                    (0.5, 0), 0.5, 1,
-                    facecolor=f"#{mr:02X}{mg:02X}{mb:02X}",
-                    linewidth=0,
-                ))
+                ax.add_patch(
+                    patches.Rectangle(
+                        (0.5, 0),
+                        0.5,
+                        1,
+                        facecolor=f"#{mr:02X}{mg:02X}{mb:02X}",
+                        linewidth=0,
+                    )
+                )
                 # Vertical divider
                 ax.axvline(0.5, color="white", linewidth=0.8)
 
@@ -1124,9 +1240,14 @@ class ColorVisualizer:
                 bright_match = self._calculate_brightness((mr, mg, mb))
                 txt_col = "white" if bright_match < 140 else "#1A1A1A"
                 ax.text(
-                    0.75, 0.5, name_str,
-                    ha="center", va="center", fontsize=5.5,
-                    color=txt_col, multialignment="center",
+                    0.75,
+                    0.5,
+                    name_str,
+                    ha="center",
+                    va="center",
+                    fontsize=5.5,
+                    color=txt_col,
+                    multialignment="center",
                 )
 
         if save_path:
