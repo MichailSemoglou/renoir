@@ -2,7 +2,7 @@
 
 A computational tool for analyzing artist-specific works from WikiArt with comprehensive color analysis capabilities. Designed for teaching computational color theory and data analysis to art and design students through culturally meaningful examples.
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19675349.svg)](https://doi.org/10.5281/zenodo.19675349)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17355170.svg)](https://doi.org/10.5281/zenodo.17355170)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![PyPI](https://img.shields.io/pypi/v/renoir-wikiart.svg)](https://pypi.org/project/renoir-wikiart/)
@@ -452,7 +452,7 @@ If you use this software in your research or teaching, please cite:
   title = {renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt},
   year = {2026},
   version = {3.4.1},
-  doi = {10.5281/zenodo.17573993},
+  doi = {10.5281/zenodo.17355170},
   url = {https://github.com/MichailSemoglou/renoir}
 }
 ```

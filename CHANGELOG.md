@@ -277,4 +277,4 @@ Visualization features are optional. Install with `pip install 'renoir-wikiart[v
 - [GitHub Repository](https://github.com/MichailSemoglou/renoir)
 - [Documentation](https://renoir-wikiart.readthedocs.io)
 - [Issue Tracker](https://github.com/MichailSemoglou/renoir/issues)
-- [Zenodo DOI](https://doi.org/10.5281/zenodo.17573993)
+- [Zenodo DOI](https://doi.org/10.5281/zenodo.17355170)
