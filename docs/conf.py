@@ -15,7 +15,7 @@ project = 'renoir'
 project_copyright = '2026, Michail Semoglou'
 copyright = project_copyright  # noqa: A001 - required by Sphinx
 author = 'Michail Semoglou'
-release = '3.4.1'
+release = '3.5.0'
 
 # -- General configuration ---------------------------------------------------
 

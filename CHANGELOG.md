@@ -5,6 +5,24 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] - 2026-07-03
+
+### Added
+
+- **`ArtistAnalyzer.artist_color_signature()`** — high-level API to compute an
+  artist's colour signature directly from a WikiArt artist name, with temporal
+  or random sampling of works and an optional per-period breakdown.
+- **`ArtistAnalyzer.analyze_works_color_signature()`** — lower-level signature
+  computation over an arbitrary list of works.
+- Internal `_sample_works()` / `_aggregate_palette()` helpers supporting the
+  new colour signature API.
+
+### Fixed
+
+- Temporal sampling could undershoot the requested `limit` when an early
+  decade had fewer candidate works than its allotted quota. Shortfalls are
+  now redistributed across decades that still have unselected candidates.
+
 ## [3.4.1] - 2026-06-26
 
 ### Added

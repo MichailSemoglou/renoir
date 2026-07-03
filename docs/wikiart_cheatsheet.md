@@ -415,7 +415,3 @@ pip install renoir-wikiart[dev]
 - **GitHub**: https://github.com/MichailSemoglou/renoir
 - **PyPI**: https://pypi.org/project/renoir-wikiart/
 - **WikiArt Dataset**: HuggingFace `huggan/wikiart`
-
----
-
-_Renoir Package v3.4.0 - Educational tool for art colour analysis_
