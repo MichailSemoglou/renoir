@@ -5,8 +5,8 @@ This package provides simple functions for extracting and analyzing works by
 specific artists from the WikiArt dataset, designed for teaching computational
 design and digital humanities courses.
 
-Version 3.4.0 adds PromptGenerator for GenAI colour prompt workflows and
-cross-vocabulary colour name translation (translate() / translate_all_vocabularies()),
+Version 3.4.0 adds PromptGenerator for GenAI color prompt workflows and
+cross-vocabulary color name translation (translate() / translate_all_vocabularies()),
 alongside security hardening, reproducibility fixes, and expanded test coverage.
 """
 

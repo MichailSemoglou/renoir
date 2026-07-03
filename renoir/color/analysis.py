@@ -810,9 +810,9 @@ class ColorAnalyzer:
         """
         Calculate Palette Earth Mover's Distance (PEMD) between two palettes.
 
-        Uses CIEDE2000 as the perceptual ground distance and colour proportions
+        Uses CIEDE2000 as the perceptual ground distance and color proportions
         as weights, solved via optimal transport. This provides a structurally
-        aware comparison that accounts for both colour similarity and proportion
+        aware comparison that accounts for both color similarity and proportion
         differences.
 
         Args:
@@ -860,7 +860,7 @@ class ColorAnalyzer:
         w1 = np.array([w for _, w in palette1], dtype=float)
         w2 = np.array([w for _, w in palette2], dtype=float)
 
-        # Normalise weights
+        # Normalize weights
         w1 = w1 / w1.sum()
         w2 = w2 / w2.sum()
 
@@ -926,17 +926,17 @@ class ColorAnalyzer:
         weights: Optional[Dict[str, float]] = None,
     ) -> Dict:
         """
-        Calculate the Colour Complexity Index (CCI) for a palette.
+        Calculate the Color Complexity Index (CCI) for a palette.
 
         A multi-dimensional information-theoretic measure combining:
-        - Hue entropy (spread across the colour wheel)
+        - Hue entropy (spread across the color wheel)
         - Perceptual spread (mean pairwise CIEDE2000 distance)
         - Proportion evenness (1 - Gini coefficient)
-        - Harmony penalty (lower complexity if colours follow harmony rules)
+        - Harmony penalty (lower complexity if colors follow harmony rules)
 
         Args:
             colors: List of RGB tuples
-            proportions: Optional list of colour proportions (should sum to 1).
+            proportions: Optional list of color proportions (should sum to 1).
                          If None, equal proportions are assumed.
             weights: Optional dict of component weights with keys:
                      'hue_entropy', 'perceptual_spread', 'proportion_evenness',
@@ -944,9 +944,9 @@ class ColorAnalyzer:
 
         Returns:
             Dictionary containing:
-                - cci: Composite Colour Complexity Index (0-1)
-                - hue_entropy: Normalised hue entropy (0-1)
-                - perceptual_spread: Normalised mean pairwise CIEDE2000 (0-1)
+                - cci: Composite Color Complexity Index (0-1)
+                - hue_entropy: Normalized hue entropy (0-1)
+                - perceptual_spread: Normalized mean pairwise CIEDE2000 (0-1)
                 - proportion_evenness: 1 - Gini coefficient (0-1)
                 - harmony_penalty: Harmony score (0-1, subtracted)
                 - components: Dict of weighted sub-scores
@@ -976,10 +976,10 @@ class ColorAnalyzer:
         }
         w = weights if weights else default_weights
 
-        # 1. Hue entropy (reuse existing method, already normalised 0–1)
+        # 1. Hue entropy (reuse existing method, already normalized 0–1)
         hue_entropy = self.calculate_color_diversity(colors)
 
-        # 2. Perceptual spread: mean pairwise CIEDE2000, normalised
+        # 2. Perceptual spread: mean pairwise CIEDE2000, normalized
         namer = self._get_namer()
         labs = [namer._rgb_to_lab(c) for c in colors]
         distances = []
@@ -988,7 +988,7 @@ class ColorAnalyzer:
                 distances.append(namer._ciede2000(labs[i], labs[j]))
 
         mean_distance = float(np.mean(distances)) if distances else 0.0
-        # Normalise: CIEDE2000 of 100 is extreme; cap at 100
+        # Normalize: CIEDE2000 of 100 is extreme; cap at 100
         perceptual_spread = min(1.0, mean_distance / 100.0)
 
         # 3. Proportion evenness (1 - Gini coefficient)
@@ -1045,23 +1045,23 @@ class ColorAnalyzer:
         proportions: Optional[List[float]] = None,
     ) -> Dict:
         """
-        Calculate Colour Provenance Score (CPS) for a palette and attributed date.
+        Calculate Color Provenance Score (CPS) for a palette and attributed date.
 
         Estimates how consistent a palette is with historically available pigments
-        at the given date. Low scores may indicate anachronistic colour usage.
+        at the given date. Low scores may indicate anachronistic color usage.
 
         Requires the artist_pigments vocabulary with historical date fields.
 
         Args:
             colors: List of RGB tuples from the artwork
             year: Attributed year of the artwork
-            proportions: Optional colour proportions. If None, equal weights used.
+            proportions: Optional color proportions. If None, equal weights used.
 
         Returns:
             Dictionary containing:
                 - score: Overall provenance score (0–1, higher = more consistent)
-                - per_color: List of per-colour assessments
-                - flagged: Colours flagged as potentially anachronistic
+                - per_color: List of per-color assessments
+                - flagged: Colors flagged as potentially anachronistic
 
         Example:
             >>> analyzer = ColorAnalyzer()

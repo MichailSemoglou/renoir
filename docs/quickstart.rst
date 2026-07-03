@@ -1,7 +1,7 @@
 Quick Start
 ===========
 
-Extracting a Colour Palette
+Extracting a Color Palette
 -----------------------------
 
 .. code-block:: python
@@ -12,23 +12,24 @@ Extracting a Colour Palette
    extractor = ColorExtractor()
    image = Image.open("artwork.jpg")
 
-   # Extract 6 dominant colours (reproducible with default random_state=42)
+   # Extract 6 dominant colors (reproducible with default random_state=42)
    palette = extractor.extract_dominant_colors(image, n_colors=6)
    print(palette)  # [(120, 89, 143), ...]
 
-Naming Colours with Art-Historical Vocabularies
+Naming Colors with Art-Historical Vocabularies
 ------------------------------------------------
 
 .. code-block:: python
 
-   from renoir.color import ColorAnalyzer
+   from renoir.color import ColorNamer
 
-   analyzer = ColorAnalyzer()
+   namer = ColorNamer()
    rgb = (120, 89, 143)
 
    # Name using four different vocabularies
    for vocab in ["artist", "resene", "natural", "xkcd"]:
-       name = analyzer.get_color_name(rgb, vocabulary=vocab)
+       namer.set_vocabulary(vocab)
+       name = namer.name(rgb)
        print(f"{vocab}: {name}")
 
 Advanced Metrics
@@ -36,19 +37,24 @@ Advanced Metrics
 
 .. code-block:: python
 
-   # Colour Complexity Index
-   cci = analyzer.calculate_colour_complexity_index(palette)
-   print(f"CCI: {cci['overall_complexity']:.3f}")
+   from renoir.color import ColorAnalyzer, ColorNamer
+
+   analyzer = ColorAnalyzer()
+
+   # Color Complexity Index
+   cci = analyzer.calculate_color_complexity(palette)
+   print(f"CCI: {cci['cci']:.3f}")
 
    # Historical Pigment Probability (for a painting dated 1650)
-   hpp = analyzer.calculate_historical_pigment_probability(rgb, year=1650)
+   namer = ColorNamer(vocabulary="artist")
+   hpp = namer.historical_pigment_probability(rgb, year=1650)
    print(hpp)
 
-   # Colour Provenance Score
-   cps = analyzer.calculate_colour_provenance_score(palette, year=1650)
-   print(f"Provenance score: {cps['provenance_score']:.3f}")
+   # Color Provenance Score
+   cps = analyzer.colour_provenance_score(palette, year=1650)
+   print(f"Provenance score: {cps['score']:.3f}")
 
-Visualisation
+Visualization
 -------------
 
 .. code-block:: python

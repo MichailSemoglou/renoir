@@ -1,9 +1,9 @@
 """
-Generative AI colour prompt module.
+Generative AI color prompt module.
 
-Converts renoir colour analysis results into structured prompts for
+Converts renoir color analysis results into structured prompts for
 generative AI image and video models (DALL-E, Midjourney, Stable Diffusion,
-Runway, Sora). Bridges the gap between computational colour analysis and
+Runway, Sora). Bridges the gap between computational color analysis and
 AI-assisted design workflows.
 """
 
@@ -12,9 +12,9 @@ from typing import List, Dict, Tuple, Optional, Union
 
 class PromptGenerator:
     """
-    Generate structured colour prompts for generative AI models.
+    Generate structured color prompts for generative AI models.
 
-    Composes outputs from renoir's colour analysis, naming, and harmony
+    Composes outputs from renoir's color analysis, naming, and harmony
     detection into descriptive prompt strings that can be used with
     image/video generation APIs.
 
@@ -34,7 +34,7 @@ class PromptGenerator:
         Initialize PromptGenerator.
 
         Args:
-            vocabulary: Colour naming vocabulary to use (default: 'artist').
+            vocabulary: Color naming vocabulary to use (default: 'artist').
         """
         self.vocabulary = vocabulary
 
@@ -52,16 +52,16 @@ class PromptGenerator:
         target_model: str = "generic",
     ) -> str:
         """
-        Generate a structured colour prompt from a palette.
+        Generate a structured color prompt from a palette.
 
         Args:
             colors: List of RGB tuples (typically from ColorExtractor).
-            proportions: Optional colour proportions (should sum to 1.0).
+            proportions: Optional color proportions (should sum to 1.0).
                          If None, equal proportions are assumed.
             style: Optional art style descriptor (e.g. 'impressionist',
                    'minimalist', 'art deco').
             medium: Optional medium descriptor (e.g. 'oil painting',
-                    'watercolour', 'digital illustration').
+                    'watercolor', 'digital illustration').
             mood: Optional mood descriptor (e.g. 'serene', 'dramatic').
             subject: Optional subject descriptor (e.g. 'landscape',
                      'portrait', 'abstract composition').
@@ -93,7 +93,7 @@ class PromptGenerator:
         if proportions is None:
             proportions = [1.0 / len(colors)] * len(colors)
 
-        # Name each colour
+        # Name each color
         named = []
         for color, prop in zip(colors, proportions):
             name = namer.name(color)
@@ -118,15 +118,15 @@ class PromptGenerator:
         if opener_parts:
             parts.append(" ".join(opener_parts) + ".")
 
-        # Colour palette
-        palette_desc = "Colour palette: " + ", ".join(
+        # Color palette
+        palette_desc = "Color palette: " + ", ".join(
             f"{name} ({pct}%)" if pct > 0 else name for name, pct, _ in named
         )
         parts.append(palette_desc + ".")
 
-        # Dominant colour
+        # Dominant color
         dominant_name, _, _ = named[0]
-        parts.append(f"Dominant colour: {dominant_name}.")
+        parts.append(f"Dominant color: {dominant_name}.")
 
         # Harmony analysis
         if include_harmony and len(colors) >= 2:
@@ -134,7 +134,7 @@ class PromptGenerator:
             dominant_harmony = harmony["dominant_harmony"]
             if dominant_harmony != "none":
                 harmony_desc = dominant_harmony.replace("_", " ")
-                parts.append(f"Colour harmony: {harmony_desc}.")
+                parts.append(f"Color harmony: {harmony_desc}.")
 
         # Temperature distribution
         if include_temperature:
@@ -143,7 +143,7 @@ class PromptGenerator:
             cool_pct = temp["cool_percentage"]
             dom_temp = temp["dominant_temperature"]
             parts.append(
-                f"Colour temperature: {dom_temp}-dominant "
+                f"Color temperature: {dom_temp}-dominant "
                 f"({warm_pct:.0f}% warm, {cool_pct:.0f}% cool)."
             )
 
@@ -157,7 +157,7 @@ class PromptGenerator:
                 complexity_word = "Moderate"
             else:
                 complexity_word = "High"
-            parts.append(f"{complexity_word} colour complexity (CCI: {cci:.2f}).")
+            parts.append(f"{complexity_word} color complexity (CCI: {cci:.2f}).")
 
         # Mood
         if mood:
@@ -170,7 +170,7 @@ class PromptGenerator:
             prompt = prompt + " --v 6"
         elif target_model == "stable_diffusion":
             # SD prefers comma-separated keywords at the end
-            prompt = prompt + ", highly detailed, professional colour grading"
+            prompt = prompt + ", highly detailed, professional color grading"
 
         return prompt
 
@@ -183,7 +183,7 @@ class PromptGenerator:
         """
         Generate multiple prompt variations from a single palette.
 
-        Creates variations by rotating emphasis across palette colours
+        Creates variations by rotating emphasis across palette colors
         and varying descriptors.
 
         Args:
@@ -207,11 +207,11 @@ class PromptGenerator:
         variations = []
 
         for i in range(min(n_variations, len(colors))):
-            # Emphasise colour i; give every other colour a small uniform base
+            # Emphasize color i; give every other color a small uniform base
             base = 0.1
             proportions = [base] * len(colors)
             proportions[i % len(colors)] = 1.0 - base * (len(colors) - 1)
-            # Renormalise to sum to 1.0
+            # Renormalize to sum to 1.0
             total = sum(proportions)
             proportions = [p / total for p in proportions]
 
@@ -249,7 +249,7 @@ class PromptGenerator:
 
         keywords = []
 
-        # Colour names
+        # Color names
         for color in colors:
             keywords.append(namer.name(color))
 

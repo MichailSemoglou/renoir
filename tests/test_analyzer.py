@@ -354,11 +354,11 @@ class TestQuickAnalysis:
             assert len(works) == 3
 
 
-# --- Portfolio Colour Signature API tests (Phase 5) ---
+# --- Portfolio Color Signature API tests (Phase 5) ---
 
 
 def _make_image(rgb, size=(20, 20)):
-    """Create a solid-colour PIL Image for testing."""
+    """Create a solid-color PIL Image for testing."""
     from PIL import Image
 
     return Image.new("RGB", size, rgb)
@@ -509,7 +509,7 @@ class TestAnalyzeWorksColorSignature:
 
 
 class TestArtistColorSignature:
-    """Test the high-level artist colour signature method."""
+    """Test the high-level artist color signature method."""
 
     def test_with_dated_mock_images(self):
         analyzer = ArtistAnalyzer()

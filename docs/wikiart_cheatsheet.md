@@ -48,7 +48,7 @@ The current live `huggan/wikiart` dataset provides four fields:
 | `genre`  | int       | Genre index (portrait, landscape, etc.)       |
 | `style`  | int       | Style/movement index                          |
 
-**Note:** `title` and `date` are not present in the current published dataset. Some renoir methods (e.g. temporal analysis and colour signatures) accept user-provided works that include these fields.
+**Note:** `title` and `date` are not present in the current published dataset. Some renoir methods (e.g. temporal analysis and color signatures) accept user-provided works that include these fields.
 
 ### Decode Indices
 
@@ -196,22 +196,22 @@ visualizer.plot_color_wheel(
 
 ---
 
-## Portfolio Colour Signature
+## Portfolio Color Signature
 
-### Artist Colour Signature
+### Artist Color Signature
 
 ```python
 from renoir import ArtistAnalyzer
 
 analyzer = ArtistAnalyzer()
 
-# Default: sample 10 works to maximise temporal coverage
+# Default: sample 10 works to maximize temporal coverage
 signature = analyzer.artist_color_signature('claude-monet')
 
 # Result structure
 signature['artist']               # Artist name
 signature['n_works_available']    # Total works found
-signature['n_works_selected']     # Works analysed
+signature['n_works_selected']     # Works analyzed
 signature['effective_strategy']   # 'temporal', 'random', or 'first'
 signature['palette']              # Aggregated signature palette [(R,G,B), ...]
 signature['metrics']              # diversity, saturation, brightness, temperature, harmony, complexity
@@ -236,11 +236,11 @@ signature = analyzer.analyze_works_color_signature(my_works)
 
 | Parameter         | Applies to                      | Default      | Description                                               |
 | ----------------- | ------------------------------- | ------------ | --------------------------------------------------------- |
-| `limit`           | `artist_color_signature`        | `10`         | Number of works to analyse                                |
+| `limit`           | `artist_color_signature`        | `10`         | Number of works to analyze                                |
 | `strategy`        | `artist_color_signature`        | `'temporal'` | Sampling strategy: `'temporal'`, `'random'`, or `'first'` |
-| `n_colors`        | both                            | `5`          | Colours extracted per work and in final palette           |
+| `n_colors`        | both                            | `5`          | Colors extracted per work and in final palette           |
 | `group_by_period` | `analyze_works_color_signature` | `True`       | Compute per-decade breakdown when dates are available     |
-| `include_figure`  | both                            | `False`      | Generate a matplotlib visualisation                       |
+| `include_figure`  | both                            | `False`      | Generate a matplotlib visualization                       |
 | `save_path`       | both                            | `None`       | Save figure to path instead of displaying                 |
 | `random_state`    | both                            | `42`         | Seed for reproducibility                                  |
 

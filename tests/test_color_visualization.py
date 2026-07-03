@@ -317,13 +317,13 @@ def test_plot_3d_rgb_space_save(visualizer, sample_colors, cleanup_plots):
 
 
 def test_plot_temperature_distribution(visualizer, sample_colors, cleanup_plots):
-    """Test colour temperature distribution chart."""
+    """Test color temperature distribution chart."""
     visualizer.plot_temperature_distribution(sample_colors)
     plt.close()
 
 
 def test_plot_temperature_distribution_save(visualizer, sample_colors, cleanup_plots):
-    """Test colour temperature distribution with save."""
+    """Test color temperature distribution with save."""
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
         save_path = f.name
 
@@ -342,7 +342,7 @@ def test_plot_temperature_distribution_save(visualizer, sample_colors, cleanup_p
 
 
 def test_create_artist_color_report_save(visualizer, sample_colors, cleanup_plots):
-    """Test comprehensive colour report with save."""
+    """Test comprehensive color report with save."""
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
         save_path = f.name
 

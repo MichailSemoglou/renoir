@@ -382,7 +382,7 @@ class TestColorComplexityIndex:
         assert isinstance(result, dict)
 
 
-class TestColourProvenanceScore:
+class TestColorProvenanceScore:
     """Tests for CPS."""
 
     def test_historical_palette(self, analyzer):

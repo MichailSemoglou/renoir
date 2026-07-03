@@ -177,7 +177,7 @@ class ColorNamer:
 
     def _lab_to_rgb(self, lab: Tuple[float, float, float]) -> Tuple[int, int, int]:
         """
-        Convert CIE Lab colour back to RGB.
+        Convert CIE Lab color back to RGB.
 
         Inverse of `_rgb_to_lab()`. Uses D65 illuminant and 2° standard observer.
         Result is clamped to the sRGB gamut [0, 255].
@@ -639,27 +639,27 @@ class ColorNamer:
         k: int = 3,
     ) -> Dict:
         """
-        Translate a colour name from one vocabulary to another.
+        Translate a color name from one vocabulary to another.
 
-        Creates a "colour Rosetta Stone" by finding the perceptually closest
+        Creates a "color Rosetta Stone" by finding the perceptually closest
         names in the target vocabulary via CIEDE2000 matching in Lab space.
 
         Args:
-            color_name: Name of the colour to translate (case-insensitive)
+            color_name: Name of the color to translate (case-insensitive)
             from_vocabulary: Source vocabulary. If None, uses current vocabulary.
             to_vocabulary: Target vocabulary name.
             k: Number of closest matches to return (default: 3).
 
         Returns:
             Dictionary containing:
-                - source_name: Original colour name
+                - source_name: Original color name
                 - source_vocabulary: Source vocabulary
-                - source_rgb: RGB of the source colour
+                - source_rgb: RGB of the source color
                 - translations: List of dicts with name, rgb, hex, distance
                 - target_vocabulary: Target vocabulary name
 
         Raises:
-            ValueError: If colour name not found or vocabulary is invalid.
+            ValueError: If color name not found or vocabulary is invalid.
 
         Example:
             >>> namer = ColorNamer(vocabulary="werner")
@@ -680,7 +680,7 @@ class ColorNamer:
         original_colors = self._colors
 
         try:
-            # Load source vocabulary and find the colour
+            # Load source vocabulary and find the color
             self.vocabulary = src_vocab
             self._colors = None
             src_colors = self._load_colors()
@@ -694,7 +694,7 @@ class ColorNamer:
             if source is None:
                 available = [c["name"] for c in src_colors]
                 raise ValueError(
-                    f"Colour '{color_name}' not found in {src_vocab} vocabulary. "
+                    f"Color '{color_name}' not found in {src_vocab} vocabulary. "
                     f"Available: {', '.join(available[:10])}..."
                 )
 
@@ -741,10 +741,10 @@ class ColorNamer:
         k: int = 1,
     ) -> Dict:
         """
-        Translate a colour name to all other vocabularies at once.
+        Translate a color name to all other vocabularies at once.
 
         Args:
-            color_name: Name of the colour to translate
+            color_name: Name of the color to translate
             from_vocabulary: Source vocabulary. If None, uses current.
             k: Number of matches per vocabulary (default: 1)
 
@@ -776,9 +776,9 @@ class ColorNamer:
         top_k: int = 5,
     ) -> List[Dict]:
         """
-        Estimate probability of historical pigments for a colour at a given date.
+        Estimate probability of historical pigments for a color at a given date.
 
-        Uses Bayesian reasoning: P(pigment|colour,date) is proportional to
+        Uses Bayesian reasoning: P(pigment|color,date) is proportional to
         perceptual match (CIEDE2000) multiplied by historical availability.
 
         Pigments with year_introduced/year_discontinued fields in the artist
@@ -797,7 +797,7 @@ class ColorNamer:
                 - name: Pigment name
                 - ci_name: Color Index name (if available)
                 - rgb: RGB tuple
-                - probability: Normalised probability (0–1)
+                - probability: Normalized probability (0–1)
                 - ciede2000: Raw CIEDE2000 distance
                 - available: Whether pigment was available at given year
 
@@ -861,7 +861,7 @@ class ColorNamer:
                     }
                 )
 
-            # Normalise to probabilities
+            # Normalize to probabilities
             total = sum(s["raw_score"] for s in scored)
             if total > 0:
                 for s in scored:

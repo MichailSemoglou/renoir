@@ -76,7 +76,7 @@ class ColorExtractor:
                          clustering (default: 42)
             filter_extremes: Whether to remove pure black (0,0,0) and pure white
                             (255,255,255) pixels before clustering. Set to False
-                            when analysing artworks where true black or white are
+                            when analyzing artworks where true black or white are
                             meaningful (default: True)
 
         Returns:

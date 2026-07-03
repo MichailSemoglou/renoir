@@ -1,7 +1,7 @@
 """
 Tests for PromptGenerator class.
 
-Test suite for GenAI colour prompt generation functionality.
+Test suite for GenAI color prompt generation functionality.
 """
 
 import pytest
@@ -61,7 +61,7 @@ class TestPromptGeneration:
     def test_generate_stable_diffusion_target(self, gen):
         colors = [(255, 0, 0)]
         prompt = gen.generate(colors, target_model="stable_diffusion")
-        assert "colour grading" in prompt.lower()
+        assert "color grading" in prompt.lower()
 
     def test_generate_with_proportions(self, gen):
         colors = [(255, 0, 0), (0, 0, 255)]
@@ -113,7 +113,7 @@ class TestPaletteKeywords:
         gen = PromptGenerator()
         keywords = gen.palette_to_prompt_keywords([(255, 0, 0), (0, 0, 255)])
         assert isinstance(keywords, list)
-        assert len(keywords) >= 2  # At least the colour names
+        assert len(keywords) >= 2  # At least the color names
 
     def test_keywords_vibrant(self):
         gen = PromptGenerator()

@@ -12,8 +12,8 @@ renoir documentation
 .. image:: https://img.shields.io/badge/License-MIT-yellow.svg
    :target: https://opensource.org/licenses/MIT
 
-A pedagogical Python toolkit for transparent computational colour analysis in art and design education.
-renoir exposes every analytical step — from k-means palette extraction through perceptual colour naming
+A pedagogical Python toolkit for transparent computational color analysis in art and design education.
+renoir exposes every analytical step — from k-means palette extraction through perceptual color naming
 with art-historical vocabularies to novel interpretable metrics.
 
 .. toctree::

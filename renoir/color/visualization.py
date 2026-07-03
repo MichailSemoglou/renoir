@@ -736,15 +736,15 @@ class ColorVisualizer:
         save_path: Optional[str] = None,
     ) -> None:
         """
-        Visualise Historical Pigment Probability (HPP) output for one colour.
+        Visualize Historical Pigment Probability (HPP) output for one color.
 
-        Shows the input colour alongside the ranked candidate pigments returned
+        Shows the input color alongside the ranked candidate pigments returned
         by :meth:`~renoir.color.namer.ColorNamer.historical_pigment_probability`,
-        with swatch, Colour Index name, year of introduction, probability bar,
+        with swatch, Color Index name, year of introduction, probability bar,
         and availability flag for each candidate.
 
         Args:
-            color: Input RGB colour tuple, e.g. ``(28, 62, 145)``.
+            color: Input RGB color tuple, e.g. ``(28, 62, 145)``.
             year: Historical year against which availability is assessed.
             results: Pre-computed HPP output (list of dicts).  If ``None`` the
                 method calls :class:`~renoir.color.namer.ColorNamer` internally.
@@ -821,7 +821,7 @@ class ColorVisualizer:
         ax_in.text(
             0.5,
             0.20,
-            "Input colour",
+            "Input color",
             transform=ax_in.transAxes,
             ha="center",
             va="center",
@@ -854,7 +854,7 @@ class ColorVisualizer:
             available = cand.get("available", True)
             yr_intro = cand.get("year_introduced")
 
-            # Top 50 % → colour swatch
+            # Top 50 % → color swatch
             ax.add_patch(
                 patches.Rectangle(
                     (0, 0.50),
@@ -865,7 +865,7 @@ class ColorVisualizer:
                 )
             )
 
-            # Pigment name (centred in swatch)
+            # Pigment name (centered in swatch)
             ax.text(
                 0.5,
                 0.66,
@@ -967,9 +967,9 @@ class ColorVisualizer:
         save_path: Optional[str] = None,
     ) -> None:
         """
-        Visualise Palette Earth Mover's Distance (PEMD) for one or more palette pairs.
+        Visualize Palette Earth Mover's Distance (PEMD) for one or more palette pairs.
 
-        Each pair is shown as two proportional colour strips with the PEMD value
+        Each pair is shown as two proportional color strips with the PEMD value
         annotated between them.  Accepts pre-computed PEMD values or computes
         them internally.
 
@@ -1111,11 +1111,11 @@ class ColorVisualizer:
         save_path: Optional[str] = None,
     ) -> None:
         """
-        Visualise how a palette is named across all four colour vocabularies.
+        Visualize how a palette is named across all four color vocabularies.
 
-        Creates a grid with vocabularies in rows and colours in columns.
-        Each cell shows the matched colour swatch and the name from that
-        vocabulary (CIEDE2000 nearest-neighbour match).
+        Creates a grid with vocabularies in rows and colors in columns.
+        Each cell shows the matched color swatch and the name from that
+        vocabulary (CIEDE2000 nearest-neighbor match).
 
         Args:
             colors: List of RGB tuples to name.
@@ -1164,14 +1164,14 @@ class ColorVisualizer:
         )
         fig.patch.set_facecolor("white")
         fig.suptitle(
-            "Cross-vocabulary colour naming",
+            "Cross-vocabulary color naming",
             fontsize=10,
             fontweight="bold",
             y=0.96,
             color="#1A1A1A",
         )
 
-        # Column headers: input colour hex
+        # Column headers: input color hex
         for col_idx, rgb in enumerate(colors):
             rr, gg, bb = rgb
             axes[0, col_idx].set_title(
@@ -1213,7 +1213,7 @@ class ColorVisualizer:
                     name_str = str(meta)
                     mr, mg, mb = rgb
 
-                # Left half: input colour
+                # Left half: input color
                 ax.add_patch(
                     patches.Rectangle(
                         (0, 0),
@@ -1223,7 +1223,7 @@ class ColorVisualizer:
                         linewidth=0,
                     )
                 )
-                # Right half: matched colour from vocabulary
+                # Right half: matched color from vocabulary
                 ax.add_patch(
                     patches.Rectangle(
                         (0.5, 0),

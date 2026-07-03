@@ -12,45 +12,45 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 
 ## Overview
 
-`renoir` is a pedagogical Python package for computational colour analysis of artworks from WikiArt. Its primary contributions are four interpretable metrics designed for art-historical reasoning: Palette Earth Mover's Distance for perceptual palette comparison, Colour Complexity Index combining information-theoretic and perceptual measures, Historical Pigment Probability for dating-aware Bayesian pigment attribution, and Colour Provenance Score for detecting anachronistic palettes. These sit alongside a complete 17-lesson curriculum, four colour naming vocabularies, and a PromptGenerator module for generative AI workflows, designed to take art and design students from k-means basics through machine learning using a culturally meaningful dataset.
+`renoir` is a pedagogical Python package for computational color analysis of artworks from WikiArt. Its primary contributions are four interpretable metrics designed for art-historical reasoning: Palette Earth Mover's Distance for perceptual palette comparison, Color Complexity Index combining information-theoretic and perceptual measures, Historical Pigment Probability for dating-aware Bayesian pigment attribution, and Color Provenance Score for detecting anachronistic palettes. These sit alongside a complete 17-lesson curriculum, four color naming vocabularies, and a PromptGenerator module for generative AI workflows, designed to take art and design students from k-means basics through machine learning using a culturally meaningful dataset.
 
 ## Key Features
 
 ### Artist analysis
 
-- Extract and analyse works by 100+ artists from WikiArt
-- Built-in visualisations for genre and style distributions
+- Extract and analyze works by 100+ artists from WikiArt
+- Built-in visualizations for genre and style distributions
 - Temporal analysis of artistic development
 - Comparative analysis across artists and movements
 
-### Advanced colour metrics
+### Advanced color metrics
 
 - **Palette Earth Mover's Distance (PEMD)**: Perceptual optimal-transport distance between palettes using CIEDE2000 as ground metric
-- **Colour Complexity Index (CCI)**: Information-theoretic measure combining hue entropy, perceptual spread, proportion evenness, and harmony
-- **Historical Pigment Probability (HPP)**: Bayesian estimation of which historical pigments could produce a given colour at a given date
-- **Colour Provenance Score (CPS)**: Anomaly detection for anachronistic palettes in art-historical attribution
-- **Cross-vocabulary colour translation**: Map colour names across Werner's, artist pigments, Resene, and XKCD vocabularies via CIEDE2000
-- **GenAI colour prompt generation**: Convert colour analysis into structured prompts for DALL-E, Midjourney, and Stable Diffusion
+- **Color Complexity Index (CCI)**: Information-theoretic measure combining hue entropy, perceptual spread, proportion evenness, and harmony
+- **Historical Pigment Probability (HPP)**: Bayesian estimation of which historical pigments could produce a given color at a given date
+- **Color Provenance Score (CPS)**: Anomaly detection for anachronistic palettes in art-historical attribution
+- **Cross-vocabulary color translation**: Map color names across Werner's, artist pigments, Resene, and XKCD vocabularies via CIEDE2000
+- **GenAI color prompt generation**: Convert color analysis into structured prompts for DALL-E, Midjourney, and Stable Diffusion
 
-### Colour analysis
+### Color analysis
 
-- **Colour extraction**: K-means clustering for intelligent palette extraction
-- **Colour naming**: Evocative, artist-friendly colour names (Burnt Sienna, Prussian Blue, etc.)
+- **Color extraction**: K-means clustering for intelligent palette extraction
+- **Color naming**: Evocative, artist-friendly color names (Burnt Sienna, Prussian Blue, etc.)
   - 4 naming vocabularies: artist pigments, Resene, Werner's, XKCD
-  - CIEDE2000 perceptually accurate colour matching
-  - Colour Index names for physical paint matching
-- **Colour space analysis**: RGB, HSV, and HSL conversions
-- **Statistical metrics**: Colour diversity, saturation, brightness, temperature
-- **Colour relationships**: Complementary detection, WCAG contrast ratios
-- **Colour harmony detection**: Triadic, analogous, split-complementary, tetradic schemes
-- **8 visualisation types**: Palettes, colour wheels, distributions, 3D spaces
+  - CIEDE2000 perceptually accurate color matching
+  - Color Index names for physical paint matching
+- **Color space analysis**: RGB, HSV, and HSL conversions
+- **Statistical metrics**: Color diversity, saturation, brightness, temperature
+- **Color relationships**: Complementary detection, WCAG contrast ratios
+- **Color harmony detection**: Triadic, analogous, split-complementary, tetradic schemes
+- **8 visualization types**: Palettes, color wheels, distributions, 3D spaces
 - **Export capabilities**: CSS variables and JSON formats
 
 ### Educational focus
 
 - **17 complete Jupyter notebooks** -- Progressive curriculum from basics to advanced ML
 - Designed specifically for classroom use and student projects
-- Publication-ready visualisations
+- Publication-ready visualizations
 - WikiArt cheatsheet for quick reference
 - Pure Python with minimal dependencies
 
@@ -204,7 +204,7 @@ All notebooks are in `examples/color_analysis/`:
 
 - **[WikiArt Cheatsheet](docs/wikiart_cheatsheet.md)** - Quick reference for all API methods, common artists, genres, styles, and code snippets
 
-## Advanced Colour Metrics: Examples
+## Advanced Color Metrics: Examples
 
 ### Palette Comparison (PEMD)
 
@@ -221,7 +221,7 @@ distance = analyzer.palette_earth_movers_distance(palette1, palette2)
 print(f"Perceptual palette distance: {distance:.2f}")
 ```
 
-### Colour Complexity Index
+### Color Complexity Index
 
 ```python
 colors = [(255, 87, 51), (0, 49, 83), (34, 139, 34), (255, 215, 0)]
@@ -257,7 +257,7 @@ print(result)  # Closest XKCD equivalents
 all_translations = namer.translate_all_vocabularies("Prussian Blue")
 ```
 
-### Colour Provenance Score
+### Color Provenance Score
 
 ```python
 colors = [(0, 49, 83), (255, 215, 0), (139, 69, 19)]
@@ -266,7 +266,7 @@ print(f"Provenance score: {score['score']:.2f}")
 print(f"Flagged: {score['flagged']}")
 ```
 
-### GenAI Colour Prompts
+### GenAI Color Prompts
 
 ```python
 from renoir.color import PromptGenerator
@@ -389,17 +389,17 @@ extractor.export_palette_css(colors, 'palette.css', prefix='monet')
 extractor.export_palette_json(colors, 'palette.json')
 ```
 
-### Portfolio Colour Signature
+### Portfolio Color Signature
 
 ```python
 from renoir import ArtistAnalyzer
 
 analyzer = ArtistAnalyzer()
 
-# Aggregated colour signature across an artist's corpus
+# Aggregated color signature across an artist's corpus
 signature = analyzer.artist_color_signature('claude-monet', limit=10)
 
-print(f"Analysed {signature['n_works_selected']} of {signature['n_works_available']} works")
+print(f"Analyzed {signature['n_works_selected']} of {signature['n_works_available']} works")
 print(f"Strategy used: {signature['effective_strategy']}")
 print(f"Signature palette: {signature['palette']}")
 print(f"Dominant harmony: {signature['metrics']['harmony']['dominant_harmony']}")
@@ -459,7 +459,7 @@ Install with: `pip install 'renoir-wikiart[visualization]'`
 - `ColorAnalyzer` - Analyze colors across multiple color spaces (includes PEMD, CCI, CPS)
 - `ColorNamer` - Perceptual color naming, cross-vocabulary translation, historical pigment probability
 - `ColorVisualizer` - Create publication-quality color visualizations
-- `PromptGenerator` - Generate structured colour prompts for generative AI models
+- `PromptGenerator` - Generate structured color prompts for generative AI models
 
 ## Citation
 

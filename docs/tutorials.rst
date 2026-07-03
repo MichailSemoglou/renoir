@@ -13,37 +13,37 @@ Jupyter Lab or Jupyter Notebook.
      - Title
      - Key Concepts
    * - 01
-     - Colour Palette Extraction
+     - Color Palette Extraction
      - k-means, pixel sampling
    * - 02
-     - Colour Space Analysis
+     - Color Space Analysis
      - RGB, HSV, HSL
    * - 03
      - Comparative Artist Analysis
      - palette comparison, PEMD
    * - 04
-     - Artist Colour Signature
+     - Artist Color Signature
      - statistical profiling
    * - 05
-     - Colour Harmony Principles
+     - Color Harmony Principles
      - triadic, analogous, tetradic
    * - 06
-     - Thematic Colour Analysis
+     - Thematic Color Analysis
      - CCI, hue entropy
    * - 07
-     - Colour Analysis Pipeline
+     - Color Analysis Pipeline
      - end-to-end workflow
    * - 08
-     - Movement Colour Evolution
+     - Movement Color Evolution
      - temporal analysis
    * - 09
-     - Colour Psychology
+     - Color Psychology
      - valence, arousal
    * - 10
      - Style Classifier
      - scikit-learn, feature engineering
    * - 11
-     - Colour Naming
+     - Color Naming
      - CIEDE2000, four vocabularies
    * - 12
      - Art Movement Classification
@@ -52,7 +52,7 @@ Jupyter Lab or Jupyter Notebook.
      - Palette Generation (VAE)
      - PyTorch, generative models
    * - 14
-     - Artist Colour DNA
+     - Artist Color DNA
      - cross-vocabulary translation
    * - 15
      - Clustering & Anomaly Detection

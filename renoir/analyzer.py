@@ -621,7 +621,7 @@ class ArtistAnalyzer:
             plt.show()
 
     # ------------------------------------------------------------------
-    # Portfolio Colour Signature API (Phase 5)
+    # Portfolio Color Signature API (Phase 5)
     # ------------------------------------------------------------------
 
     def _parse_year(self, work: Dict[str, Any]) -> Optional[int]:
@@ -726,17 +726,17 @@ class ArtistAnalyzer:
         namer: Optional["ColorNamer"] = None,
     ) -> List[Tuple[int, int, int]]:
         """
-        Aggregate a collection of colours into ``n_colors`` representatives.
+        Aggregate a collection of colors into ``n_colors`` representatives.
 
         Clustering is performed in CIE Lab space to keep the aggregation
-        perceptually meaningful, then cluster centres are converted back
-        to sRGB. If the input contains fewer unique colours than requested,
-        the unique colours are returned instead of forcing duplicate clusters.
+        perceptually meaningful, then cluster centers are converted back
+        to sRGB. If the input contains fewer unique colors than requested,
+        the unique colors are returned instead of forcing duplicate clusters.
         """
         if not colors:
             return []
 
-        # Normalise to plain-Python int tuples
+        # Normalize to plain-Python int tuples
         colors = [tuple(int(c) for c in color) for color in colors]
 
         n_colors = min(n_colors, len(colors))
@@ -768,7 +768,7 @@ class ArtistAnalyzer:
         palette: List[Tuple[int, int, int]],
         analyzer: "ColorAnalyzer",
     ) -> Dict[str, Any]:
-        """Compute the standard colour metrics for a palette."""
+        """Compute the standard color metrics for a palette."""
         if not palette:
             return {}
         return {
@@ -781,7 +781,7 @@ class ArtistAnalyzer:
         }
 
     def _empty_signature(self, artist_name: Optional[str] = None) -> Dict[str, Any]:
-        """Return a neutral signature result when no works can be analysed."""
+        """Return a neutral signature result when no works can be analyzed."""
         return {
             "artist": artist_name,
             "n_works_analyzed": 0,
@@ -804,7 +804,7 @@ class ArtistAnalyzer:
         by_period: Dict[str, Any],
         save_path: Optional[str],
     ) -> Any:
-        """Build a multi-panel overview figure for a colour signature."""
+        """Build a multi-panel overview figure for a color signature."""
         if not self._check_visualization_available():
             print("Visualization libraries not available.")
             print("Install with: pip install 'renoir-wikiart[visualization]'")
@@ -832,7 +832,7 @@ class ArtistAnalyzer:
             ax_palette.set_aspect("equal")
             ax_palette.axis("off")
             ax_palette.set_title(
-                f"Colour Signature: {title} — Aggregated Palette",
+                f"Color Signature: {title} — Aggregated Palette",
                 fontsize=14,
                 fontweight="bold",
             )
@@ -882,7 +882,7 @@ class ArtistAnalyzer:
         verbose: bool = True,
     ) -> Dict[str, Any]:
         """
-        Compute a colour signature from a provided list of artwork dictionaries.
+        Compute a color signature from a provided list of artwork dictionaries.
 
         This lower-level method lets callers supply their own dated works,
         enabling full temporal analysis when the dataset includes date metadata.
@@ -890,7 +890,7 @@ class ArtistAnalyzer:
         Args:
             works: List of artwork dictionaries. Each should contain an ``image``
                 key (PIL Image or ndarray) and optionally a ``date`` key.
-            n_colors: Number of dominant colours to extract per artwork and
+            n_colors: Number of dominant colors to extract per artwork and
                 to return in the aggregated signature palette.
             group_by_period: If True and dates are available, also compute
                 per-decade signatures.
@@ -1023,26 +1023,26 @@ class ArtistAnalyzer:
         verbose: bool = True,
     ) -> Dict[str, Any]:
         """
-        Compute a colour signature for an artist from WikiArt.
+        Compute a color signature for an artist from WikiArt.
 
-        By default, extracts up to 10 works sampled to maximise temporal
+        By default, extracts up to 10 works sampled to maximize temporal
         coverage. If no parseable dates are available in the dataset, the
         method falls back to random sampling and reports the effective
         strategy in the result.
 
         Args:
             artist_name: Artist name as it appears in WikiArt.
-            limit: Maximum number of works to analyse (default: 10).
-            n_colors: Number of colours in the signature palette.
+            limit: Maximum number of works to analyze (default: 10).
+            n_colors: Number of colors in the signature palette.
             strategy: Sampling strategy — ``'temporal'`` (default),
                 ``'random'``, or ``'first'``.
-            include_figure: If True, generate a visualisation.
+            include_figure: If True, generate a visualization.
             save_path: Optional path to save the figure.
             random_state: Seed for reproducible sampling and extraction.
             verbose: If True, print progress messages.
 
         Returns:
-            Dictionary with artist colour signature, metrics, optional
+            Dictionary with artist color signature, metrics, optional
             per-period breakdown, and optional figure.
         """
         if not artist_name or not isinstance(artist_name, str):
@@ -1058,7 +1058,7 @@ class ArtistAnalyzer:
             raise ValueError("limit must be at least 1")
 
         if verbose:
-            print(f"Computing colour signature for {artist_name}...")
+            print(f"Computing color signature for {artist_name}...")
 
         # For "first" strategy we can avoid loading the full corpus.
         extract_limit = limit if strategy == "first" else None
@@ -1079,7 +1079,7 @@ class ArtistAnalyzer:
             )
 
         if verbose:
-            print(f"Analysing {len(selected)} works...")
+            print(f"Analyzing {len(selected)} works...")
 
         result = self.analyze_works_color_signature(
             selected,

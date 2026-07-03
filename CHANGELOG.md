@@ -10,12 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **`ArtistAnalyzer.artist_color_signature()`** — high-level API to compute an
-  artist's colour signature directly from a WikiArt artist name, with temporal
+  artist's color signature directly from a WikiArt artist name, with temporal
   or random sampling of works and an optional per-period breakdown.
 - **`ArtistAnalyzer.analyze_works_color_signature()`** — lower-level signature
   computation over an arbitrary list of works.
 - Internal `_sample_works()` / `_aggregate_palette()` helpers supporting the
-  new colour signature API.
+  new color signature API.
 
 ### Fixed
 
@@ -28,11 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **`ColorVisualizer.plot_historical_pigment_probability()`** — publication-quality panel figure
-  for HPP output: colour swatch, Colour Index name, year of introduction, probability bar, and
+  for HPP output: color swatch, Color Index name, year of introduction, probability bar, and
   availability badge per candidate pigment.
 - **`ColorVisualizer.plot_pemd_comparison()`** — visualizes Palette Earth Mover's Distance for
-  one or more palette pairs as proportional colour strips with PEMD values annotated between them.
-- **`ColorVisualizer.plot_cross_vocabulary_naming()`** — comparative figure displaying colour name
+  one or more palette pairs as proportional color strips with PEMD values annotated between them.
+- **`ColorVisualizer.plot_cross_vocabulary_naming()`** — comparative figure displaying color name
   translations across multiple vocabularies (Munsell, ISCC-NBS, historical pigment names, etc.).
 - `historical_pigment_probability()` results now include `year_introduced` and `year_discontinued`
   fields per candidate pigment.
@@ -51,18 +51,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **PromptGenerator module** (`renoir/color/prompt.py`) — Generate descriptive colour prompts for
+- **PromptGenerator module** (`renoir/color/prompt.py`) — Generate descriptive color prompts for
   generative AI workflows from extracted palettes
 - **`translate()` / `translate_all_vocabularies()`** methods in `ColorNamer` — Cross-vocabulary
-  colour name translation (artist ↔ resene ↔ natural ↔ xkcd)
+  color name translation (artist ↔ resene ↔ natural ↔ xkcd)
 - **Palette Earth Mover's Distance** (`ColorAnalyzer.palette_earth_movers_distance()`) — Optimal-
   transport perceptual distance between palettes using CIEDE2000 as ground metric
-- **Colour Complexity Index** (`ColorAnalyzer.calculate_color_complexity()`) — Information-theoretic
+- **Color Complexity Index** (`ColorAnalyzer.calculate_color_complexity()`) — Information-theoretic
   measure combining hue entropy, perceptual spread, proportion evenness, and harmony
 - **Historical Pigment Probability** (`ColorNamer.historical_pigment_probability()`) — Bayesian
-  estimation of which historical pigments could produce a colour at a given date; all 49 pigments
+  estimation of which historical pigments could produce a color at a given date; all 49 pigments
   in `artist_pigments.json` carry `year_introduced` fields
-- **Colour Provenance Score** (`ColorAnalyzer.colour_provenance_score()`) — Weighted pigment-
+- **Color Provenance Score** (`ColorAnalyzer.colour_provenance_score()`) — Weighted pigment-
   probability score per palette with anachronism flagging
 
 ### Fixed
@@ -75,8 +75,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Test coverage raised from 77 % to 85 % with 27 new parametrised test cases covering
-  validation edge-cases, grayscale/all-black images, named-palette visualisations,
+- Test coverage raised from 77 % to 85 % with 27 new parametrized test cases covering
+  validation edge-cases, grayscale/all-black images, named-palette visualizations,
   temperature-distribution charts, and save-path branches
 
 ## [3.3.1] - 2025-11-30
@@ -115,7 +115,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Color vocabulary JSON data files in `renoir/data/colors/`:
   - `artist_pigments.json` - 49 traditional artist pigments with CI names (PB29, PBr7, etc.)
   - `resene.json` - 102 Resene interior design paint colors
-  - `werner.json` - 65 Werner's Nomenclature of Colours (18th century naturalist vocabulary)
+  - `werner.json` - 65 Werner's Nomenclature of Colors (18th century naturalist vocabulary)
   - `xkcd.json` - 120+ crowdsourced color names from XKCD color survey
 - ColorVisualizer integration:
   - `show_names` and `vocabulary` parameters for `plot_palette()` method
