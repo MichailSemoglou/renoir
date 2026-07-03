@@ -248,6 +248,38 @@ class TestColorConversions:
         # Red should have high L (lightness)
         assert lab[0] > 0
 
+    def test_lab_to_rgb(self):
+        """Test Lab to RGB conversion."""
+        namer = ColorNamer()
+        # Use the Lab value for pure red
+        lab = namer._rgb_to_lab((255, 0, 0))
+        rgb = namer._lab_to_rgb(lab)
+
+        assert isinstance(rgb, tuple)
+        assert len(rgb) == 3
+        assert all(isinstance(c, int) for c in rgb)
+        assert all(0 <= c <= 255 for c in rgb)
+
+    def test_lab_rgb_round_trip(self):
+        """Test that RGB -> Lab -> RGB round-trips correctly."""
+        namer = ColorNamer()
+        test_colors = [
+            (255, 0, 0),
+            (0, 255, 0),
+            (0, 0, 255),
+            (255, 255, 255),
+            (0, 0, 0),
+            (128, 128, 128),
+            (255, 87, 51),
+            (0, 49, 83),
+        ]
+
+        for rgb in test_colors:
+            lab = namer._rgb_to_lab(rgb)
+            rgb2 = namer._lab_to_rgb(lab)
+            # Allow tiny rounding differences
+            assert all(abs(c1 - c2) <= 1 for c1, c2 in zip(rgb, rgb2))
+
 
 class TestCIEDE2000:
     """Test CIEDE2000 color difference calculations."""

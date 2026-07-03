@@ -6,9 +6,14 @@ from the WikiArt dataset, designed for educational use in computational design
 and digital humanities courses.
 """
 
-from typing import List, Dict, Optional, Any
-from collections import Counter
+from typing import List, Dict, Optional, Any, Tuple, TYPE_CHECKING
+from collections import Counter, defaultdict
 from datasets import load_dataset
+
+import numpy as np
+
+if TYPE_CHECKING:
+    from renoir.color import ColorAnalyzer, ColorNamer
 
 
 class ArtistAnalyzer:
@@ -70,7 +75,10 @@ class ArtistAnalyzer:
             limit: Optional maximum number of works to return
 
         Returns:
-            List of dictionaries containing artwork data (image, metadata)
+            List of dictionaries containing artwork data. The current live
+            `huggan/wikiart` dataset provides keys ``image``, ``artist``,
+            ``genre`` and ``style``. Additional keys such as ``title`` or
+            ``date`` may be present in augmented or user-provided datasets.
 
         Raises:
             ValueError: If artist_name is empty or invalid
@@ -79,8 +87,8 @@ class ArtistAnalyzer:
         Examples:
             >>> analyzer = ArtistAnalyzer()
             >>> monet_works = analyzer.extract_artist_works('claude-monet', limit=10)
-            >>> print(monet_works[0].keys())
-            dict_keys(['image', 'artist', 'title', 'style', 'genre', 'date'])
+            >>> print(sorted(monet_works[0].keys()))
+            ['artist', 'genre', 'image', 'style']
         """
         # Input validation
         if not artist_name or not isinstance(artist_name, str):
@@ -611,6 +619,485 @@ class ArtistAnalyzer:
             print(f"Figure saved to {save_path}")
         else:
             plt.show()
+
+    # ------------------------------------------------------------------
+    # Portfolio Colour Signature API (Phase 5)
+    # ------------------------------------------------------------------
+
+    def _parse_year(self, work: Dict[str, Any]) -> Optional[int]:
+        """
+        Extract a four-digit year from an artwork dict.
+
+        Mirrors the parsing logic in :meth:`analyze_temporal_distribution`
+        so that synthetic and augmented datasets with date fields work
+        consistently with the rest of the package.
+        """
+        date = work.get("date")
+        if date and isinstance(date, (int, str)):
+            try:
+                return int(str(date)[:4]) if isinstance(date, str) else date
+            except (ValueError, IndexError):
+                pass
+        return None
+
+    def _sample_works(
+        self,
+        works: List[Dict[str, Any]],
+        limit: int,
+        strategy: str,
+        random_state: int,
+    ) -> Tuple[List[Dict[str, Any]], str]:
+        """
+        Select up to ``limit`` works using the requested strategy.
+
+        Temporal sampling bins works by decade and distributes selections
+        evenly across bins. If no parseable dates are found, it falls back
+        to random sampling and reports the effective strategy.
+        """
+        if strategy not in {"temporal", "random", "first"}:
+            raise ValueError("strategy must be 'temporal', 'random', or 'first'")
+
+        if strategy == "first":
+            return works[:limit], "first"
+
+        if strategy == "random":
+            rng = np.random.RandomState(random_state)
+            n = min(limit, len(works))
+            indices = rng.choice(len(works), n, replace=False)
+            return [works[i] for i in sorted(indices)], "random"
+
+        # strategy == "temporal"
+        dated = []
+        for work in works:
+            year = self._parse_year(work)
+            if year is not None:
+                decade = (year // 10) * 10
+                dated.append((work, year, decade))
+
+        if not dated:
+            sampled, _ = self._sample_works(works, limit, "random", random_state)
+            return sampled, "random"
+
+        decade_groups = defaultdict(list)
+        for work, year, decade in dated:
+            decade_groups[decade].append((work, year))
+
+        decades = sorted(decade_groups.keys())
+        n_decades = len(decades)
+
+        # Distribute limit across decades as evenly as possible
+        base = limit // n_decades
+        extra = limit % n_decades
+
+        rng = np.random.RandomState(random_state)
+        selected = []
+        leftovers = []
+        for i, decade in enumerate(decades):
+            n_from_decade = base + (1 if i < extra else 0)
+            candidates = decade_groups[decade]
+            candidates.sort(key=lambda x: x[1])
+            if len(candidates) <= n_from_decade:
+                chosen = candidates
+            else:
+                indices = set(
+                    rng.choice(len(candidates), n_from_decade, replace=False)
+                )
+                chosen = [candidates[idx] for idx in sorted(indices)]
+                leftovers.extend(
+                    candidates[idx] for idx in range(len(candidates)) if idx not in indices
+                )
+            selected.extend([work for work, _ in chosen])
+
+        # A decade with fewer candidates than its quota causes an undershoot;
+        # redistribute the shortfall from decades that still have leftovers.
+        shortfall = limit - len(selected)
+        if shortfall > 0 and leftovers:
+            n_extra = min(shortfall, len(leftovers))
+            indices = rng.choice(len(leftovers), n_extra, replace=False)
+            selected.extend(leftovers[idx][0] for idx in sorted(indices))
+
+        return selected, "temporal"
+
+    def _aggregate_palette(
+        self,
+        colors: List[Tuple[int, int, int]],
+        n_colors: int,
+        random_state: int,
+        namer: Optional["ColorNamer"] = None,
+    ) -> List[Tuple[int, int, int]]:
+        """
+        Aggregate a collection of colours into ``n_colors`` representatives.
+
+        Clustering is performed in CIE Lab space to keep the aggregation
+        perceptually meaningful, then cluster centres are converted back
+        to sRGB. If the input contains fewer unique colours than requested,
+        the unique colours are returned instead of forcing duplicate clusters.
+        """
+        if not colors:
+            return []
+
+        # Normalise to plain-Python int tuples
+        colors = [tuple(int(c) for c in color) for color in colors]
+
+        n_colors = min(n_colors, len(colors))
+        if n_colors <= 0:
+            return []
+
+        if namer is None:
+            from renoir.color import ColorNamer
+
+            namer = ColorNamer()
+
+        unique_colors = list(dict.fromkeys(colors))  # preserve order, deduplicate
+        if n_colors >= len(unique_colors):
+            return unique_colors
+
+        labs = np.array([namer._rgb_to_lab(c) for c in colors])
+
+        from sklearn.cluster import KMeans
+
+        kmeans = KMeans(n_clusters=n_colors, random_state=random_state, n_init=10)
+        kmeans.fit(labs)
+        centers = kmeans.cluster_centers_
+
+        aggregated = [namer._lab_to_rgb(tuple(center)) for center in centers]
+        return aggregated
+
+    def _compute_palette_metrics(
+        self,
+        palette: List[Tuple[int, int, int]],
+        analyzer: "ColorAnalyzer",
+    ) -> Dict[str, Any]:
+        """Compute the standard colour metrics for a palette."""
+        if not palette:
+            return {}
+        return {
+            "diversity": analyzer.calculate_color_diversity(palette),
+            "saturation": analyzer.calculate_saturation_score(palette),
+            "brightness": analyzer.calculate_brightness_score(palette),
+            "temperature": analyzer.analyze_color_temperature_distribution(palette),
+            "harmony": analyzer.analyze_color_harmony(palette),
+            "complexity": analyzer.calculate_color_complexity(palette),
+        }
+
+    def _empty_signature(self, artist_name: Optional[str] = None) -> Dict[str, Any]:
+        """Return a neutral signature result when no works can be analysed."""
+        return {
+            "artist": artist_name,
+            "n_works_analyzed": 0,
+            "n_works_available": 0,
+            "n_works_selected": 0,
+            "requested_strategy": None,
+            "effective_strategy": None,
+            "date_range": None,
+            "palette": [],
+            "metrics": {},
+            "by_period": {},
+            "work_palettes": [],
+            "figure": None,
+        }
+
+    def _build_signature_figure(
+        self,
+        palette: List[Tuple[int, int, int]],
+        artist_name: Optional[str],
+        by_period: Dict[str, Any],
+        save_path: Optional[str],
+    ) -> Any:
+        """Build a multi-panel overview figure for a colour signature."""
+        if not self._check_visualization_available():
+            print("Visualization libraries not available.")
+            print("Install with: pip install 'renoir-wikiart[visualization]'")
+            return None
+
+        from renoir.color import ColorVisualizer
+        import matplotlib.pyplot as plt
+        import matplotlib.patches as patches
+
+        title = artist_name if artist_name else "Artist"
+
+        if by_period:
+            fig = plt.figure(figsize=(14, 8))
+            gs = fig.add_gridspec(2, 1, hspace=0.3)
+
+            ax_palette = fig.add_subplot(gs[0])
+            for i, color in enumerate(palette):
+                normalized = tuple(c / 255 for c in color)
+                rect = patches.Rectangle(
+                    (i, 0), 1, 1, facecolor=normalized, edgecolor="black", linewidth=2
+                )
+                ax_palette.add_patch(rect)
+            ax_palette.set_xlim(0, len(palette))
+            ax_palette.set_ylim(0, 1)
+            ax_palette.set_aspect("equal")
+            ax_palette.axis("off")
+            ax_palette.set_title(
+                f"Colour Signature: {title} — Aggregated Palette",
+                fontsize=14,
+                fontweight="bold",
+            )
+
+            ax_trend = fig.add_subplot(gs[1])
+            periods = sorted(by_period.keys(), key=lambda p: int(p))
+            complexities = [
+                by_period[p]["metrics"].get("complexity", {}).get("cci", 0)
+                for p in periods
+            ]
+            saturations = [
+                by_period[p]["metrics"].get("saturation", 0) for p in periods
+            ]
+
+            ax_trend.plot(periods, complexities, marker="o", label="CCI", linewidth=2)
+            ax_trend.plot(
+                periods, saturations, marker="s", label="Saturation", linewidth=2
+            )
+            ax_trend.set_xlabel("Period", fontsize=12)
+            ax_trend.set_ylabel("Score", fontsize=12)
+            ax_trend.set_title("Temporal Evolution", fontsize=14, fontweight="bold")
+            ax_trend.legend()
+            ax_trend.grid(True, alpha=0.3)
+
+            plt.tight_layout()
+
+            if save_path:
+                plt.savefig(save_path, dpi=300, bbox_inches="tight")
+                print(f"Figure saved to {save_path}")
+            else:
+                plt.show()
+
+            return fig
+
+        visualizer = ColorVisualizer()
+        visualizer.create_artist_color_report(palette, title, save_path=save_path)
+        return None
+
+    def analyze_works_color_signature(
+        self,
+        works: List[Dict[str, Any]],
+        n_colors: int = 5,
+        group_by_period: bool = True,
+        include_figure: bool = False,
+        save_path: Optional[str] = None,
+        random_state: int = 42,
+        verbose: bool = True,
+    ) -> Dict[str, Any]:
+        """
+        Compute a colour signature from a provided list of artwork dictionaries.
+
+        This lower-level method lets callers supply their own dated works,
+        enabling full temporal analysis when the dataset includes date metadata.
+
+        Args:
+            works: List of artwork dictionaries. Each should contain an ``image``
+                key (PIL Image or ndarray) and optionally a ``date`` key.
+            n_colors: Number of dominant colours to extract per artwork and
+                to return in the aggregated signature palette.
+            group_by_period: If True and dates are available, also compute
+                per-decade signatures.
+            include_figure: If True, generate and return a matplotlib figure.
+            save_path: Optional path to save the figure instead of displaying it.
+            random_state: Random seed for reproducible extraction and sampling.
+            verbose: If True, print progress messages.
+
+        Returns:
+            Dictionary with aggregated palette, metrics, optional per-period
+            breakdown, and optional figure.
+        """
+        if not isinstance(works, list):
+            raise ValueError("works must be a list")
+
+        for i, work in enumerate(works):
+            if not isinstance(work, dict):
+                raise TypeError(f"Item at index {i} is not a dictionary")
+
+        if not works:
+            return self._empty_signature()
+
+        import warnings
+
+        from sklearn.exceptions import ConvergenceWarning
+
+        from renoir.color import ColorExtractor, ColorAnalyzer, ColorNamer
+
+        extractor = ColorExtractor()
+        analyzer = ColorAnalyzer()
+        namer = ColorNamer()
+
+        work_palettes = []
+        for i, work in enumerate(works):
+            image = work.get("image")
+            year = self._parse_year(work)
+
+            if image is None:
+                if verbose:
+                    print(f"Warning: work {i} has no image; skipping")
+                continue
+
+            try:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", ConvergenceWarning)
+                    palette = extractor.extract_dominant_colors(
+                        image,
+                        n_colors=n_colors,
+                        random_state=random_state,
+                    )
+                work_palettes.append((work, palette, year))
+                if verbose and (i + 1) % 5 == 0:
+                    print(f"  Processed {i + 1}/{len(works)} works...")
+            except Exception as e:
+                if verbose:
+                    print(f"Warning: failed to extract palette for work {i}: {e}")
+                continue
+
+        if not work_palettes:
+            return self._empty_signature()
+
+        all_colors = [color for _, palette, _ in work_palettes for color in palette]
+        signature_palette = self._aggregate_palette(
+            all_colors, n_colors, random_state, namer
+        )
+        metrics = self._compute_palette_metrics(signature_palette, analyzer)
+
+        by_period: Dict[str, Any] = {}
+        if group_by_period:
+            period_groups = defaultdict(list)
+            for work, palette, year in work_palettes:
+                if year is not None:
+                    decade = (year // 10) * 10
+                    period_groups[decade].append((work, palette, year))
+
+            for period in sorted(period_groups.keys()):
+                group = period_groups[period]
+                period_colors = [c for _, palette, _ in group for c in palette]
+                period_palette = self._aggregate_palette(
+                    period_colors, n_colors, random_state, namer
+                )
+                by_period[str(period)] = {
+                    "n_works": len(group),
+                    "years": sorted({y for _, _, y in group if y is not None}),
+                    "palette": period_palette,
+                    "metrics": self._compute_palette_metrics(period_palette, analyzer),
+                }
+
+        years = [y for _, _, y in work_palettes if y is not None]
+        date_range = (min(years), max(years)) if years else None
+
+        figure = None
+        if include_figure:
+            figure = self._build_signature_figure(
+                signature_palette, None, by_period, save_path
+            )
+
+        return {
+            "artist": None,
+            "n_works_analyzed": len(work_palettes),
+            "n_works_available": len(works),
+            "n_works_selected": len(work_palettes),
+            "requested_strategy": None,
+            "effective_strategy": None,
+            "date_range": date_range,
+            "palette": signature_palette,
+            "metrics": metrics,
+            "by_period": by_period,
+            "work_palettes": [
+                {
+                    "title": work.get("title", "Unknown"),
+                    "artist": work.get("artist", "Unknown"),
+                    "year": year,
+                    "palette": palette,
+                }
+                for work, palette, year in work_palettes
+            ],
+            "figure": figure,
+        }
+
+    def artist_color_signature(
+        self,
+        artist_name: str,
+        limit: int = 10,
+        n_colors: int = 5,
+        strategy: str = "temporal",
+        include_figure: bool = False,
+        save_path: Optional[str] = None,
+        random_state: int = 42,
+        verbose: bool = True,
+    ) -> Dict[str, Any]:
+        """
+        Compute a colour signature for an artist from WikiArt.
+
+        By default, extracts up to 10 works sampled to maximise temporal
+        coverage. If no parseable dates are available in the dataset, the
+        method falls back to random sampling and reports the effective
+        strategy in the result.
+
+        Args:
+            artist_name: Artist name as it appears in WikiArt.
+            limit: Maximum number of works to analyse (default: 10).
+            n_colors: Number of colours in the signature palette.
+            strategy: Sampling strategy — ``'temporal'`` (default),
+                ``'random'``, or ``'first'``.
+            include_figure: If True, generate a visualisation.
+            save_path: Optional path to save the figure.
+            random_state: Seed for reproducible sampling and extraction.
+            verbose: If True, print progress messages.
+
+        Returns:
+            Dictionary with artist colour signature, metrics, optional
+            per-period breakdown, and optional figure.
+        """
+        if not artist_name or not isinstance(artist_name, str):
+            raise ValueError("artist_name must be a non-empty string")
+
+        if artist_name.strip() == "":
+            raise ValueError("artist_name cannot be empty or whitespace")
+
+        if not isinstance(limit, int):
+            raise ValueError("limit must be an integer")
+
+        if limit < 1:
+            raise ValueError("limit must be at least 1")
+
+        if verbose:
+            print(f"Computing colour signature for {artist_name}...")
+
+        # For "first" strategy we can avoid loading the full corpus.
+        extract_limit = limit if strategy == "first" else None
+        works = self.extract_artist_works(artist_name, limit=extract_limit)
+
+        if not works:
+            return self._empty_signature(artist_name=artist_name)
+
+        actual_limit = min(limit, len(works))
+        selected, effective_strategy = self._sample_works(
+            works, actual_limit, strategy, random_state
+        )
+
+        if effective_strategy != strategy and verbose:
+            print(
+                f"Note: '{strategy}' sampling not possible (no parseable dates). "
+                f"Using '{effective_strategy}' instead."
+            )
+
+        if verbose:
+            print(f"Analysing {len(selected)} works...")
+
+        result = self.analyze_works_color_signature(
+            selected,
+            n_colors=n_colors,
+            group_by_period=True,
+            include_figure=include_figure,
+            save_path=save_path,
+            random_state=random_state,
+            verbose=verbose,
+        )
+
+        result["artist"] = artist_name
+        result["n_works_available"] = len(works)
+        result["n_works_selected"] = len(selected)
+        result["requested_strategy"] = strategy
+        result["effective_strategy"] = effective_strategy
+
+        return result
 
 
 def quick_analysis(

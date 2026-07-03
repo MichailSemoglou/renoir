@@ -352,3 +352,223 @@ class TestQuickAnalysis:
             )
             assert isinstance(works, list)
             assert len(works) == 3
+
+
+# --- Portfolio Colour Signature API tests (Phase 5) ---
+
+
+def _make_image(rgb, size=(20, 20)):
+    """Create a solid-colour PIL Image for testing."""
+    from PIL import Image
+
+    return Image.new("RGB", size, rgb)
+
+
+class TestSampleWorks:
+    """Test the internal _sample_works helper."""
+
+    def test_temporal_sampling_spreads_across_decades(self):
+        analyzer = ArtistAnalyzer()
+        works = [
+            {"date": 1870},
+            {"date": 1872},
+            {"date": 1880},
+            {"date": 1885},
+            {"date": 1890},
+            {"date": 1899},
+        ]
+        selected, strategy = analyzer._sample_works(works, 4, "temporal", 42)
+        assert strategy == "temporal"
+        assert len(selected) == 4
+        decades = {(w["date"] // 10) * 10 for w in selected}
+        assert len(decades) >= 2  # should cover multiple decades
+
+    def test_temporal_fallback_when_no_dates(self):
+        analyzer = ArtistAnalyzer()
+        works = [{"artist": "x"}, {"artist": "y"}, {"artist": "z"}]
+        selected, strategy = analyzer._sample_works(works, 2, "temporal", 42)
+        assert strategy == "random"
+        assert len(selected) == 2
+
+    def test_first_strategy(self):
+        analyzer = ArtistAnalyzer()
+        works = [{"date": i} for i in range(10)]
+        selected, strategy = analyzer._sample_works(works, 3, "first", 42)
+        assert strategy == "first"
+        assert [w["date"] for w in selected] == [0, 1, 2]
+
+    def test_random_strategy(self):
+        analyzer = ArtistAnalyzer()
+        works = [{"date": i} for i in range(10)]
+        selected, strategy = analyzer._sample_works(works, 3, "random", 42)
+        assert strategy == "random"
+        assert len(selected) == 3
+        assert len({id(w) for w in selected}) == 3  # no duplicates
+
+    def test_invalid_strategy_raises(self):
+        analyzer = ArtistAnalyzer()
+        with pytest.raises(ValueError, match="strategy must be"):
+            analyzer._sample_works([{}], 1, "invalid", 42)
+
+
+class TestAggregatePalette:
+    """Test the internal _aggregate_palette helper."""
+
+    def test_aggregate_reduces_to_n_colors(self):
+        analyzer = ArtistAnalyzer()
+        colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]
+        result = analyzer._aggregate_palette(colors, 2, 42)
+        assert len(result) == 2
+        for color in result:
+            assert len(color) == 3
+            assert all(0 <= c <= 255 for c in color)
+            assert all(isinstance(c, int) for c in color)
+
+    def test_aggregate_returns_unique_when_few_distinct(self):
+        analyzer = ArtistAnalyzer()
+        colors = [(255, 0, 0)] * 10 + [(0, 255, 0)] * 10
+        result = analyzer._aggregate_palette(colors, 5, 42)
+        # Should not force duplicate clusters
+        assert len(result) == 2
+        assert set(result).issubset({(255, 0, 0), (0, 255, 0)})
+
+    def test_aggregate_empty(self):
+        analyzer = ArtistAnalyzer()
+        assert analyzer._aggregate_palette([], 3, 42) == []
+
+
+class TestAnalyzeWorksColorSignature:
+    """Test the lower-level signature method."""
+
+    def test_full_temporal_signature(self):
+        analyzer = ArtistAnalyzer()
+        works = [
+            {
+                "image": _make_image((255, 0, 0)),
+                "date": 1870,
+                "title": "Red 1",
+            },
+            {
+                "image": _make_image((0, 0, 255)),
+                "date": 1885,
+                "title": "Blue 1",
+            },
+            {
+                "image": _make_image((0, 255, 0)),
+                "date": 1895,
+                "title": "Green 1",
+            },
+        ]
+        result = analyzer.analyze_works_color_signature(
+            works, n_colors=2, verbose=False
+        )
+        assert result["n_works_analyzed"] == 3
+        assert len(result["palette"]) > 0
+        assert "metrics" in result
+        assert "diversity" in result["metrics"]
+        assert set(result["by_period"].keys()) == {"1870", "1880", "1890"}
+        assert result["date_range"] == (1870, 1895)
+
+    def test_signature_without_dates(self):
+        analyzer = ArtistAnalyzer()
+        works = [
+            {"image": _make_image((255, 0, 0))},
+            {"image": _make_image((0, 0, 255))},
+        ]
+        result = analyzer.analyze_works_color_signature(
+            works, n_colors=2, verbose=False
+        )
+        assert result["n_works_analyzed"] == 2
+        assert len(result["palette"]) > 0
+        assert result["by_period"] == {}
+        assert result["date_range"] is None
+
+    def test_signature_skips_missing_images(self):
+        analyzer = ArtistAnalyzer()
+        works = [
+            {"image": _make_image((255, 0, 0))},
+            {"date": 1880},  # no image
+        ]
+        result = analyzer.analyze_works_color_signature(
+            works, n_colors=2, verbose=False
+        )
+        assert result["n_works_analyzed"] == 1
+
+    def test_signature_empty_works(self):
+        analyzer = ArtistAnalyzer()
+        result = analyzer.analyze_works_color_signature([], verbose=False)
+        assert result["n_works_analyzed"] == 0
+        assert result["palette"] == []
+
+    def test_signature_invalid_input(self):
+        analyzer = ArtistAnalyzer()
+        with pytest.raises(ValueError):
+            analyzer.analyze_works_color_signature("not a list", verbose=False)
+        with pytest.raises(TypeError):
+            analyzer.analyze_works_color_signature(["not a dict"], verbose=False)
+
+
+class TestArtistColorSignature:
+    """Test the high-level artist colour signature method."""
+
+    def test_with_dated_mock_images(self):
+        analyzer = ArtistAnalyzer()
+        works = [
+            {"artist": "test-artist", "image": _make_image((255, 0, 0)), "date": 1870},
+            {"artist": "test-artist", "image": _make_image((0, 0, 255)), "date": 1880},
+            {"artist": "test-artist", "image": _make_image((0, 255, 0)), "date": 1890},
+        ]
+        analyzer._dataset = works
+        result = analyzer.artist_color_signature(
+            "test-artist", limit=3, verbose=False
+        )
+        assert result["artist"] == "test-artist"
+        assert result["n_works_available"] == 3
+        assert result["n_works_selected"] == 3
+        assert result["effective_strategy"] == "temporal"
+        assert len(result["palette"]) > 0
+
+    def test_fallback_when_no_dates(self):
+        analyzer = ArtistAnalyzer()
+        works = [
+            {"artist": "test-artist", "image": _make_image((255, 0, 0))},
+            {"artist": "test-artist", "image": _make_image((0, 0, 255))},
+        ]
+        analyzer._dataset = works
+        result = analyzer.artist_color_signature(
+            "test-artist", limit=2, verbose=False
+        )
+        assert result["effective_strategy"] == "random"
+        assert result["n_works_selected"] == 2
+
+    def test_empty_artist(self):
+        analyzer = ArtistAnalyzer()
+        analyzer._dataset = []
+        result = analyzer.artist_color_signature(
+            "unknown-artist", limit=2, verbose=False
+        )
+        assert result["n_works_analyzed"] == 0
+        assert result["palette"] == []
+
+    def test_validation(self):
+        analyzer = ArtistAnalyzer()
+        with pytest.raises(ValueError):
+            analyzer.artist_color_signature("", verbose=False)
+        with pytest.raises(ValueError):
+            analyzer.artist_color_signature("monet", limit=0, verbose=False)
+        with pytest.raises(ValueError):
+            analyzer.artist_color_signature("monet", limit=-1, verbose=False)
+
+    def test_filters_out_other_artists(self):
+        analyzer = ArtistAnalyzer()
+        works = [
+            {"artist": "test-artist", "image": _make_image((255, 0, 0)), "date": 1870},
+            {"artist": "test-artist", "image": _make_image((0, 0, 255)), "date": 1880},
+            {"artist": "other-artist", "image": _make_image((0, 255, 0)), "date": 1890},
+        ]
+        analyzer._dataset = works
+        result = analyzer.artist_color_signature(
+            "test-artist", limit=10, verbose=False
+        )
+        assert result["n_works_available"] == 2
+        assert result["n_works_selected"] == 2

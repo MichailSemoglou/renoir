@@ -175,6 +175,60 @@ class ColorNamer:
         self._lab_cache[rgb] = lab
         return lab
 
+    def _lab_to_rgb(self, lab: Tuple[float, float, float]) -> Tuple[int, int, int]:
+        """
+        Convert CIE Lab colour back to RGB.
+
+        Inverse of `_rgb_to_lab()`. Uses D65 illuminant and 2° standard observer.
+        Result is clamped to the sRGB gamut [0, 255].
+
+        Args:
+            lab: Tuple of (L, a, b) values in CIE Lab space
+
+        Returns:
+            Tuple of (R, G, B) values (0-255)
+        """
+        L, a, b_lab = lab
+
+        # Convert Lab to XYZ
+        delta = 6.0 / 29.0
+
+        def f_inv(t):
+            if t > delta:
+                return t**3
+            else:
+                return 3 * (delta**2) * (t - 4.0 / 29.0)
+
+        fy = (L + 16.0) / 116.0
+        fx = a / 500.0 + fy
+        fz = fy - b_lab / 200.0
+
+        x = 0.95047 * f_inv(fx)
+        y = 1.00000 * f_inv(fy)
+        z = 1.08883 * f_inv(fz)
+
+        # Convert XYZ to linear RGB (inverse of D65 matrix in _rgb_to_lab)
+        r_linear = x * 3.2404542 + y * -1.5371385 + z * -0.4985314
+        g_linear = x * -0.9692660 + y * 1.8760108 + z * 0.0415560
+        b_linear = x * 0.0556434 + y * -0.2040259 + z * 1.0572252
+
+        # Inverse sRGB gamma correction
+        def inverse_gamma(c):
+            if c <= 0.0031308:
+                return c * 12.92
+            else:
+                return 1.055 * (c ** (1.0 / 2.4)) - 0.055
+
+        r = inverse_gamma(r_linear)
+        g = inverse_gamma(g_linear)
+        b = inverse_gamma(b_linear)
+
+        # Clamp and convert to int
+        def to_byte(c):
+            return int(round(max(0.0, min(1.0, c)) * 255))
+
+        return (to_byte(r), to_byte(g), to_byte(b))
+
     def _ciede2000(
         self,
         lab1: Tuple[float, float, float],

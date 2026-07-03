@@ -30,7 +30,7 @@ print(f"Total artworks: {len(dataset)}")  # ~81,000 artworks
 works = artist_analyzer.extract_artist_works('claude-monet', limit=20)
 for work in works:
     image = work['image']        # PIL Image
-    title = work.get('title')    # Artwork title
+    artist = work.get('artist')  # Artist index
     genre = work.get('genre')    # Genre index
     style = work.get('style')    # Style index
 ```
@@ -39,13 +39,16 @@ for work in works:
 
 ## Dataset Fields
 
+The current live `huggan/wikiart` dataset provides four fields:
+
 | Field    | Type      | Description                                   |
 | -------- | --------- | --------------------------------------------- |
 | `image`  | PIL.Image | The artwork image                             |
-| `title`  | str       | Artwork title                                 |
 | `artist` | int       | Artist index (use `features['artist'].names`) |
 | `genre`  | int       | Genre index (portrait, landscape, etc.)       |
 | `style`  | int       | Style/movement index                          |
+
+**Note:** `title` and `date` are not present in the current published dataset. Some renoir methods (e.g. temporal analysis and colour signatures) accept user-provided works that include these fields.
 
 ### Decode Indices
 
@@ -190,6 +193,56 @@ visualizer.plot_color_wheel(
     title="Color Distribution"
 )
 ```
+
+---
+
+## Portfolio Colour Signature
+
+### Artist Colour Signature
+
+```python
+from renoir import ArtistAnalyzer
+
+analyzer = ArtistAnalyzer()
+
+# Default: sample 10 works to maximise temporal coverage
+signature = analyzer.artist_color_signature('claude-monet')
+
+# Result structure
+signature['artist']               # Artist name
+signature['n_works_available']    # Total works found
+signature['n_works_selected']     # Works analysed
+signature['effective_strategy']   # 'temporal', 'random', or 'first'
+signature['palette']              # Aggregated signature palette [(R,G,B), ...]
+signature['metrics']              # diversity, saturation, brightness, temperature, harmony, complexity
+signature['by_period']            # Per-decade breakdown (when dates available)
+signature['date_range']           # (min_year, max_year) or None
+```
+
+### Custom Dated Works
+
+```python
+# Provide your own list of artwork dictionaries with 'image' and 'date' keys
+my_works = [
+    {'image': img1, 'date': 1870, 'title': 'Early work'},
+    {'image': img2, 'date': 1885, 'title': 'Middle work'},
+    {'image': img3, 'date': 1895, 'title': 'Late work'},
+]
+
+signature = analyzer.analyze_works_color_signature(my_works)
+```
+
+### Parameters
+
+| Parameter         | Applies to                      | Default      | Description                                               |
+| ----------------- | ------------------------------- | ------------ | --------------------------------------------------------- |
+| `limit`           | `artist_color_signature`        | `10`         | Number of works to analyse                                |
+| `strategy`        | `artist_color_signature`        | `'temporal'` | Sampling strategy: `'temporal'`, `'random'`, or `'first'` |
+| `n_colors`        | both                            | `5`          | Colours extracted per work and in final palette           |
+| `group_by_period` | `analyze_works_color_signature` | `True`       | Compute per-decade breakdown when dates are available     |
+| `include_figure`  | both                            | `False`      | Generate a matplotlib visualisation                       |
+| `save_path`       | both                            | `None`       | Save figure to path instead of displaying                 |
+| `random_state`    | both                            | `42`         | Seed for reproducibility                                  |
 
 ---
 

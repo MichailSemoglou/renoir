@@ -203,7 +203,6 @@ All notebooks are in `examples/color_analysis/`:
 ## Documentation
 
 - **[WikiArt Cheatsheet](docs/wikiart_cheatsheet.md)** - Quick reference for all API methods, common artists, genres, styles, and code snippets
-- **[Color Naming Implementation](docs/COLOR_NAMING_IMPLEMENTATION.md)** - Technical details of the ColorNamer module
 
 ## Advanced Colour Metrics: Examples
 
@@ -388,6 +387,26 @@ extractor.export_palette_css(colors, 'palette.css', prefix='monet')
 
 # Export as JSON
 extractor.export_palette_json(colors, 'palette.json')
+```
+
+### Portfolio Colour Signature
+
+```python
+from renoir import ArtistAnalyzer
+
+analyzer = ArtistAnalyzer()
+
+# Aggregated colour signature across an artist's corpus
+signature = analyzer.artist_color_signature('claude-monet', limit=10)
+
+print(f"Analysed {signature['n_works_selected']} of {signature['n_works_available']} works")
+print(f"Strategy used: {signature['effective_strategy']}")
+print(f"Signature palette: {signature['palette']}")
+print(f"Dominant harmony: {signature['metrics']['harmony']['dominant_harmony']}")
+
+# Per-period breakdown (available when works have date metadata)
+for period, data in signature['by_period'].items():
+    print(f"{period}s: {data['n_works']} works, CCI={data['metrics']['complexity']['cci']:.3f}")
 ```
 
 ## Dataset Information
