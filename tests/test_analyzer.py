@@ -519,9 +519,7 @@ class TestArtistColorSignature:
             {"artist": "test-artist", "image": _make_image((0, 255, 0)), "date": 1890},
         ]
         analyzer._dataset = works
-        result = analyzer.artist_color_signature(
-            "test-artist", limit=3, verbose=False
-        )
+        result = analyzer.artist_color_signature("test-artist", limit=3, verbose=False)
         assert result["artist"] == "test-artist"
         assert result["n_works_available"] == 3
         assert result["n_works_selected"] == 3
@@ -535,9 +533,7 @@ class TestArtistColorSignature:
             {"artist": "test-artist", "image": _make_image((0, 0, 255))},
         ]
         analyzer._dataset = works
-        result = analyzer.artist_color_signature(
-            "test-artist", limit=2, verbose=False
-        )
+        result = analyzer.artist_color_signature("test-artist", limit=2, verbose=False)
         assert result["effective_strategy"] == "random"
         assert result["n_works_selected"] == 2
 
@@ -567,8 +563,6 @@ class TestArtistColorSignature:
             {"artist": "other-artist", "image": _make_image((0, 255, 0)), "date": 1890},
         ]
         analyzer._dataset = works
-        result = analyzer.artist_color_signature(
-            "test-artist", limit=10, verbose=False
-        )
+        result = analyzer.artist_color_signature("test-artist", limit=10, verbose=False)
         assert result["n_works_available"] == 2
         assert result["n_works_selected"] == 2

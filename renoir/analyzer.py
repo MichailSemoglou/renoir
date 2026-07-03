@@ -699,12 +699,12 @@ class ArtistAnalyzer:
             if len(candidates) <= n_from_decade:
                 chosen = candidates
             else:
-                indices = set(
-                    rng.choice(len(candidates), n_from_decade, replace=False)
-                )
+                indices = set(rng.choice(len(candidates), n_from_decade, replace=False))
                 chosen = [candidates[idx] for idx in sorted(indices)]
                 leftovers.extend(
-                    candidates[idx] for idx in range(len(candidates)) if idx not in indices
+                    candidates[idx]
+                    for idx in range(len(candidates))
+                    if idx not in indices
                 )
             selected.extend([work for work, _ in chosen])
 
