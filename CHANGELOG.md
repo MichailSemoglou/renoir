@@ -5,6 +5,28 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0] - 2026-07-10
+
+### Added
+
+- **`ArtistAnalyzer.load_dataset()`** — public accessor for the lazily loaded
+  WikiArt dataset.
+- **`ArtistAnalyzer.list_artists()`** — list artist names available in the
+  WikiArt dataset, with an optional limit.
+- **Optional `show` parameter on all plotting methods** in `ColorVisualizer`
+  and `ArtistAnalyzer`; methods now return a `matplotlib.figure.Figure`.
+- **`ColorAnalyzer.color_provenance_score()`** — American-spelling alias for
+  `colour_provenance_score()`.
+- **`ColorNamer` is now exported at the top-level `renoir` package**.
+
+### Fixed
+
+- `examples/basic_usage.py` no longer tries to iterate genres as a dict or
+  call a non-existent `list_artists()` method.
+- `examples/visualization_examples.py` correctly labels the style chart as a
+  bar chart.
+- `docs/wikiart_cheatsheet.md` documents the public `load_dataset()` method.
+
 ## [3.5.0] - 2026-07-03
 
 ### Added

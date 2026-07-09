@@ -1,6 +1,40 @@
 Changelog
 =========
 
+3.6.0 (2026-07-10)
+------------------
+
+Added
+~~~~~
+
+- ``ArtistAnalyzer.load_dataset()`` -- public accessor for the lazily loaded WikiArt dataset
+- ``ArtistAnalyzer.list_artists()`` -- list artist names available in the WikiArt dataset
+- Optional ``show`` parameter on all plotting methods in ``ColorVisualizer`` and ``ArtistAnalyzer``; methods now return a ``matplotlib.figure.Figure``
+- ``ColorAnalyzer.color_provenance_score()`` -- American-spelling alias for ``colour_provenance_score()``
+- ``ColorNamer`` is now exported at the top-level ``renoir`` package
+
+Fixed
+~~~~~
+
+- ``examples/basic_usage.py`` no longer iterates genres as a dict or calls a missing ``list_artists()`` method
+- ``examples/visualization_examples.py`` correctly labels the style chart as a bar chart
+- ``docs/wikiart_cheatsheet.md`` documents the public ``load_dataset()`` method
+
+3.5.0 (2026-07-03)
+------------------
+
+Added
+~~~~~
+
+- ``ArtistAnalyzer.artist_color_signature()`` -- high-level API to compute an artist's color signature directly from a WikiArt artist name
+- ``ArtistAnalyzer.analyze_works_color_signature()`` -- lower-level signature computation over an arbitrary list of works
+- Internal ``_sample_works()`` / ``_aggregate_palette()`` helpers
+
+Fixed
+~~~~~
+
+- Temporal sampling now redistributes shortfalls across decades that still have unselected candidates
+
 3.4.0 (2026-04-21)
 ------------------
 
