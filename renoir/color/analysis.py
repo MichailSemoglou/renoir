@@ -1135,3 +1135,6 @@ class ColorAnalyzer:
             "per_color": per_color,
             "flagged": flagged,
         }
+
+    # American-spelling alias for API consistency.
+    color_provenance_score = colour_provenance_score

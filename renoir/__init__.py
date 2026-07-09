@@ -16,7 +16,13 @@ __author__ = "Michail Semoglou"
 from .analyzer import ArtistAnalyzer, quick_analysis
 
 # Color analysis module (new in v3.0.0)
-from .color import ColorExtractor, ColorAnalyzer, ColorVisualizer, PromptGenerator
+from .color import (
+    ColorExtractor,
+    ColorAnalyzer,
+    ColorVisualizer,
+    ColorNamer,
+    PromptGenerator,
+)
 
 __all__ = [
     "ArtistAnalyzer",
@@ -24,6 +30,7 @@ __all__ = [
     "ColorExtractor",
     "ColorAnalyzer",
     "ColorVisualizer",
+    "ColorNamer",
     "PromptGenerator",
 ]
 

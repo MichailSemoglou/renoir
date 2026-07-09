@@ -396,3 +396,10 @@ class TestColorProvenanceScore:
     def test_empty_palette(self, analyzer):
         with pytest.raises(ValueError, match="colors must not be empty"):
             analyzer.colour_provenance_score([], 1800)
+
+    def test_american_spelling_alias(self, analyzer):
+        """color_provenance_score must be an alias for colour_provenance_score."""
+        palette = [(255, 0, 0), (0, 0, 255)]
+        british = analyzer.colour_provenance_score(palette, 1600)
+        american = analyzer.color_provenance_score(palette, 1600)
+        assert american == british

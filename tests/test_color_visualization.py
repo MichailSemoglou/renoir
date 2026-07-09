@@ -16,6 +16,7 @@ try:
 
     matplotlib.use("Agg")  # Use non-interactive backend for testing
     import matplotlib.pyplot as plt
+    from matplotlib.figure import Figure
     from renoir.color import ColorVisualizer
 
     VISUALIZATION_AVAILABLE = True
@@ -61,9 +62,10 @@ def test_visualizer_initialization(visualizer):
 def test_plot_palette(visualizer, sample_colors, cleanup_plots):
     """Test palette plotting."""
     # Should not raise an error
-    visualizer.plot_palette(
-        sample_colors, title="Test Palette", save_path=None, show_hex=True
+    fig = visualizer.plot_palette(
+        sample_colors, title="Test Palette", save_path=None, show_hex=True, show=False
     )
+    assert isinstance(fig, Figure)
     plt.close()
 
 
@@ -73,9 +75,10 @@ def test_plot_palette_save(visualizer, sample_colors, cleanup_plots):
         save_path = f.name
 
     try:
-        visualizer.plot_palette(
-            sample_colors, title="Test Palette", save_path=save_path
+        fig = visualizer.plot_palette(
+            sample_colors, title="Test Palette", save_path=save_path, show=False
         )
+        assert isinstance(fig, Figure)
 
         # Check that file was created
         assert os.path.exists(save_path)
@@ -89,32 +92,37 @@ def test_plot_palette_save(visualizer, sample_colors, cleanup_plots):
 
 def test_plot_palette_no_hex(visualizer, sample_colors, cleanup_plots):
     """Test palette plotting without hex codes."""
-    visualizer.plot_palette(sample_colors, show_hex=False)
+    fig = visualizer.plot_palette(sample_colors, show_hex=False, show=False)
+    assert isinstance(fig, Figure)
     plt.close()
 
 
 def test_plot_color_wheel(visualizer, sample_colors, cleanup_plots):
     """Test color wheel plotting."""
     # Should not raise an error
-    visualizer.plot_color_wheel(sample_colors)
+    fig = visualizer.plot_color_wheel(sample_colors, show=False)
+    assert isinstance(fig, Figure)
     plt.close()
 
 
 def test_plot_rgb_distribution(visualizer, sample_colors, cleanup_plots):
     """Test RGB distribution plotting."""
-    visualizer.plot_rgb_distribution(sample_colors)
+    fig = visualizer.plot_rgb_distribution(sample_colors, show=False)
+    assert isinstance(fig, Figure)
     plt.close()
 
 
 def test_plot_hsv_distribution(visualizer, sample_colors, cleanup_plots):
     """Test HSV distribution plotting."""
-    visualizer.plot_hsv_distribution(sample_colors)
+    fig = visualizer.plot_hsv_distribution(sample_colors, show=False)
+    assert isinstance(fig, Figure)
     plt.close()
 
 
 def test_plot_3d_rgb_space(visualizer, sample_colors, cleanup_plots):
     """Test 3D RGB space plotting."""
-    visualizer.plot_3d_rgb_space(sample_colors)
+    fig = visualizer.plot_3d_rgb_space(sample_colors, show=False)
+    assert isinstance(fig, Figure)
     plt.close()
 
 
@@ -123,13 +131,19 @@ def test_compare_palettes(visualizer, sample_colors, cleanup_plots):
     colors1 = sample_colors[:3]
     colors2 = sample_colors[2:5]
 
-    visualizer.compare_palettes(colors1, colors2, labels=("Palette 1", "Palette 2"))
+    fig = visualizer.compare_palettes(
+        colors1, colors2, labels=("Palette 1", "Palette 2"), show=False
+    )
+    assert isinstance(fig, Figure)
     plt.close()
 
 
 def test_create_artist_color_report(visualizer, sample_colors, cleanup_plots):
     """Test comprehensive color report."""
-    visualizer.create_artist_color_report(sample_colors, artist_name="Test Artist")
+    fig = visualizer.create_artist_color_report(
+        sample_colors, artist_name="Test Artist", show=False
+    )
+    assert isinstance(fig, Figure)
     plt.close()
 
 
@@ -137,7 +151,7 @@ def test_plot_palette_empty_list(visualizer, cleanup_plots):
     """Test palette plotting with empty list."""
     # Should handle gracefully
     try:
-        visualizer.plot_palette([])
+        visualizer.plot_palette([], show=False)
         plt.close()
     except Exception as e:
         # Should either work or raise a clear error
@@ -147,7 +161,8 @@ def test_plot_palette_empty_list(visualizer, cleanup_plots):
 
 def test_plot_palette_single_color(visualizer, cleanup_plots):
     """Test palette plotting with single color."""
-    visualizer.plot_palette([(255, 0, 0)])
+    fig = visualizer.plot_palette([(255, 0, 0)], show=False)
+    assert isinstance(fig, Figure)
     plt.close()
 
 
@@ -157,7 +172,10 @@ def test_plot_color_wheel_save(visualizer, sample_colors, cleanup_plots):
         save_path = f.name
 
     try:
-        visualizer.plot_color_wheel(sample_colors, save_path=save_path)
+        fig = visualizer.plot_color_wheel(
+            sample_colors, save_path=save_path, show=False
+        )
+        assert isinstance(fig, Figure)
         assert os.path.exists(save_path)
     finally:
         if os.path.exists(save_path):
@@ -171,7 +189,10 @@ def test_rgb_distribution_save(visualizer, sample_colors, cleanup_plots):
         save_path = f.name
 
     try:
-        visualizer.plot_rgb_distribution(sample_colors, save_path=save_path)
+        fig = visualizer.plot_rgb_distribution(
+            sample_colors, save_path=save_path, show=False
+        )
+        assert isinstance(fig, Figure)
         assert os.path.exists(save_path)
     finally:
         if os.path.exists(save_path):
@@ -185,9 +206,10 @@ def test_compare_palettes_save(visualizer, sample_colors, cleanup_plots):
         save_path = f.name
 
     try:
-        visualizer.compare_palettes(
-            sample_colors[:3], sample_colors[2:5], save_path=save_path
+        fig = visualizer.compare_palettes(
+            sample_colors[:3], sample_colors[2:5], save_path=save_path, show=False
         )
+        assert isinstance(fig, Figure)
         assert os.path.exists(save_path)
     finally:
         if os.path.exists(save_path):
@@ -214,10 +236,10 @@ def test_visualization_methods_exist(visualizer):
 
 def test_custom_figsize(visualizer, sample_colors, cleanup_plots):
     """Test custom figure sizes."""
-    visualizer.plot_palette(sample_colors, figsize=(16, 3))
+    visualizer.plot_palette(sample_colors, figsize=(16, 3), show=False)
     plt.close()
 
-    visualizer.plot_rgb_distribution(sample_colors, figsize=(10, 8))
+    visualizer.plot_rgb_distribution(sample_colors, figsize=(10, 8), show=False)
     plt.close()
 
 
@@ -226,10 +248,10 @@ def test_many_colors(visualizer, cleanup_plots):
     # Create palette with 20 colors
     many_colors = [(int(i * 255 / 20), 100, 100) for i in range(20)]
 
-    visualizer.plot_palette(many_colors)
+    visualizer.plot_palette(many_colors, show=False)
     plt.close()
 
-    visualizer.plot_color_wheel(many_colors)
+    visualizer.plot_color_wheel(many_colors, show=False)
     plt.close()
 
 
@@ -240,7 +262,10 @@ def test_many_colors(visualizer, cleanup_plots):
 
 def test_plot_palette_with_names(visualizer, sample_colors, cleanup_plots):
     """Test palette plotting with color names enabled."""
-    visualizer.plot_palette(sample_colors, show_names=True, vocabulary="artist")
+    fig = visualizer.plot_palette(
+        sample_colors, show_names=True, vocabulary="artist", show=False
+    )
+    assert isinstance(fig, Figure)
     plt.close()
 
 
@@ -251,15 +276,17 @@ def test_plot_palette_with_names(visualizer, sample_colors, cleanup_plots):
 
 def test_plot_named_palette(visualizer, sample_colors, cleanup_plots):
     """Test named palette visualization."""
-    visualizer.plot_named_palette(sample_colors, vocabulary="artist")
+    fig = visualizer.plot_named_palette(sample_colors, vocabulary="artist", show=False)
+    assert isinstance(fig, Figure)
     plt.close()
 
 
 def test_plot_named_palette_with_metadata(visualizer, sample_colors, cleanup_plots):
     """Test named palette with metadata display."""
-    visualizer.plot_named_palette(
-        sample_colors, vocabulary="artist", show_metadata=True
+    fig = visualizer.plot_named_palette(
+        sample_colors, vocabulary="artist", show_metadata=True, show=False
     )
+    assert isinstance(fig, Figure)
     plt.close()
 
 
@@ -269,7 +296,10 @@ def test_plot_named_palette_save(visualizer, sample_colors, cleanup_plots):
         save_path = f.name
 
     try:
-        visualizer.plot_named_palette(sample_colors, save_path=save_path)
+        fig = visualizer.plot_named_palette(
+            sample_colors, save_path=save_path, show=False
+        )
+        assert isinstance(fig, Figure)
         assert os.path.exists(save_path)
     finally:
         if os.path.exists(save_path):
@@ -289,7 +319,10 @@ def test_plot_hsv_distribution_save(visualizer, sample_colors, cleanup_plots):
         save_path = f.name
 
     try:
-        visualizer.plot_hsv_distribution(sample_colors, save_path=save_path)
+        fig = visualizer.plot_hsv_distribution(
+            sample_colors, save_path=save_path, show=False
+        )
+        assert isinstance(fig, Figure)
         assert os.path.exists(save_path)
     finally:
         if os.path.exists(save_path):
@@ -303,7 +336,10 @@ def test_plot_3d_rgb_space_save(visualizer, sample_colors, cleanup_plots):
         save_path = f.name
 
     try:
-        visualizer.plot_3d_rgb_space(sample_colors, save_path=save_path)
+        fig = visualizer.plot_3d_rgb_space(
+            sample_colors, save_path=save_path, show=False
+        )
+        assert isinstance(fig, Figure)
         assert os.path.exists(save_path)
     finally:
         if os.path.exists(save_path):
@@ -318,7 +354,8 @@ def test_plot_3d_rgb_space_save(visualizer, sample_colors, cleanup_plots):
 
 def test_plot_temperature_distribution(visualizer, sample_colors, cleanup_plots):
     """Test color temperature distribution chart."""
-    visualizer.plot_temperature_distribution(sample_colors)
+    fig = visualizer.plot_temperature_distribution(sample_colors, show=False)
+    assert isinstance(fig, Figure)
     plt.close()
 
 
@@ -328,7 +365,10 @@ def test_plot_temperature_distribution_save(visualizer, sample_colors, cleanup_p
         save_path = f.name
 
     try:
-        visualizer.plot_temperature_distribution(sample_colors, save_path=save_path)
+        fig = visualizer.plot_temperature_distribution(
+            sample_colors, save_path=save_path, show=False
+        )
+        assert isinstance(fig, Figure)
         assert os.path.exists(save_path)
     finally:
         if os.path.exists(save_path):
@@ -347,9 +387,10 @@ def test_create_artist_color_report_save(visualizer, sample_colors, cleanup_plot
         save_path = f.name
 
     try:
-        visualizer.create_artist_color_report(
-            sample_colors, artist_name="Test Artist", save_path=save_path
+        fig = visualizer.create_artist_color_report(
+            sample_colors, artist_name="Test Artist", save_path=save_path, show=False
         )
+        assert isinstance(fig, Figure)
         assert os.path.exists(save_path)
     finally:
         if os.path.exists(save_path):

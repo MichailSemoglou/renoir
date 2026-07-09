@@ -261,7 +261,7 @@ all_translations = namer.translate_all_vocabularies("Prussian Blue")
 
 ```python
 colors = [(0, 49, 83), (255, 215, 0), (139, 69, 19)]
-score = analyzer.colour_provenance_score(colors, year=1700)
+score = analyzer.color_provenance_score(colors, year=1700)
 print(f"Provenance score: {score['score']:.2f}")
 print(f"Flagged: {score['flagged']}")
 ```

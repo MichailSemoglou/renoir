@@ -64,6 +64,44 @@ class ArtistAnalyzer:
                 )
         return self._dataset
 
+    def load_dataset(self):
+        """
+        Load and return the WikiArt dataset.
+
+        This is a public alias for :meth:`_load_dataset`.
+
+        Returns:
+            The loaded WikiArt dataset.
+
+        Raises:
+            RuntimeError: If dataset loading fails
+        """
+        return self._load_dataset()
+
+    def list_artists(self, limit: Optional[int] = None) -> List[str]:
+        """
+        List artist names available in the WikiArt dataset.
+
+        Args:
+            limit: Optional maximum number of artist names to return
+
+        Returns:
+            List of artist names as they appear in the dataset
+        """
+        dataset = self._load_dataset()
+
+        if not hasattr(dataset, "features"):
+            return []
+
+        artist_feature = dataset.features.get("artist")
+        if artist_feature is None or not hasattr(artist_feature, "names"):
+            return []
+
+        names = list(artist_feature.names)
+        if limit is not None:
+            names = names[:limit]
+        return names
+
     def extract_artist_works(
         self, artist_name: str, limit: Optional[int] = None
     ) -> List[Dict[str, Any]]:
@@ -340,7 +378,8 @@ class ArtistAnalyzer:
         limit: Optional[int] = None,
         save_path: Optional[str] = None,
         figsize: tuple = (10, 6),
-    ) -> None:
+        show: bool = True,
+    ) -> Any:
         """
         Plot genre distribution for a specific artist as a bar chart.
 
@@ -349,15 +388,16 @@ class ArtistAnalyzer:
             limit: Optional limit on number of works to analyze
             save_path: Optional path to save the figure
             figsize: Figure size as (width, height)
+            show: If True, display the figure with plt.show()
 
         Example:
             >>> analyzer = ArtistAnalyzer()
-            >>> analyzer.plot_genre_distribution('pierre-auguste-renoir')
+            >>> fig = analyzer.plot_genre_distribution('pierre-auguste-renoir')
         """
         if not self._check_visualization_available():
             print("Visualization libraries not available.")
             print("Install with: pip install 'renoir-wikiart[visualization]'")
-            return
+            return None
 
         import matplotlib.pyplot as plt
         import seaborn as sns
@@ -389,8 +429,9 @@ class ArtistAnalyzer:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Figure saved to {save_path}")
-        else:
+        if show:
             plt.show()
+        return fig
 
     def plot_style_distribution(
         self,
@@ -398,7 +439,8 @@ class ArtistAnalyzer:
         limit: Optional[int] = None,
         save_path: Optional[str] = None,
         figsize: tuple = (10, 6),
-    ) -> None:
+        show: bool = True,
+    ) -> Any:
         """
         Plot style distribution for a specific artist as a bar chart.
 
@@ -407,15 +449,16 @@ class ArtistAnalyzer:
             limit: Optional limit on number of works to analyze
             save_path: Optional path to save the figure
             figsize: Figure size as (width, height)
+            show: If True, display the figure with plt.show()
 
         Example:
             >>> analyzer = ArtistAnalyzer()
-            >>> analyzer.plot_style_distribution('pablo-picasso')
+            >>> fig = analyzer.plot_style_distribution('pablo-picasso')
         """
         if not self._check_visualization_available():
             print("Visualization libraries not available.")
             print("Install with: pip install 'renoir-wikiart[visualization]'")
-            return
+            return None
 
         import matplotlib.pyplot as plt
         import seaborn as sns
@@ -447,8 +490,9 @@ class ArtistAnalyzer:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Figure saved to {save_path}")
-        else:
+        if show:
             plt.show()
+        return fig
 
     def compare_artists_genres(
         self,
@@ -456,7 +500,8 @@ class ArtistAnalyzer:
         limit: Optional[int] = None,
         save_path: Optional[str] = None,
         figsize: tuple = (12, 8),
-    ) -> None:
+        show: bool = True,
+    ) -> Any:
         """
         Compare genre distributions across multiple artists.
 
@@ -465,15 +510,16 @@ class ArtistAnalyzer:
             limit: Optional limit on number of works per artist
             save_path: Optional path to save the figure
             figsize: Figure size as (width, height)
+            show: If True, display the figure with plt.show()
 
         Example:
             >>> analyzer = ArtistAnalyzer()
-            >>> analyzer.compare_artists_genres(['claude-monet', 'pierre-auguste-renoir', 'edgar-degas'])
+            >>> fig = analyzer.compare_artists_genres(['claude-monet', 'pierre-auguste-renoir', 'edgar-degas'])
         """
         if not self._check_visualization_available():
             print("Visualization libraries not available.")
             print("Install with: pip install 'renoir-wikiart[visualization]'")
-            return
+            return None
 
         import matplotlib.pyplot as plt
         import seaborn as sns
@@ -513,8 +559,9 @@ class ArtistAnalyzer:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Figure saved to {save_path}")
-        else:
+        elif show:
             plt.show()
+        return fig
 
     def create_artist_overview(
         self,
@@ -522,7 +569,8 @@ class ArtistAnalyzer:
         limit: Optional[int] = None,
         save_path: Optional[str] = None,
         figsize: tuple = (14, 10),
-    ) -> None:
+        show: bool = True,
+    ) -> Any:
         """
         Create a comprehensive overview visualization for an artist.
 
@@ -534,15 +582,16 @@ class ArtistAnalyzer:
             limit: Optional limit on number of works to analyze
             save_path: Optional path to save the figure
             figsize: Figure size as (width, height)
+            show: If True, display the figure with plt.show()
 
         Example:
             >>> analyzer = ArtistAnalyzer()
-            >>> analyzer.create_artist_overview('vincent-van-gogh')
+            >>> fig = analyzer.create_artist_overview('vincent-van-gogh')
         """
         if not self._check_visualization_available():
             print("Visualization libraries not available.")
             print("Install with: pip install 'renoir-wikiart[visualization]'")
-            return
+            return None
 
         import matplotlib.pyplot as plt
         import seaborn as sns
@@ -617,8 +666,9 @@ class ArtistAnalyzer:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Figure saved to {save_path}")
-        else:
+        if show:
             plt.show()
+        return fig
 
     # ------------------------------------------------------------------
     # Portfolio Color Signature API (Phase 5)
@@ -803,6 +853,7 @@ class ArtistAnalyzer:
         artist_name: Optional[str],
         by_period: Dict[str, Any],
         save_path: Optional[str],
+        show: bool = False,
     ) -> Any:
         """Build a multi-panel overview figure for a color signature."""
         if not self._check_visualization_available():
@@ -862,14 +913,15 @@ class ArtistAnalyzer:
             if save_path:
                 plt.savefig(save_path, dpi=300, bbox_inches="tight")
                 print(f"Figure saved to {save_path}")
-            else:
+            if show:
                 plt.show()
 
             return fig
 
         visualizer = ColorVisualizer()
-        visualizer.create_artist_color_report(palette, title, save_path=save_path)
-        return None
+        return visualizer.create_artist_color_report(
+            palette, title, save_path=save_path, show=show
+        )
 
     def analyze_works_color_signature(
         self,

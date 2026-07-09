@@ -51,7 +51,7 @@ Advanced Metrics
    print(hpp)
 
    # Color Provenance Score
-   cps = analyzer.colour_provenance_score(palette, year=1650)
+   cps = analyzer.color_provenance_score(palette, year=1650)
    print(f"Provenance score: {cps['score']:.3f}")
 
 Visualization

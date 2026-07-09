@@ -9,6 +9,7 @@ import numpy as np
 from typing import List, Dict, Tuple, Optional
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
 
 try:
@@ -42,7 +43,8 @@ class ColorVisualizer:
         show_hex: bool = True,
         show_names: bool = False,
         vocabulary: str = "artist",
-    ) -> None:
+        show: bool = True,
+    ) -> Figure:
         """
         Visualize a color palette as horizontal color swatches.
 
@@ -57,6 +59,7 @@ class ColorVisualizer:
             show_names: Whether to show evocative color names (default: False)
             vocabulary: Color naming vocabulary to use when show_names=True
                        Options: 'artist', 'resene', 'natural', 'xkcd'
+            show: If True, display the figure with plt.show()
 
         Example:
             >>> from renoir.color import ColorExtractor, ColorVisualizer
@@ -148,7 +151,9 @@ class ColorVisualizer:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Palette saved to: {save_path}")
 
-        plt.show()
+        if show:
+            plt.show()
+        return fig
 
     def plot_named_palette(
         self,
@@ -158,7 +163,8 @@ class ColorVisualizer:
         figsize: Tuple[int, int] = (12, 4),
         save_path: Optional[str] = None,
         show_metadata: bool = False,
-    ) -> None:
+        show: bool = True,
+    ) -> Figure:
         """
         Visualize a color palette with evocative color names.
 
@@ -172,6 +178,7 @@ class ColorVisualizer:
             figsize: Figure size (width, height)
             save_path: Optional path to save the figure
             show_metadata: Whether to show additional metadata like CI names
+            show: If True, display the figure with plt.show()
 
         Example:
             >>> from renoir.color import ColorExtractor, ColorVisualizer
@@ -269,7 +276,9 @@ class ColorVisualizer:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Named palette saved to: {save_path}")
 
-        plt.show()
+        if show:
+            plt.show()
+        return fig
 
     def plot_color_wheel(
         self,
@@ -277,7 +286,8 @@ class ColorVisualizer:
         title: str = "Color Wheel Distribution",
         figsize: Tuple[int, int] = (8, 8),
         save_path: Optional[str] = None,
-    ) -> None:
+        show: bool = True,
+    ) -> Figure:
         """
         Plot colors on a color wheel to show hue distribution.
 
@@ -288,11 +298,12 @@ class ColorVisualizer:
             title: Plot title
             figsize: Figure size
             save_path: Optional path to save the figure
+            show: If True, display the figure with plt.show()
 
         Example:
             >>> visualizer = ColorVisualizer()
             >>> colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
-            >>> visualizer.plot_color_wheel(colors)
+            >>> fig = visualizer.plot_color_wheel(colors)
         """
         from .analysis import ColorAnalyzer
 
@@ -339,7 +350,9 @@ class ColorVisualizer:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Color wheel saved to: {save_path}")
 
-        plt.show()
+        if show:
+            plt.show()
+        return fig
 
     def plot_rgb_distribution(
         self,
@@ -347,7 +360,8 @@ class ColorVisualizer:
         title: str = "RGB Distribution",
         figsize: Tuple[int, int] = (12, 4),
         save_path: Optional[str] = None,
-    ) -> None:
+        show: bool = True,
+    ) -> Figure:
         """
         Plot RGB channel distributions as histograms.
 
@@ -358,6 +372,7 @@ class ColorVisualizer:
             title: Plot title
             figsize: Figure size
             save_path: Optional path to save the figure
+            show: If True, display the figure with plt.show()
         """
         rgb_array = np.array(colors)
 
@@ -380,7 +395,9 @@ class ColorVisualizer:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"RGB distribution saved to: {save_path}")
 
-        plt.show()
+        if show:
+            plt.show()
+        return fig
 
     def plot_hsv_distribution(
         self,
@@ -388,7 +405,8 @@ class ColorVisualizer:
         title: str = "HSV Distribution",
         figsize: Tuple[int, int] = (14, 4),
         save_path: Optional[str] = None,
-    ) -> None:
+        show: bool = True,
+    ) -> Figure:
         """
         Plot HSV (Hue, Saturation, Value) distributions.
 
@@ -399,6 +417,7 @@ class ColorVisualizer:
             title: Plot title
             figsize: Figure size
             save_path: Optional path to save the figure
+            show: If True, display the figure with plt.show()
         """
         from .analysis import ColorAnalyzer
 
@@ -445,7 +464,9 @@ class ColorVisualizer:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"HSV distribution saved to: {save_path}")
 
-        plt.show()
+        if show:
+            plt.show()
+        return fig
 
     def plot_3d_rgb_space(
         self,
@@ -453,7 +474,8 @@ class ColorVisualizer:
         title: str = "RGB Color Space (3D)",
         figsize: Tuple[int, int] = (10, 8),
         save_path: Optional[str] = None,
-    ) -> None:
+        show: bool = True,
+    ) -> Figure:
         """
         Plot colors in 3D RGB space.
 
@@ -464,6 +486,7 @@ class ColorVisualizer:
             title: Plot title
             figsize: Figure size
             save_path: Optional path to save the figure
+            show: If True, display the figure with plt.show()
         """
         fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(111, projection="3d")
@@ -501,7 +524,9 @@ class ColorVisualizer:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"3D RGB space saved to: {save_path}")
 
-        plt.show()
+        if show:
+            plt.show()
+        return fig
 
     def compare_palettes(
         self,
@@ -510,7 +535,8 @@ class ColorVisualizer:
         labels: Tuple[str, str] = ("Palette 1", "Palette 2"),
         figsize: Tuple[int, int] = (12, 6),
         save_path: Optional[str] = None,
-    ) -> None:
+        show: bool = True,
+    ) -> Figure:
         """
         Compare two color palettes side by side.
 
@@ -522,6 +548,7 @@ class ColorVisualizer:
             labels: Tuple of labels for the two palettes
             figsize: Figure size
             save_path: Optional path to save the figure
+            show: If True, display the figure with plt.show()
         """
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize)
 
@@ -559,7 +586,9 @@ class ColorVisualizer:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Palette comparison saved to: {save_path}")
 
-        plt.show()
+        if show:
+            plt.show()
+        return fig
 
     def plot_temperature_distribution(
         self,
@@ -567,7 +596,8 @@ class ColorVisualizer:
         title: str = "Color Temperature Distribution",
         figsize: Tuple[int, int] = (10, 6),
         save_path: Optional[str] = None,
-    ) -> None:
+        show: bool = True,
+    ) -> Figure:
         """
         Visualize warm vs. cool color distribution.
 
@@ -578,6 +608,7 @@ class ColorVisualizer:
             title: Plot title
             figsize: Figure size
             save_path: Optional path to save the figure
+            show: If True, display the figure with plt.show()
         """
         from .analysis import ColorAnalyzer
 
@@ -627,7 +658,9 @@ class ColorVisualizer:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Temperature distribution saved to: {save_path}")
 
-        plt.show()
+        if show:
+            plt.show()
+        return fig
 
     def create_artist_color_report(
         self,
@@ -635,7 +668,8 @@ class ColorVisualizer:
         artist_name: str,
         figsize: Tuple[int, int] = (16, 12),
         save_path: Optional[str] = None,
-    ) -> None:
+        show: bool = True,
+    ) -> Figure:
         """
         Create a comprehensive color analysis report for an artist.
 
@@ -647,6 +681,7 @@ class ColorVisualizer:
             artist_name: Name of the artist
             figsize: Figure size
             save_path: Optional path to save the figure
+            show: If True, display the figure with plt.show()
         """
         from .analysis import ColorAnalyzer
 
@@ -716,7 +751,9 @@ class ColorVisualizer:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Color report saved to: {save_path}")
 
-        plt.show()
+        if show:
+            plt.show()
+        return fig
 
     # ------------------------------------------------------------------
     # Paper-figure methods (added v3.4.0)
@@ -734,7 +771,8 @@ class ColorVisualizer:
         top_k: int = 5,
         figsize: Tuple[float, float] = (10.0, 4.5),
         save_path: Optional[str] = None,
-    ) -> None:
+        show: bool = True,
+    ) -> Figure:
         """
         Visualize Historical Pigment Probability (HPP) output for one color.
 
@@ -751,6 +789,7 @@ class ColorVisualizer:
             top_k: Number of candidate pigments to display (default 5).
             figsize: Figure dimensions ``(width, height)`` in inches.
             save_path: File path for saving (PNG at 300 dpi or PDF).
+            show: If True, display the figure with plt.show().
         """
         from .namer import ColorNamer
 
@@ -956,7 +995,9 @@ class ColorVisualizer:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"HPP figure saved: {save_path}")
-        plt.show()
+        if show:
+            plt.show()
+        return fig
 
     def plot_pemd_comparison(
         self,
@@ -965,7 +1006,8 @@ class ColorVisualizer:
         pemd_values: Optional[List[float]] = None,
         figsize: Tuple[float, float] = (9.0, 4.0),
         save_path: Optional[str] = None,
-    ) -> None:
+        show: bool = True,
+    ) -> Figure:
         """
         Visualize Palette Earth Mover's Distance (PEMD) for one or more palette pairs.
 
@@ -981,6 +1023,7 @@ class ColorVisualizer:
                 values are computed internally (requires scipy).
             figsize: Figure dimensions ``(width, height)`` in inches.
             save_path: File path for saving (PNG at 300 dpi or PDF).
+            show: If True, display the figure with plt.show().
         """
         from .analysis import ColorAnalyzer
 
@@ -1101,7 +1144,9 @@ class ColorVisualizer:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"PEMD figure saved: {save_path}")
-        plt.show()
+        if show:
+            plt.show()
+        return fig
 
     def plot_cross_vocabulary_naming(
         self,
@@ -1109,7 +1154,8 @@ class ColorVisualizer:
         vocabulary_labels: Optional[Dict[str, str]] = None,
         figsize: Optional[Tuple[float, float]] = None,
         save_path: Optional[str] = None,
-    ) -> None:
+        show: bool = True,
+    ) -> Figure:
         """
         Visualize how a palette is named across all four color vocabularies.
 
@@ -1124,6 +1170,7 @@ class ColorVisualizer:
             figsize: Figure dimensions ``(width, height)`` in inches.
                 Auto-sized when ``None``.
             save_path: File path for saving (PNG at 300 dpi or PDF).
+            show: If True, display the figure with plt.show().
         """
         from .namer import ColorNamer
 
@@ -1253,7 +1300,9 @@ class ColorVisualizer:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
             print(f"Cross-vocabulary figure saved: {save_path}")
-        plt.show()
+        if show:
+            plt.show()
+        return fig
 
 
 def check_visualization_support() -> bool:

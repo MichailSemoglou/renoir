@@ -6,7 +6,12 @@ These tests can be expanded as the package develops.
 
 import pytest
 from unittest.mock import patch
-from renoir import ArtistAnalyzer, quick_analysis, check_visualization_support
+from renoir import (
+    ArtistAnalyzer,
+    quick_analysis,
+    check_visualization_support,
+    ColorNamer,
+)
 
 
 def test_artist_analyzer_initialization():
@@ -136,6 +141,11 @@ def test_visualization_methods_exist():
     assert hasattr(analyzer, "compare_artists_genres")
     assert hasattr(analyzer, "create_artist_overview")
     assert hasattr(analyzer, "_check_visualization_available")
+
+
+def test_color_namer_exported():
+    """ColorNamer should be importable from the top-level renoir package."""
+    assert ColorNamer is not None
 
 
 def test_visualization_check():
@@ -566,3 +576,35 @@ class TestArtistColorSignature:
         result = analyzer.artist_color_signature("test-artist", limit=10, verbose=False)
         assert result["n_works_available"] == 2
         assert result["n_works_selected"] == 2
+
+
+class TestDatasetHelpers:
+    """Tests for public dataset helper methods."""
+
+    def test_load_dataset_returns_dataset(self):
+        analyzer = ArtistAnalyzer()
+        analyzer._dataset = MOCK_WORKS
+        result = analyzer.load_dataset()
+        assert result is MOCK_WORKS
+
+    def test_list_artists_with_mock_features(self):
+        from unittest.mock import MagicMock
+
+        analyzer = ArtistAnalyzer()
+        mock_names = ["claude-monet", "pablo-picasso", "vincent-van-gogh"]
+        mock_feature = MagicMock()
+        mock_feature.names = mock_names
+        mock_dataset = MagicMock()
+        mock_dataset.features = {"artist": mock_feature}
+        analyzer._dataset = mock_dataset
+
+        artists = analyzer.list_artists()
+        assert artists == mock_names
+
+        limited = analyzer.list_artists(limit=2)
+        assert limited == mock_names[:2]
+
+    def test_list_artists_fallback_without_features(self):
+        analyzer = ArtistAnalyzer()
+        analyzer._dataset = MOCK_WORKS
+        assert analyzer.list_artists() == []
