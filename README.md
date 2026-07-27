@@ -9,6 +9,7 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/renoir-wikiart?period=total&units=INTERNATIONAL_SYSTEM&left_color=GRAY&right_color=MAGENTA&left_text=downloads)](https://pepy.tech/projects/renoir-wikiart)
 [![Tests](https://github.com/MichailSemoglou/renoir/actions/workflows/tests.yml/badge.svg)](https://github.com/MichailSemoglou/renoir/actions/workflows/tests.yml)
 [![Documentation](https://readthedocs.org/projects/renoir-wikiart/badge/?version=latest)](https://renoir-wikiart.readthedocs.io)
+[![Mentioned in Awesome Digital Humanities](https://awesome.re/mentioned-badge.svg)](https://github.com/dh-tech/awesome-digital-humanities)
 
 ## Overview
 
