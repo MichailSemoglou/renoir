@@ -872,7 +872,7 @@ class ColorAnalyzer:
         }
 
         # Determine dominant harmony
-        dominant = max(harmony_counts, key=harmony_counts.get)
+        dominant = max(harmony_counts, key=lambda k: harmony_counts.get(k, 0))
         if harmony_counts[dominant] == 0:
             dominant = "none"
 
@@ -1183,7 +1183,7 @@ class ColorAnalyzer:
                 f"colors length ({len(colors)})"
             )
 
-        per_color = []
+        per_color: List[Dict[str, Any]] = []
         flagged = []
 
         for i, (color, weight) in enumerate(zip(colors, proportions)):

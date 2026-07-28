@@ -8,7 +8,7 @@ of color data, palettes, and distributions.
 import logging
 
 import numpy as np
-from typing import List, Dict, Tuple, Optional
+from typing import Any, Dict, List, Optional, Tuple, cast
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.figure import Figure
@@ -169,7 +169,7 @@ class ColorVisualizer:
                 from .namer import ColorNamer
 
                 namer = ColorNamer(vocabulary=vocabulary)
-                color_names = namer.name_palette(colors)
+                color_names = cast(List[str], namer.name_palette(colors))
             except ImportError:
                 logger.warning("ColorNamer not available. Showing hex codes only.")
                 color_names = None
@@ -254,7 +254,9 @@ class ColorVisualizer:
             return None
 
         namer = ColorNamer(vocabulary=vocabulary)
-        named_colors = namer.name_palette(colors, return_metadata=True)
+        named_colors = cast(
+            List[Dict[str, Any]], namer.name_palette(colors, return_metadata=True)
+        )
 
         n_colors = len(colors)
 
@@ -264,7 +266,7 @@ class ColorVisualizer:
 
         # Adjust figure height for metadata
         if show_metadata:
-            figsize = (figsize[0], figsize[1] + 0.5)
+            figsize = (figsize[0], figsize[1] + 0.5)  # type: ignore[assignment]
 
         fig, ax = plt.subplots(figsize=figsize)
 
@@ -367,8 +369,8 @@ class ColorVisualizer:
             )
 
         ax.set_ylim(0, 1)
-        ax.set_theta_zero_location("N")
-        ax.set_theta_direction(-1)
+        ax.set_theta_zero_location("N")  # type: ignore[attr-defined]
+        ax.set_theta_direction(-1)  # type: ignore[attr-defined]
         ax.set_title(title, fontsize=14, fontweight="bold", pad=20)
         ax.set_ylabel("Saturation", fontsize=10)
 
@@ -1105,7 +1107,9 @@ class ColorVisualizer:
         vocab_data: Dict[str, List[Dict]] = {}
         for v in _VOCABS:
             namer = ColorNamer(vocabulary=v)
-            vocab_data[v] = namer.name_palette(colors, return_metadata=True)
+            vocab_data[v] = cast(
+                List[Dict[str, Any]], namer.name_palette(colors, return_metadata=True)
+            )
 
         n_colors = len(colors)
         n_vocabs = len(_VOCABS)

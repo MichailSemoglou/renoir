@@ -518,6 +518,7 @@ class ColorNamer:
                 best_distance = distance
                 best_match = pigment
 
+        assert best_match is not None
         return {
             "name": best_match["name"],
             "ci_name": best_match["ci_name"],
@@ -610,7 +611,7 @@ class ColorNamer:
         colors = self._load_colors()
 
         # Count colors by family
-        families = {}
+        families: Dict[str, int] = {}
         for color in colors:
             family = color.get("family", "Unknown")
             families[family] = families.get(family, 0) + 1

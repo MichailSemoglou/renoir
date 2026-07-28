@@ -254,7 +254,7 @@ class ArtistAnalyzer:
 
     def analyze_temporal_distribution(
         self, works: List[Dict[str, Any]]
-    ) -> Dict[str, int]:
+    ) -> Dict[int, int]:
         """
         Analyze the temporal distribution of works by decade.
 
@@ -270,7 +270,7 @@ class ArtistAnalyzer:
             >>> for decade, count in sorted(decades.items()):
             ...     print(f"{decade}s: {count} works")
         """
-        decades = {}
+        decades: Dict[int, int] = {}
         for work in works:
             year = self._parse_year(work)
             if year is not None:
@@ -757,7 +757,7 @@ class ArtistAnalyzer:
 
         rng = np.random.RandomState(random_state)
         selected = []
-        leftovers = []
+        leftovers: List[Any] = []
         for i, decade in enumerate(decades):
             n_from_decade = base + (1 if i < extra else 0)
             candidates = decade_groups[decade]
@@ -765,12 +765,12 @@ class ArtistAnalyzer:
             if len(candidates) <= n_from_decade:
                 chosen = candidates
             else:
-                indices = set(rng.choice(len(candidates), n_from_decade, replace=False))
-                chosen = [candidates[idx] for idx in sorted(indices)]
+                idx_set = set(rng.choice(len(candidates), n_from_decade, replace=False))
+                chosen = [candidates[idx] for idx in sorted(idx_set)]
                 leftovers.extend(
                     candidates[idx]
                     for idx in range(len(candidates))
-                    if idx not in indices
+                    if idx not in idx_set
                 )
             selected.extend([work for work, _ in chosen])
 
@@ -803,7 +803,7 @@ class ArtistAnalyzer:
             return []
 
         # Normalize to plain-Python int tuples
-        colors = [tuple(int(c) for c in color) for color in colors]
+        colors = [(int(r), int(g), int(b)) for r, g, b in colors]
 
         n_colors = min(n_colors, len(colors))
         if n_colors <= 0:

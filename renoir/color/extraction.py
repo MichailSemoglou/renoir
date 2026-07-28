@@ -351,7 +351,8 @@ class ColorExtractor:
         hex_color = hex_color.lstrip("#")
 
         # Convert to RGB
-        return tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
+        r, g, b = (int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
+        return (r, g, b)
 
     def palette_to_dict(
         self, colors: List[Tuple[int, int, int]], include_hex: bool = True
