@@ -291,7 +291,7 @@ class ColorAnalyzer:
         hist, _ = np.histogram(hues, bins=bins)
 
         # Calculate Shannon entropy
-        hist = hist / hist.sum()
+        hist = hist.astype(float) / hist.sum()
         hist = hist[hist > 0]  # Remove zero bins
         entropy = -np.sum(hist * np.log2(hist))
 
