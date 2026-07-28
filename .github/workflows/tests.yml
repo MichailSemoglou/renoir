@@ -39,7 +39,7 @@ jobs:
       - name: Check code formatting with black
         run: |
           pip install black
-          black --check renoir tests
+          black --check --target-version py39 renoir tests
 
       - name: Type check with mypy
         run: |

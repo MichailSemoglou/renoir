@@ -401,7 +401,7 @@ class ColorExtractor:
         """
         _validate_export_filename(filename)
 
-        if not re.fullmatch(r'[A-Za-z0-9_-]+', prefix):
+        if not re.fullmatch(r"[A-Za-z0-9_-]+", prefix):
             raise ValueError(
                 "prefix must contain only letters, digits, hyphens, and underscores."
             )

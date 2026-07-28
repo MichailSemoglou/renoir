@@ -522,7 +522,10 @@ class TestAnalyzeWorksColorSignature:
             {"image": make_solid_image((255, 0, 0))},
             {"image": make_solid_image((0, 0, 255))},
         ]
-        with patch.dict("sys.modules", {"sklearn": None, "sklearn.exceptions": None, "sklearn.cluster": None}):
+        with patch.dict(
+            "sys.modules",
+            {"sklearn": None, "sklearn.exceptions": None, "sklearn.cluster": None},
+        ):
             result = analyzer.analyze_works_color_signature(
                 works, n_colors=2, verbose=False
             )
