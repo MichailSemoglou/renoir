@@ -9,7 +9,6 @@ and digital humanities courses.
 from typing import List, Dict, Optional, Any, Tuple, TYPE_CHECKING
 from collections import Counter, defaultdict
 import logging
-from datasets import load_dataset
 
 import numpy as np
 
@@ -54,6 +53,8 @@ class ArtistAnalyzer:
         """
         if self._dataset is None:
             try:
+                from datasets import load_dataset
+
                 logger.info("Loading WikiArt dataset...")
                 self._dataset = load_dataset(
                     "huggan/wikiart", split="train", cache_dir=self.cache_dir

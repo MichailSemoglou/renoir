@@ -341,7 +341,7 @@ class TestLoadDatasetFailure:
     def test_load_dataset_runtime_error(self):
         analyzer = ArtistAnalyzer()
         with patch(
-            "renoir.analyzer.load_dataset", side_effect=ConnectionError("network error")
+            "datasets.load_dataset", side_effect=ConnectionError("network error")
         ):
             with pytest.raises(RuntimeError, match="Failed to load"):
                 analyzer.extract_artist_works("monet")
@@ -349,7 +349,7 @@ class TestLoadDatasetFailure:
     def test_load_dataset_caches(self):
         analyzer = ArtistAnalyzer()
         fake_ds = MOCK_WORKS
-        with patch("renoir.analyzer.load_dataset", return_value=fake_ds) as mock_ld:
+        with patch("datasets.load_dataset", return_value=fake_ds) as mock_ld:
             analyzer.extract_artist_works("claude-monet")
             analyzer.extract_artist_works("claude-monet")
             assert mock_ld.call_count == 1  # cached after first call
