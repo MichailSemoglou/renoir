@@ -6,6 +6,7 @@ These tests can be expanded as the package develops.
 
 import pytest
 from unittest.mock import patch
+from tests.helpers import make_solid_image
 from renoir import (
     ArtistAnalyzer,
     quick_analysis,
@@ -122,13 +123,15 @@ def test_visualization_support():
     assert isinstance(result, bool)
 
 
-def test_visualization_support_unavailable(capsys):
+def test_visualization_support_unavailable(caplog):
     """Test check_visualization_support when matplotlib is not available."""
+    import logging
+
     with patch("renoir.VISUALIZATION_AVAILABLE", False):
-        result = check_visualization_support()
+        with caplog.at_level(logging.WARNING, logger="renoir"):
+            result = check_visualization_support()
     assert result is False
-    captured = capsys.readouterr()
-    assert "not installed" in captured.out or "Visualization" in captured.out
+    assert "renoir-wikiart[visualization]" in caplog.text
 
 
 def test_visualization_methods_exist():
@@ -338,7 +341,7 @@ class TestLoadDatasetFailure:
     def test_load_dataset_runtime_error(self):
         analyzer = ArtistAnalyzer()
         with patch(
-            "renoir.analyzer.load_dataset", side_effect=Exception("network error")
+            "renoir.analyzer.load_dataset", side_effect=ConnectionError("network error")
         ):
             with pytest.raises(RuntimeError, match="Failed to load"):
                 analyzer.extract_artist_works("monet")
@@ -365,13 +368,6 @@ class TestQuickAnalysis:
 
 
 # --- Portfolio Color Signature API tests (Phase 5) ---
-
-
-def _make_image(rgb, size=(20, 20)):
-    """Create a solid-color PIL Image for testing."""
-    from PIL import Image
-
-    return Image.new("RGB", size, rgb)
 
 
 class TestSampleWorks:
@@ -454,17 +450,17 @@ class TestAnalyzeWorksColorSignature:
         analyzer = ArtistAnalyzer()
         works = [
             {
-                "image": _make_image((255, 0, 0)),
+                "image": make_solid_image((255, 0, 0)),
                 "date": 1870,
                 "title": "Red 1",
             },
             {
-                "image": _make_image((0, 0, 255)),
+                "image": make_solid_image((0, 0, 255)),
                 "date": 1885,
                 "title": "Blue 1",
             },
             {
-                "image": _make_image((0, 255, 0)),
+                "image": make_solid_image((0, 255, 0)),
                 "date": 1895,
                 "title": "Green 1",
             },
@@ -482,8 +478,8 @@ class TestAnalyzeWorksColorSignature:
     def test_signature_without_dates(self):
         analyzer = ArtistAnalyzer()
         works = [
-            {"image": _make_image((255, 0, 0))},
-            {"image": _make_image((0, 0, 255))},
+            {"image": make_solid_image((255, 0, 0))},
+            {"image": make_solid_image((0, 0, 255))},
         ]
         result = analyzer.analyze_works_color_signature(
             works, n_colors=2, verbose=False
@@ -496,7 +492,7 @@ class TestAnalyzeWorksColorSignature:
     def test_signature_skips_missing_images(self):
         analyzer = ArtistAnalyzer()
         works = [
-            {"image": _make_image((255, 0, 0))},
+            {"image": make_solid_image((255, 0, 0))},
             {"date": 1880},  # no image
         ]
         result = analyzer.analyze_works_color_signature(
@@ -517,6 +513,22 @@ class TestAnalyzeWorksColorSignature:
         with pytest.raises(TypeError):
             analyzer.analyze_works_color_signature(["not a dict"], verbose=False)
 
+    def test_signature_without_sklearn(self):
+        """analyze_works_color_signature must not crash when sklearn is absent."""
+        from unittest.mock import patch
+
+        analyzer = ArtistAnalyzer()
+        works = [
+            {"image": make_solid_image((255, 0, 0))},
+            {"image": make_solid_image((0, 0, 255))},
+        ]
+        with patch.dict("sys.modules", {"sklearn": None, "sklearn.exceptions": None, "sklearn.cluster": None}):
+            result = analyzer.analyze_works_color_signature(
+                works, n_colors=2, verbose=False
+            )
+        assert result["n_works_analyzed"] == 2
+        assert len(result["palette"]) > 0
+
 
 class TestArtistColorSignature:
     """Test the high-level artist color signature method."""
@@ -524,9 +536,21 @@ class TestArtistColorSignature:
     def test_with_dated_mock_images(self):
         analyzer = ArtistAnalyzer()
         works = [
-            {"artist": "test-artist", "image": _make_image((255, 0, 0)), "date": 1870},
-            {"artist": "test-artist", "image": _make_image((0, 0, 255)), "date": 1880},
-            {"artist": "test-artist", "image": _make_image((0, 255, 0)), "date": 1890},
+            {
+                "artist": "test-artist",
+                "image": make_solid_image((255, 0, 0)),
+                "date": 1870,
+            },
+            {
+                "artist": "test-artist",
+                "image": make_solid_image((0, 0, 255)),
+                "date": 1880,
+            },
+            {
+                "artist": "test-artist",
+                "image": make_solid_image((0, 255, 0)),
+                "date": 1890,
+            },
         ]
         analyzer._dataset = works
         result = analyzer.artist_color_signature("test-artist", limit=3, verbose=False)
@@ -539,8 +563,8 @@ class TestArtistColorSignature:
     def test_fallback_when_no_dates(self):
         analyzer = ArtistAnalyzer()
         works = [
-            {"artist": "test-artist", "image": _make_image((255, 0, 0))},
-            {"artist": "test-artist", "image": _make_image((0, 0, 255))},
+            {"artist": "test-artist", "image": make_solid_image((255, 0, 0))},
+            {"artist": "test-artist", "image": make_solid_image((0, 0, 255))},
         ]
         analyzer._dataset = works
         result = analyzer.artist_color_signature("test-artist", limit=2, verbose=False)
@@ -568,9 +592,21 @@ class TestArtistColorSignature:
     def test_filters_out_other_artists(self):
         analyzer = ArtistAnalyzer()
         works = [
-            {"artist": "test-artist", "image": _make_image((255, 0, 0)), "date": 1870},
-            {"artist": "test-artist", "image": _make_image((0, 0, 255)), "date": 1880},
-            {"artist": "other-artist", "image": _make_image((0, 255, 0)), "date": 1890},
+            {
+                "artist": "test-artist",
+                "image": make_solid_image((255, 0, 0)),
+                "date": 1870,
+            },
+            {
+                "artist": "test-artist",
+                "image": make_solid_image((0, 0, 255)),
+                "date": 1880,
+            },
+            {
+                "artist": "other-artist",
+                "image": make_solid_image((0, 255, 0)),
+                "date": 1890,
+            },
         ]
         analyzer._dataset = works
         result = analyzer.artist_color_signature("test-artist", limit=10, verbose=False)
@@ -608,3 +644,134 @@ class TestDatasetHelpers:
         analyzer = ArtistAnalyzer()
         analyzer._dataset = MOCK_WORKS
         assert analyzer.list_artists() == []
+
+
+class TestParseYear:
+    """Tests for the internal _parse_year helper."""
+
+    def test_integer_date(self):
+        analyzer = ArtistAnalyzer()
+        assert analyzer._parse_year({"date": 1872}) == 1872
+
+    def test_string_date(self):
+        analyzer = ArtistAnalyzer()
+        assert analyzer._parse_year({"date": "1868"}) == 1868
+
+    def test_missing_date(self):
+        analyzer = ArtistAnalyzer()
+        assert analyzer._parse_year({}) is None
+
+    def test_invalid_string_date(self):
+        analyzer = ArtistAnalyzer()
+        assert analyzer._parse_year({"date": "invalid"}) is None
+
+    def test_none_date(self):
+        analyzer = ArtistAnalyzer()
+        assert analyzer._parse_year({"date": None}) is None
+
+    def test_non_int_non_str_date(self):
+        analyzer = ArtistAnalyzer()
+        assert analyzer._parse_year({"date": [1900]}) is None
+
+
+class TestEmptySignature:
+    """Tests for _empty_signature."""
+
+    def test_default(self):
+        analyzer = ArtistAnalyzer()
+        sig = analyzer._empty_signature()
+        assert sig["n_works_analyzed"] == 0
+        assert sig["palette"] == []
+        assert sig["artist"] is None
+
+    def test_with_artist_name(self):
+        analyzer = ArtistAnalyzer()
+        sig = analyzer._empty_signature(artist_name="test-artist")
+        assert sig["artist"] == "test-artist"
+
+
+class TestComputePaletteMetrics:
+    """Tests for _compute_palette_metrics."""
+
+    def test_with_valid_palette(self):
+        analyzer = ArtistAnalyzer()
+        from renoir.color import ColorAnalyzer
+
+        color_analyzer = ColorAnalyzer()
+        palette = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+        metrics = analyzer._compute_palette_metrics(palette, color_analyzer)
+        assert "diversity" in metrics
+        assert "saturation" in metrics
+        assert "brightness" in metrics
+        assert "temperature" in metrics
+        assert "harmony" in metrics
+        assert "complexity" in metrics
+
+    def test_empty_palette(self):
+        analyzer = ArtistAnalyzer()
+        from renoir.color import ColorAnalyzer
+
+        color_analyzer = ColorAnalyzer()
+        metrics = analyzer._compute_palette_metrics([], color_analyzer)
+        assert metrics == {}
+
+
+class TestAnalyzeWorksColorSignatureWithFigure:
+    """Test analyze_works_color_signature with include_figure=True."""
+
+    def test_include_figure(self):
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        analyzer = ArtistAnalyzer()
+        works = [
+            {"image": make_solid_image((255, 0, 0)), "date": 1870},
+            {"image": make_solid_image((0, 0, 255)), "date": 1880},
+        ]
+        result = analyzer.analyze_works_color_signature(
+            works, n_colors=2, include_figure=True, verbose=False
+        )
+        assert result["figure"] is not None
+        plt.close("all")
+
+    def test_group_by_period_false(self):
+        analyzer = ArtistAnalyzer()
+        works = [
+            {"image": make_solid_image((255, 0, 0)), "date": 1870},
+            {"image": make_solid_image((0, 0, 255)), "date": 1880},
+        ]
+        result = analyzer.analyze_works_color_signature(
+            works, n_colors=2, group_by_period=False, verbose=False
+        )
+        assert result["by_period"] == {}
+
+
+class TestCreateArtistOverviewDateless:
+    """Regression test: create_artist_overview must not crash when works
+    have no ``date`` key (the default WikiArt dataset shape)."""
+
+    def test_no_date_key(self):
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        analyzer = ArtistAnalyzer()
+        works = [
+            {"artist": "test-artist", "genre": "landscape", "style": "Impressionism"},
+            {"artist": "test-artist", "genre": "portrait", "style": "Realism"},
+        ]
+        analyzer._dataset = works
+        fig = analyzer.create_artist_overview("test-artist", show=False)
+        assert fig is not None
+        plt.close("all")
+
+    def test_date_range_none_in_summary(self):
+        analyzer = ArtistAnalyzer()
+        works = [
+            {"artist": "x", "genre": "landscape", "style": "Realism"},
+        ]
+        summary = analyzer.get_work_summary(works)
+        assert summary["date_range"] is None

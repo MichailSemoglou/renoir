@@ -410,3 +410,149 @@ def test_check_visualization_support_module():
 
     result = check_visualization_support()
     assert result is True
+
+
+# ---------------------------------------------------------------------------
+# Paper-figure methods (v3.4.0+)
+# ---------------------------------------------------------------------------
+
+
+class TestPlotHistoricalPigmentProbability:
+    """Tests for plot_historical_pigment_probability."""
+
+    def test_basic(self, visualizer, cleanup_plots):
+        fig = visualizer.plot_historical_pigment_probability(
+            (28, 62, 145), 1780, top_k=3, show=False
+        )
+        assert isinstance(fig, Figure)
+        plt.close()
+
+    def test_with_precomputed_results(self, visualizer, cleanup_plots):
+        from renoir.color import ColorNamer
+
+        namer = ColorNamer()
+        results = namer.historical_pigment_probability((255, 0, 0), 1800, top_k=3)
+        fig = visualizer.plot_historical_pigment_probability(
+            (255, 0, 0), 1800, results=results, show=False
+        )
+        assert isinstance(fig, Figure)
+        plt.close()
+
+    def test_save(self, visualizer, cleanup_plots, tmp_path):
+        save_path = str(tmp_path / "out.png")
+        fig = visualizer.plot_historical_pigment_probability(
+            (0, 49, 83), 1665, top_k=3, save_path=save_path, show=False
+        )
+        assert isinstance(fig, Figure)
+        assert os.path.exists(save_path)
+        assert os.path.getsize(save_path) > 0
+        plt.close()
+
+
+class TestPlotPEMDComparison:
+    """Tests for plot_pemd_comparison."""
+
+    def test_basic(self, visualizer, cleanup_plots):
+        p1 = [((255, 0, 0), 0.5), ((0, 255, 0), 0.5)]
+        p2 = [((0, 0, 255), 0.5), ((255, 255, 0), 0.5)]
+        fig = visualizer.plot_pemd_comparison([(p1, p2)], show=False)
+        assert isinstance(fig, Figure)
+        plt.close()
+
+    def test_with_precomputed_values(self, visualizer, cleanup_plots):
+        p1 = [((255, 0, 0), 1.0)]
+        p2 = [((0, 0, 255), 1.0)]
+        fig = visualizer.plot_pemd_comparison(
+            [(p1, p2)], pemd_values=[50.0], show=False
+        )
+        assert isinstance(fig, Figure)
+        plt.close()
+
+    def test_with_labels(self, visualizer, cleanup_plots):
+        p1 = [((255, 0, 0), 0.6), ((0, 255, 0), 0.4)]
+        p2 = [((0, 0, 255), 0.5), ((255, 255, 0), 0.5)]
+        fig = visualizer.plot_pemd_comparison(
+            [(p1, p2)], labels=[("Monet", "Picasso")], show=False
+        )
+        assert isinstance(fig, Figure)
+        plt.close()
+
+    def test_multiple_pairs(self, visualizer, cleanup_plots):
+        p1 = [((255, 0, 0), 0.5), ((0, 255, 0), 0.5)]
+        p2 = [((0, 0, 255), 0.5), ((255, 255, 0), 0.5)]
+        p3 = [((128, 0, 0), 1.0)]
+        p4 = [((0, 128, 0), 1.0)]
+        fig = visualizer.plot_pemd_comparison([(p1, p2), (p3, p4)], show=False)
+        assert isinstance(fig, Figure)
+        plt.close()
+
+    def test_mismatched_pemd_values_raises(self, visualizer, cleanup_plots):
+        p1 = [((255, 0, 0), 1.0)]
+        p2 = [((0, 0, 255), 1.0)]
+        with pytest.raises(ValueError, match="pemd_values"):
+            visualizer.plot_pemd_comparison(
+                [(p1, p2)], pemd_values=[1.0, 2.0], show=False
+            )
+
+    def test_save(self, visualizer, cleanup_plots, tmp_path):
+        p1 = [((255, 0, 0), 0.5), ((0, 255, 0), 0.5)]
+        p2 = [((0, 0, 255), 0.5), ((255, 255, 0), 0.5)]
+        save_path = str(tmp_path / "out.png")
+        fig = visualizer.plot_pemd_comparison(
+            [(p1, p2)], save_path=save_path, show=False
+        )
+        assert isinstance(fig, Figure)
+        assert os.path.exists(save_path)
+        assert os.path.getsize(save_path) > 0
+        plt.close()
+
+
+class TestPlotCrossVocabularyNaming:
+    """Tests for plot_cross_vocabulary_naming."""
+
+    def test_basic(self, visualizer, cleanup_plots):
+        colors = [(255, 87, 51), (0, 49, 83)]
+        fig = visualizer.plot_cross_vocabulary_naming(colors, show=False)
+        assert isinstance(fig, Figure)
+        plt.close()
+
+    def test_custom_labels(self, visualizer, cleanup_plots):
+        colors = [(255, 0, 0)]
+        labels = {
+            "artist": "Artist",
+            "resene": "Resene",
+            "natural": "Werner",
+            "xkcd": "XKCD",
+        }
+        fig = visualizer.plot_cross_vocabulary_naming(
+            colors, vocabulary_labels=labels, show=False
+        )
+        assert isinstance(fig, Figure)
+        plt.close()
+
+    def test_save(self, visualizer, cleanup_plots, tmp_path):
+        colors = [(100, 150, 200)]
+        save_path = str(tmp_path / "out.png")
+        fig = visualizer.plot_cross_vocabulary_naming(
+            colors, save_path=save_path, show=False
+        )
+        assert isinstance(fig, Figure)
+        assert os.path.exists(save_path)
+        assert os.path.getsize(save_path) > 0
+        plt.close()
+
+
+class TestCalculateBrightness:
+    """Tests for the internal _calculate_brightness helper."""
+
+    def test_white(self, visualizer):
+        assert visualizer._calculate_brightness((255, 255, 255)) == pytest.approx(
+            255, abs=1
+        )
+
+    def test_black(self, visualizer):
+        assert visualizer._calculate_brightness((0, 0, 0)) == pytest.approx(0, abs=1)
+
+    def test_mid_gray(self, visualizer):
+        brightness = visualizer._calculate_brightness((128, 128, 128))
+        assert 100 < brightness < 160

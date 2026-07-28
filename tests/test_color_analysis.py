@@ -332,9 +332,6 @@ def test_wcag_compliance_check(analyzer):
     assert ratio < 4.5
 
 
-# --- Tests for new WOW features ---
-
-
 class TestPaletteEarthMoversDistance:
     """Tests for PEMD."""
 
@@ -403,3 +400,89 @@ class TestColorProvenanceScore:
         british = analyzer.colour_provenance_score(palette, 1600)
         american = analyzer.color_provenance_score(palette, 1600)
         assert american == british
+
+    def test_mismatched_proportions_raises(self, analyzer):
+        """proportions length must match colors length."""
+        with pytest.raises(ValueError, match="proportions length"):
+            analyzer.colour_provenance_score(
+                [(255, 0, 0), (0, 0, 255)], 1800, proportions=[0.5]
+            )
+
+
+class TestHSLValidation:
+    """Tests for hsl_to_rgb input validation."""
+
+    def test_invalid_hsl_type(self, analyzer):
+        with pytest.raises(ValueError, match="HSL must be a tuple"):
+            analyzer.hsl_to_rgb("not a tuple")
+
+    def test_wrong_length(self, analyzer):
+        with pytest.raises(ValueError, match="HSL must be a tuple"):
+            analyzer.hsl_to_rgb((0, 100))
+
+    def test_out_of_range(self, analyzer):
+        with pytest.raises(ValueError, match="H must be 0-360"):
+            analyzer.hsl_to_rgb((400, 50, 50))
+
+
+class TestEmptyInputs:
+    """Edge cases for empty or minimal inputs."""
+
+    def test_saturation_score_empty(self, analyzer):
+        assert analyzer.calculate_saturation_score([]) == 0.0
+
+    def test_brightness_score_empty(self, analyzer):
+        assert analyzer.calculate_brightness_score([]) == 0.0
+
+    def test_compare_palettes_empty(self, analyzer):
+        """Comparing two empty palettes returns neutral zero-diff statistics."""
+        result = analyzer.compare_palettes([], [])
+        assert isinstance(result, dict)
+        assert result["palette1_stats"] == {}
+        assert result["palette2_stats"] == {}
+        assert result["hue_diff"] == 0.0
+        assert result["saturation_diff"] == 0.0
+        assert result["brightness_diff"] == 0.0
+        assert result["diversity_diff"] == 0.0
+
+    def test_compare_palettes_one_empty(self, analyzer):
+        """Comparing a non-empty palette with an empty one returns neutral diffs."""
+        result = analyzer.compare_palettes([(255, 0, 0)], [])
+        assert result["hue_diff"] == 0.0
+        assert result["brightness_diff"] == 0.0
+
+    def test_temperature_distribution_single(self, analyzer):
+        result = analyzer.analyze_color_temperature_distribution([(255, 0, 0)])
+        assert result["warm_count"] == 1
+        assert result["warm_percentage"] == pytest.approx(100, abs=1)
+
+
+class TestCCIAdvanced:
+    """Additional CCI tests for custom weights and proportions."""
+
+    def test_custom_weights(self, analyzer):
+        colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+        weights = {
+            "hue_entropy": 0.5,
+            "perceptual_spread": 0.3,
+            "proportion_evenness": 0.1,
+            "harmony_penalty": 0.1,
+        }
+        result = analyzer.calculate_color_complexity(colors, weights=weights)
+        assert 0 <= result["cci"] <= 1
+        assert "components" in result
+
+    def test_with_proportions(self, analyzer):
+        colors = [(255, 0, 0), (0, 0, 255)]
+        result = analyzer.calculate_color_complexity(colors, proportions=[0.8, 0.2])
+        assert 0 <= result["cci"] <= 1
+        assert result["proportion_evenness"] >= 0
+
+    def test_components_dict(self, analyzer):
+        colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+        result = analyzer.calculate_color_complexity(colors)
+        components = result["components"]
+        assert "hue_entropy_weighted" in components
+        assert "perceptual_spread_weighted" in components
+        assert "proportion_evenness_weighted" in components
+        assert "harmony_penalty_weighted" in components

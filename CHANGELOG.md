@@ -5,6 +5,112 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.7.0] - 2026-07-28
+
+### Added
+
+- **Automated test suite expansion**: 295 tests (up from 255), 90% code coverage.
+  New `tests/conftest.py` with shared fixtures, `tests/test_color_harmony.py`
+  (26 tests for harmony detection), and expanded coverage in `test_color_analysis.py`,
+  `test_color_visualization.py`, `test_analyzer.py`, and `test_prompt.py`.
+- **`tests/helpers.py`**: shared `make_solid_image` utility extracted from
+  `test_analyzer.py`, removing the duplicate `_make_image` function.
+- **Integration test opt-in**: `pytest_collection_modifyitems` hook in
+  `tests/conftest.py` skips integration tests by default and enables them when
+  `RUN_INTEGRATION=1` is set or `-m integration` is passed. The previous
+  hardcoded `-m "not integration"` in `addopts` did not honor the environment
+  variable.
+- **Regression test** for `create_artist_overview` on dateless works (the default
+  WikiArt dataset shape).
+- **Regression test** `test_signature_without_sklearn`: verifies that
+  `analyze_works_color_signature` completes without error when sklearn is absent.
+- **Regression test** `test_export_palette_css_prefix_with_newline`: verifies
+  that a `prefix` ending with a newline character is rejected.
+
+### Fixed
+
+- `create_artist_overview` no longer crashes with `TypeError` when works lack a
+  `date` key. The `date_range` ternary now guards both index accesses.
+- `compare_palettes([], [])` no longer crashes with `KeyError`. Returns a neutral
+  zero-diff dictionary instead.
+- `palette_to_prompt_keywords([])` no longer crashes with `ZeroDivisionError`.
+  Returns `[]` for empty input, matching sibling methods.
+- `extract_artist_works` no longer raises `KeyError` on datasets without an
+  `"artist"` feature column. Uses `dataset.features.get("artist")` with a `None`
+  guard, matching `list_artists`.
+- `analyze_color_temperature_distribution` now returns a neutral dictionary for
+  empty input instead of raising `ZeroDivisionError`.
+- `Dict[str, any]` type annotations corrected to `Dict[str, Any]` in
+  `analysis.py` and `namer.py` (4 locations).
+- `compare_artists_genres` display guard changed from `elif show` to `if show`
+  so saving no longer suppresses display.
+- `ColorNamer.name()` now raises `ValueError` (not `RuntimeError`) when no match
+  is found, consistent with `closest_pigment()`.
+- Narrowed broad `except Exception` blocks in `analyzer.py` (4 locations) and
+  `extraction.py` to specific exception types.
+- Removed 9 unused imports and 1 unused variable across 6 source files.
+- Fixed README parameter name mismatch (`n` to `n_variations`).
+- `_finalize_figure` in `visualization.py` and all save-path branches in
+  `analyzer.py` (4 locations) now call `fig.savefig(...)` instead of
+  `plt.savefig(...)`, preventing the wrong figure from being saved when another
+  matplotlib figure is active.
+- `_aggregate_palette` no longer raises `ImportError` when sklearn is absent;
+  falls back to returning deduplicated unique colors.
+- `_extract_work_palettes` no longer raises `ImportError` when sklearn is absent;
+  `ConvergenceWarning` is imported conditionally and the filter is skipped when
+  the class is unavailable.
+- `export_palette_css` uses `re.fullmatch` instead of `re.match` to validate the
+  `prefix` parameter, so strings ending with a newline are correctly rejected
+  rather than passing the `$` anchor.
+- `plot_named_palette` return type corrected from `Figure` to `Optional[Figure]`
+  to match the `ImportError` path that returns `None`.
+- `plot_cross_vocabulary_naming` now merges caller-provided `vocabulary_labels`
+  over a full copy of the defaults instead of replacing them entirely, ensuring
+  every vocabulary has a label before the later lookups.
+- `PromptGenerator.generate()` empty-colors guard moved before the lazy
+  `_get_namer()` and `_get_analyzer()` calls, avoiding unnecessary vocabulary
+  loading on empty input.
+- `detect_analogous_harmony` docstring note corrected: wrap-around colors (e.g.,
+  350° and 10°) are detected correctly when adjacent after sorting; the actual
+  limitation only occurs when intervening hues break the group anchor.
+- `quick_analysis` docstring examples updated to doctest style, removing stale
+  stdout-style terminal output from an earlier print-based implementation.
+
+### Changed
+
+- **`ColorNamer` thread safety**: `closest_pigment`, `translate`, and
+  `historical_pigment_probability` now use temporary `ColorNamer` instances
+  instead of mutating and restoring `self.vocabulary`. The class docstring
+  documents the thread-safety contract.
+- **`extract_artist_works` refactored** to use a single loop with a match
+  predicate, eliminating duplicated branching between HuggingFace and
+  simple-list code paths.
+- **`analyzer.py` helpers extracted**: `_validate_artist_name`,
+  `_validate_works_list`, `_count_field`, `_check_viz_or_warn`, and
+  `_plot_distribution` replace repeated validation, guard, and plotting blocks.
+- **`visualization.py` helpers extracted**: `_draw_palette_strip`,
+  `_finalize_figure`, `_draw_candidate_panel`, and `_draw_cross_vocab_cell`
+  replace 6 swatch-drawing loops, 12 save/show/return blocks, and two large
+  inline rendering sections.
+- **`analysis.py`**: `_largest_remainder` moved from an inner function in
+  `palette_earth_movers_distance` to module level.
+- **`prompt.py`**: `_build_opener`, `_describe_complexity`, and
+  `_apply_model_suffixes` extracted from `generate()`.
+- **`check_visualization_support`** in `__init__.py` now delegates to the
+  `visualization.py` version when matplotlib is available, eliminating the
+  duplicate implementation.
+- `analyze_temporal_distribution` now calls `_parse_year` instead of duplicating
+  the date-parsing logic.
+- Plot methods return `return None` (explicit) instead of bare `return` on
+  empty-data paths.
+- `plot_named_palette` brightness calculation now uses the
+  `_calculate_brightness` helper instead of an inline integer-arithmetic formula.
+- Docstring notes added for known limitations: hue wrap-around in
+  `detect_analogous_harmony`, false-positive risk in `detect_tetradic_harmony`,
+  and O(n^3) growth in `palette_earth_movers_distance`.
+- Minimum Pillow version raised from `>=8.0.0` to `>=10.3.0` to exclude
+  versions with known CVEs.
+
 ## [3.6.0] - 2026-07-10
 
 ### Added
@@ -282,6 +388,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## Upgrade Guide
+
+### From 3.6.0 to 3.7.0
+
+One breaking behavioral change: `ColorNamer.name()` now raises `ValueError`
+instead of `RuntimeError` when no match is found. Callers catching
+`RuntimeError` must update their exception handlers. Other behavioral
+differences:
+
+- `compare_palettes` and `palette_to_prompt_keywords` now return neutral values
+  for empty input instead of raising exceptions.
+- `ColorNamer` methods `closest_pigment`, `translate`, and
+  `historical_pigment_probability` no longer mutate `self.vocabulary`. Instances
+  are now safe to share across threads for read-only operations.
+- Integration tests are deselected by default. Run them explicitly with
+  `pytest -m integration` or set the `RUN_INTEGRATION=1` environment variable.
 
 ### From 3.3.x to 3.4.0
 

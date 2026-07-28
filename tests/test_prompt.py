@@ -126,3 +126,84 @@ class TestPaletteKeywords:
         gen = PromptGenerator()
         keywords = gen.palette_to_prompt_keywords([(180, 170, 165), (160, 155, 150)])
         assert "muted" in keywords
+
+
+class TestPromptGeneratorDalle:
+    """Tests for DALL-E target model."""
+
+    def test_generate_dalle_target(self):
+        gen = PromptGenerator()
+        colors = [(255, 0, 0), (0, 0, 255)]
+        prompt = gen.generate(colors, target_model="dalle")
+        assert isinstance(prompt, str)
+        assert len(prompt) > 0
+        assert prompt == gen.generate(colors, target_model="generic")
+
+    def test_generate_generic_target(self):
+        gen = PromptGenerator()
+        colors = [(255, 0, 0)]
+        prompt = gen.generate(colors, target_model="generic")
+        assert isinstance(prompt, str)
+        assert len(prompt) > 0
+
+    def test_generate_midjourney_target(self):
+        gen = PromptGenerator()
+        colors = [(255, 0, 0), (0, 0, 255)]
+        prompt = gen.generate(colors, target_model="midjourney")
+        assert isinstance(prompt, str)
+        assert len(prompt) > 0
+        assert prompt.endswith("--v 6")
+
+
+class TestPromptGeneratorAllOptionsDisabled:
+    """Tests with all optional analysis sections disabled."""
+
+    def test_all_disabled(self):
+        gen = PromptGenerator()
+        colors = [(255, 0, 0), (0, 0, 255)]
+        prompt = gen.generate(
+            colors,
+            include_harmony=False,
+            include_temperature=False,
+            include_complexity=False,
+        )
+        assert isinstance(prompt, str)
+        assert "harmony" not in prompt.lower()
+        assert "temperature" not in prompt.lower()
+        assert "CCI" not in prompt
+
+    def test_all_options_enabled(self):
+        gen = PromptGenerator()
+        colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+        prompt = gen.generate(
+            colors,
+            style="abstract",
+            medium="acrylic",
+            mood="energetic",
+            subject="composition",
+        )
+        assert "abstract" in prompt.lower()
+        assert "acrylic" in prompt.lower()
+        assert "energetic" in prompt.lower()
+        assert "Composition" in prompt
+
+
+class TestPromptGeneratorEdgeCases:
+    """Edge cases for PromptGenerator."""
+
+    def test_single_color_palette(self):
+        gen = PromptGenerator()
+        prompt = gen.generate([(128, 128, 128)])
+        assert isinstance(prompt, str)
+        assert len(prompt) > 0
+
+    def test_many_colors(self):
+        gen = PromptGenerator()
+        colors = [(i * 25, 100, 100) for i in range(10)]
+        prompt = gen.generate(colors)
+        assert isinstance(prompt, str)
+
+    def test_keywords_empty_palette(self):
+        gen = PromptGenerator()
+        keywords = gen.palette_to_prompt_keywords([])
+        assert keywords == []

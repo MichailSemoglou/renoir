@@ -6,12 +6,15 @@ using k-means clustering and other computational methods.
 """
 
 import json
-import os
+import logging
+import re
 
 import numpy as np
 from typing import List, Dict, Tuple, Optional, Union
 from PIL import Image
 from collections import Counter
+
+logger = logging.getLogger(__name__)
 
 try:
     from sklearn.cluster import KMeans
@@ -35,7 +38,7 @@ class ColorExtractor:
     """
     Extract dominant colors and palettes from artwork images.
 
-    This class provides methods for extracting color information from
+    This class provides tools for extracting color information from
     digital images, designed for educational use in teaching computational
     color analysis to art and design students.
 
@@ -47,8 +50,10 @@ class ColorExtractor:
         """Initialize the ColorExtractor."""
         self.use_sklearn = SKLEARN_AVAILABLE
         if not SKLEARN_AVAILABLE:
-            print("Warning: scikit-learn not available. Some features may be limited.")
-            print("Install with: pip install scikit-learn")
+            logger.warning(
+                "scikit-learn not available. Some features may be limited. "
+                "Install with: pip install scikit-learn"
+            )
 
     def extract_dominant_colors(
         self,
@@ -115,18 +120,15 @@ class ColorExtractor:
             raise ValueError("method must be 'kmeans' or 'frequency'")
 
         # Validate and convert image
-        try:
-            if isinstance(image, Image.Image):
-                img_array = np.array(image)
-            elif isinstance(image, np.ndarray):
-                img_array = image
-            else:
-                raise TypeError(
-                    "image must be a PIL Image or numpy array, "
-                    f"got {type(image).__name__}"
-                )
-        except Exception as e:
-            raise TypeError(f"Failed to convert image to array: {str(e)}")
+        if isinstance(image, Image.Image):
+            img_array = np.array(image)
+        elif isinstance(image, np.ndarray):
+            img_array = image
+        else:
+            raise TypeError(
+                "image must be a PIL Image or numpy array, "
+                f"got {type(image).__name__}"
+            )
 
         # Validate image dimensions
         if img_array.ndim not in [2, 3]:
@@ -152,8 +154,8 @@ class ColorExtractor:
         # Reshape to 2D array of pixels
         try:
             pixels = img_array.reshape(-1, 3)
-        except Exception as e:
-            raise ValueError(f"Failed to reshape image: {str(e)}")
+        except (ValueError, TypeError) as e:
+            raise ValueError(f"Failed to reshape image: {str(e)}") from e
 
         # Remove any invalid pixels (e.g., all zeros, all 255s)
         if filter_extremes:
@@ -163,12 +165,14 @@ class ColorExtractor:
             valid_pixels = pixels
 
         if len(valid_pixels) == 0:
-            print("Warning: No valid pixels found in image")
+            logger.warning("No valid pixels found in image")
             return [(0, 0, 0)] * n_colors
 
         if len(valid_pixels) < n_colors:
-            print(
-                f"Warning: Only {len(valid_pixels)} unique pixels, fewer than requested {n_colors} colors"
+            logger.warning(
+                "Only %d unique pixels, fewer than requested %d colors",
+                len(valid_pixels),
+                n_colors,
             )
             n_colors = len(valid_pixels)
 
@@ -185,7 +189,7 @@ class ColorExtractor:
                 return self._extract_kmeans(sampled_pixels, n_colors, random_state)
             else:
                 return self._extract_frequency(sampled_pixels, n_colors)
-        except Exception as e:
+        except (RuntimeError, ValueError, MemoryError) as e:
             raise RuntimeError(f"Color extraction failed: {str(e)}") from e
 
     def _extract_kmeans(
@@ -397,6 +401,11 @@ class ColorExtractor:
         """
         _validate_export_filename(filename)
 
+        if not re.fullmatch(r'[A-Za-z0-9_-]+', prefix):
+            raise ValueError(
+                "prefix must contain only letters, digits, hyphens, and underscores."
+            )
+
         with open(filename, "w") as f:
             f.write(":root {\n")
             for i, color in enumerate(colors, 1):
@@ -404,7 +413,7 @@ class ColorExtractor:
                 f.write(f"  --{prefix}-{i}: {hex_color};\n")
             f.write("}\n")
 
-        print(f"Palette exported to {filename}")
+        logger.info("Palette exported to %s", filename)
 
     def export_palette_json(
         self, colors: List[Tuple[int, int, int]], filename: str
@@ -427,7 +436,7 @@ class ColorExtractor:
         with open(filename, "w") as f:
             json.dump(palette_dict, f, indent=2)
 
-        print(f"Palette exported to {filename}")
+        logger.info("Palette exported to %s", filename)
 
 
 def check_color_extraction_support() -> bool:
@@ -438,12 +447,13 @@ def check_color_extraction_support() -> bool:
         True if scikit-learn is available, False otherwise
     """
     if SKLEARN_AVAILABLE:
-        print("✅ Color extraction fully supported (scikit-learn available)")
-        print("   You can use k-means clustering for optimal color extraction")
+        logger.info("Color extraction fully supported (scikit-learn available)")
+        logger.info("You can use k-means clustering for optimal color extraction")
     else:
-        print("⚠️  Limited color extraction support")
-        print("   Install scikit-learn for k-means clustering:")
-        print("   pip install scikit-learn")
-        print("   Fallback frequency-based extraction will be used")
+        logger.warning("Limited color extraction support")
+        logger.warning(
+            "Install scikit-learn for k-means clustering: pip install scikit-learn"
+        )
+        logger.warning("Fallback frequency-based extraction will be used")
 
     return SKLEARN_AVAILABLE
