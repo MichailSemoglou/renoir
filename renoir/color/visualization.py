@@ -5,12 +5,15 @@ This module provides tools for creating educational visualizations
 of color data, palettes, and distributions.
 """
 
+import logging
+
 import numpy as np
 from typing import List, Dict, Tuple, Optional
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.figure import Figure
-from mpl_toolkits.mplot3d import Axes3D
+
+logger = logging.getLogger(__name__)
 
 try:
     import seaborn as sns
@@ -18,6 +21,31 @@ try:
     SEABORN_AVAILABLE = True
 except ImportError:
     SEABORN_AVAILABLE = False
+
+_FIGURE_TITLE_COLOR = "#1A1A1A"
+_SPINE_COLOR = "#CCCCCC"
+_CELL_SPINE_COLOR = "#E0E0E0"
+_LABEL_COLOR = "#333333"
+_HEADER_COLOR = "#444444"
+_CI_NAME_COLOR = "#555555"
+_YEAR_LABEL_COLOR = "#888888"
+_BAR_BACKGROUND_COLOR = "#E0E0E0"
+_ACTIVE_BAR_COLOR = "#2D6A9F"
+_INACTIVE_BAR_COLOR = "#AAAAAA"
+_AVAILABLE_BADGE_COLOR = "#2E7D32"
+_UNAVAILABLE_BADGE_COLOR = "#B71C1C"
+_BRIGHTNESS_TEXT_THRESHOLD = 140
+_WARM_BAR_COLOR = "#FF6B35"
+_COOL_BAR_COLOR = "#4ECDC4"
+_NEUTRAL_BAR_COLOR = "#95A5A6"
+_MIN_SEGMENT_WIDTH_FOR_LABEL = 0.10
+_CROSS_VOCAB_VOCABULARIES = ["artist", "resene", "natural", "xkcd"]
+_CROSS_VOCAB_DEFAULT_LABELS = {
+    "artist": "Artist pigments",
+    "resene": "Resene",
+    "natural": "Werner's Nomenclature",
+    "xkcd": "xkcd",
+}
 
 
 class ColorVisualizer:
@@ -29,10 +57,66 @@ class ColorVisualizer:
     theory and computational analysis to art and design students.
     """
 
-    def __init__(self):
-        """Initialize the ColorVisualizer."""
+    def __init__(self, namer=None, analyzer=None):
+        """Initialize the ColorVisualizer.
+
+        Args:
+            namer: Optional pre-configured ``ColorNamer`` instance.
+                When ``None``, one is created lazily on first use.
+            analyzer: Optional pre-configured ``ColorAnalyzer`` instance.
+                When ``None``, one is created lazily on first use.
+        """
         if SEABORN_AVAILABLE:
             sns.set_style("whitegrid")
+        self._namer = namer
+        self._analyzer = analyzer
+
+    def _get_namer(self):
+        if self._namer is None:
+            from .namer import ColorNamer
+
+            self._namer = ColorNamer()
+        return self._namer
+
+    def _get_analyzer(self):
+        if self._analyzer is None:
+            from .analysis import ColorAnalyzer
+
+            self._analyzer = ColorAnalyzer()
+        return self._analyzer
+
+    @staticmethod
+    def _draw_palette_strip(
+        ax,
+        colors: List[Tuple[int, int, int]],
+        title: Optional[str] = None,
+    ) -> None:
+        for i, color in enumerate(colors):
+            normalized = tuple(c / 255 for c in color)
+            rect = patches.Rectangle(
+                (i, 0), 1, 1, facecolor=normalized, edgecolor="black", linewidth=2
+            )
+            ax.add_patch(rect)
+        ax.set_xlim(0, len(colors))
+        ax.set_ylim(0, 1)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        if title:
+            ax.set_title(title, fontsize=12, fontweight="bold")
+
+    @staticmethod
+    def _finalize_figure(
+        fig,
+        save_path: Optional[str],
+        show: bool,
+        label: str = "Figure",
+    ):
+        if save_path:
+            fig.savefig(save_path, dpi=300, bbox_inches="tight")
+            logger.info("%s saved to: %s", label, save_path)
+        if show:
+            plt.show()
+        return fig
 
     def plot_palette(
         self,
@@ -87,25 +171,17 @@ class ColorVisualizer:
                 namer = ColorNamer(vocabulary=vocabulary)
                 color_names = namer.name_palette(colors)
             except ImportError:
-                print("Warning: ColorNamer not available. Showing hex codes only.")
+                logger.warning("ColorNamer not available. Showing hex codes only.")
                 color_names = None
 
-        # Create color swatches
+        self._draw_palette_strip(ax, colors)
+        ax.set_title(title, fontsize=14, fontweight="bold", pad=20)
+
+        # Add text overlays
         for i, color in enumerate(colors):
-            # Normalize to 0-1 for matplotlib
-            normalized_color = tuple(c / 255 for c in color)
-
-            # Draw rectangle
-            rect = patches.Rectangle(
-                (i, 0), 1, 1, facecolor=normalized_color, edgecolor="black", linewidth=2
-            )
-            ax.add_patch(rect)
-
-            # Determine text color (black or white) based on brightness
             brightness = self._calculate_brightness(color)
             text_color = "white" if brightness < 128 else "black"
 
-            # Add hex code if requested
             if show_hex and not show_names:
                 hex_code = "#{:02x}{:02x}{:02x}".format(*color)
                 ax.text(
@@ -119,10 +195,8 @@ class ColorVisualizer:
                     color=text_color,
                 )
 
-            # Add color names if requested
             if show_names and color_names:
                 name = color_names[i]
-                # Wrap long names
                 if len(name) > 15:
                     words = name.split()
                     mid = len(words) // 2
@@ -139,21 +213,8 @@ class ColorVisualizer:
                     color=text_color,
                 )
 
-        ax.set_xlim(0, n_colors)
-        ax.set_ylim(0, 1)
-        ax.set_aspect("equal")
-        ax.axis("off")
-        ax.set_title(title, fontsize=14, fontweight="bold", pad=20)
-
         plt.tight_layout()
-
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"Palette saved to: {save_path}")
-
-        if show:
-            plt.show()
-        return fig
+        return self._finalize_figure(fig, save_path, show, "Palette")
 
     def plot_named_palette(
         self,
@@ -164,7 +225,7 @@ class ColorVisualizer:
         save_path: Optional[str] = None,
         show_metadata: bool = False,
         show: bool = True,
-    ) -> Figure:
+    ) -> Optional[Figure]:
         """
         Visualize a color palette with evocative color names.
 
@@ -189,8 +250,8 @@ class ColorVisualizer:
         try:
             from .namer import ColorNamer
         except ImportError:
-            print("Error: ColorNamer not available")
-            return
+            logger.error("ColorNamer not available")
+            return None
 
         namer = ColorNamer(vocabulary=vocabulary)
         named_colors = namer.name_palette(colors, return_metadata=True)
@@ -207,24 +268,15 @@ class ColorVisualizer:
 
         fig, ax = plt.subplots(figsize=figsize)
 
-        # Create color swatches with names
+        self._draw_palette_strip(ax, colors)
+        ax.set_title(title, fontsize=14, fontweight="bold", pad=20)
+
+        # Add text overlays
         for i, (color, metadata) in enumerate(zip(colors, named_colors)):
-            # Normalize to 0-1 for matplotlib
-            normalized_color = tuple(c / 255 for c in color)
-
-            # Draw rectangle
-            rect = patches.Rectangle(
-                (i, 0), 1, 1, facecolor=normalized_color, edgecolor="black", linewidth=2
-            )
-            ax.add_patch(rect)
-
-            # Determine text color based on brightness
-            brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000
+            brightness = self._calculate_brightness(color)
             text_color = "white" if brightness < 128 else "black"
 
-            # Add color name
             name = metadata["name"]
-            # Wrap long names
             if len(name) > 15:
                 words = name.split()
                 if len(words) > 1:
@@ -243,7 +295,6 @@ class ColorVisualizer:
                 color=text_color,
             )
 
-            # Add metadata if requested
             if show_metadata:
                 meta_lines = []
                 if metadata.get("ci_name"):
@@ -264,21 +315,8 @@ class ColorVisualizer:
                         style="italic",
                     )
 
-        ax.set_xlim(0, n_colors)
-        ax.set_ylim(0, 1)
-        ax.set_aspect("equal")
-        ax.axis("off")
-        ax.set_title(title, fontsize=14, fontweight="bold", pad=20)
-
         plt.tight_layout()
-
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"Named palette saved to: {save_path}")
-
-        if show:
-            plt.show()
-        return fig
+        return self._finalize_figure(fig, save_path, show, "Named palette")
 
     def plot_color_wheel(
         self,
@@ -305,9 +343,7 @@ class ColorVisualizer:
             >>> colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
             >>> fig = visualizer.plot_color_wheel(colors)
         """
-        from .analysis import ColorAnalyzer
-
-        analyzer = ColorAnalyzer()
+        analyzer = self._get_analyzer()
 
         fig, ax = plt.subplots(figsize=figsize, subplot_kw=dict(projection="polar"))
 
@@ -345,14 +381,7 @@ class ColorVisualizer:
             ax.plot([t, t], [0, 1], color=normalized, linewidth=2, alpha=0.3)
 
         plt.tight_layout()
-
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"Color wheel saved to: {save_path}")
-
-        if show:
-            plt.show()
-        return fig
+        return self._finalize_figure(fig, save_path, show, "Color wheel")
 
     def plot_rgb_distribution(
         self,
@@ -390,14 +419,7 @@ class ColorVisualizer:
 
         fig.suptitle(title, fontsize=14, fontweight="bold")
         plt.tight_layout()
-
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"RGB distribution saved to: {save_path}")
-
-        if show:
-            plt.show()
-        return fig
+        return self._finalize_figure(fig, save_path, show, "RGB distribution")
 
     def plot_hsv_distribution(
         self,
@@ -419,9 +441,7 @@ class ColorVisualizer:
             save_path: Optional path to save the figure
             show: If True, display the figure with plt.show()
         """
-        from .analysis import ColorAnalyzer
-
-        analyzer = ColorAnalyzer()
+        analyzer = self._get_analyzer()
         hsv_values = [analyzer.rgb_to_hsv(color) for color in colors]
         hsv_array = np.array(hsv_values)
 
@@ -459,14 +479,7 @@ class ColorVisualizer:
 
         fig.suptitle(title, fontsize=14, fontweight="bold")
         plt.tight_layout()
-
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"HSV distribution saved to: {save_path}")
-
-        if show:
-            plt.show()
-        return fig
+        return self._finalize_figure(fig, save_path, show, "HSV distribution")
 
     def plot_3d_rgb_space(
         self,
@@ -519,14 +532,7 @@ class ColorVisualizer:
         ax.set_zlim(0, 255)
 
         plt.tight_layout()
-
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"3D RGB space saved to: {save_path}")
-
-        if show:
-            plt.show()
-        return fig
+        return self._finalize_figure(fig, save_path, show, "3D RGB space")
 
     def compare_palettes(
         self,
@@ -552,43 +558,11 @@ class ColorVisualizer:
         """
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize)
 
-        # Plot first palette
-        for i, color in enumerate(palette1):
-            normalized_color = tuple(c / 255 for c in color)
-            rect = patches.Rectangle(
-                (i, 0), 1, 1, facecolor=normalized_color, edgecolor="black", linewidth=2
-            )
-            ax1.add_patch(rect)
-
-        ax1.set_xlim(0, len(palette1))
-        ax1.set_ylim(0, 1)
-        ax1.set_aspect("equal")
-        ax1.axis("off")
-        ax1.set_title(labels[0], fontsize=12, fontweight="bold")
-
-        # Plot second palette
-        for i, color in enumerate(palette2):
-            normalized_color = tuple(c / 255 for c in color)
-            rect = patches.Rectangle(
-                (i, 0), 1, 1, facecolor=normalized_color, edgecolor="black", linewidth=2
-            )
-            ax2.add_patch(rect)
-
-        ax2.set_xlim(0, len(palette2))
-        ax2.set_ylim(0, 1)
-        ax2.set_aspect("equal")
-        ax2.axis("off")
-        ax2.set_title(labels[1], fontsize=12, fontweight="bold")
+        self._draw_palette_strip(ax1, palette1, labels[0])
+        self._draw_palette_strip(ax2, palette2, labels[1])
 
         plt.tight_layout()
-
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"Palette comparison saved to: {save_path}")
-
-        if show:
-            plt.show()
-        return fig
+        return self._finalize_figure(fig, save_path, show, "Palette comparison")
 
     def plot_temperature_distribution(
         self,
@@ -610,9 +584,7 @@ class ColorVisualizer:
             save_path: Optional path to save the figure
             show: If True, display the figure with plt.show()
         """
-        from .analysis import ColorAnalyzer
-
-        analyzer = ColorAnalyzer()
+        analyzer = self._get_analyzer()
         temp_dist = analyzer.analyze_color_temperature_distribution(colors)
 
         # Create bar chart
@@ -624,7 +596,7 @@ class ColorVisualizer:
             temp_dist["cool_count"],
             temp_dist["neutral_count"],
         ]
-        bar_colors = ["#FF6B35", "#4ECDC4", "#95A5A6"]
+        bar_colors = [_WARM_BAR_COLOR, _COOL_BAR_COLOR, _NEUTRAL_BAR_COLOR]
 
         bars = ax.bar(
             categories,
@@ -653,14 +625,7 @@ class ColorVisualizer:
         ax.grid(axis="y", alpha=0.3)
 
         plt.tight_layout()
-
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"Temperature distribution saved to: {save_path}")
-
-        if show:
-            plt.show()
-        return fig
+        return self._finalize_figure(fig, save_path, show, "Temperature distribution")
 
     def create_artist_color_report(
         self,
@@ -683,9 +648,7 @@ class ColorVisualizer:
             save_path: Optional path to save the figure
             show: If True, display the figure with plt.show()
         """
-        from .analysis import ColorAnalyzer
-
-        analyzer = ColorAnalyzer()
+        analyzer = self._get_analyzer()
 
         fig = plt.figure(figsize=figsize)
         gs = fig.add_gridspec(3, 3, hspace=0.3, wspace=0.3)
@@ -695,17 +658,7 @@ class ColorVisualizer:
 
         # 1. Palette (top, spanning all columns)
         ax_palette = fig.add_subplot(gs[0, :])
-        for i, color in enumerate(colors[:10]):  # Show up to 10 colors
-            normalized_color = tuple(c / 255 for c in color)
-            rect = patches.Rectangle(
-                (i, 0), 1, 1, facecolor=normalized_color, edgecolor="black", linewidth=2
-            )
-            ax_palette.add_patch(rect)
-        ax_palette.set_xlim(0, min(10, len(colors)))
-        ax_palette.set_ylim(0, 1)
-        ax_palette.set_aspect("equal")
-        ax_palette.axis("off")
-        ax_palette.set_title("Dominant Color Palette", fontsize=12, fontweight="bold")
+        self._draw_palette_strip(ax_palette, colors[:10], "Dominant Color Palette")
 
         # 2. RGB distributions
         rgb_array = np.array(colors)
@@ -747,13 +700,7 @@ class ColorVisualizer:
         ax_val.set_xlim(0, 100)
         ax_val.grid(alpha=0.3)
 
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"Color report saved to: {save_path}")
-
-        if show:
-            plt.show()
-        return fig
+        return self._finalize_figure(fig, save_path, show, "Color report")
 
     # ------------------------------------------------------------------
     # Paper-figure methods (added v3.4.0)
@@ -791,17 +738,15 @@ class ColorVisualizer:
             save_path: File path for saving (PNG at 300 dpi or PDF).
             show: If True, display the figure with plt.show().
         """
-        from .namer import ColorNamer
-
         if results is None:
-            namer = ColorNamer()
+            namer = self._get_namer()
             results = namer.historical_pigment_probability(color, year, top_k=top_k)
 
         k = len(results)
         r, g, b = color
         hex_str = f"#{r:02X}{g:02X}{b:02X}"
         brightness = self._calculate_brightness(color)
-        input_fg = "white" if brightness < 140 else "#111111"
+        input_fg = "white" if brightness < _BRIGHTNESS_TEXT_THRESHOLD else "#111111"
 
         fig, axes = plt.subplots(
             1,
@@ -822,7 +767,7 @@ class ColorVisualizer:
             fontsize=10,
             fontweight="bold",
             y=0.96,
-            color="#1A1A1A",
+            color=_FIGURE_TITLE_COLOR,
         )
 
         # ── Input panel ──────────────────────────────────────────────────
@@ -832,7 +777,7 @@ class ColorVisualizer:
         ax_in.set_xticks([])
         ax_in.set_yticks([])
         for sp in ax_in.spines.values():
-            sp.set_edgecolor("#CCCCCC")
+            sp.set_edgecolor(_SPINE_COLOR)
             sp.set_linewidth(0.8)
         ax_in.set_facecolor(f"#{r:02X}{g:02X}{b:02X}")
         ax_in.text(
@@ -872,132 +817,115 @@ class ColorVisualizer:
 
         # ── Candidate panels ─────────────────────────────────────────────
         max_prob = max(c["probability"] for c in results) if results else 1.0
-        _ACTIVE_COL = "#2D6A9F"
-        _INACTIVE_COL = "#AAAAAA"
 
         for idx, cand in enumerate(results):
-            ax = axes[idx + 1]
-            ax.set_xlim(0, 1)
-            ax.set_ylim(0, 1)
-            ax.set_xticks([])
-            ax.set_yticks([])
-            for sp in ax.spines.values():
-                sp.set_edgecolor("#DDDDDD")
-                sp.set_linewidth(0.7)
-            ax.set_facecolor("white")
+            self._draw_candidate_panel(axes[idx + 1], cand, max_prob)
 
-            cr, cg, cb = cand["rgb"]
-            cand_hex = f"#{cr:02X}{cg:02X}{cb:02X}"
-            cand_bright = self._calculate_brightness(cand["rgb"])
-            cand_fg = "white" if cand_bright < 140 else "#111111"
-            available = cand.get("available", True)
-            yr_intro = cand.get("year_introduced")
+        return self._finalize_figure(fig, save_path, show, "HPP figure")
 
-            # Top 50 % → color swatch
-            ax.add_patch(
-                patches.Rectangle(
-                    (0, 0.50),
-                    1,
-                    0.50,
-                    facecolor=cand_hex,
-                    linewidth=0,
-                )
+    def _draw_candidate_panel(self, ax, cand: Dict, max_prob: float) -> None:
+        """Draw a single candidate pigment panel for HPP visualization."""
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        for sp in ax.spines.values():
+            sp.set_edgecolor(_CELL_SPINE_COLOR)
+            sp.set_linewidth(0.7)
+        ax.set_facecolor("white")
+
+        cr, cg, cb = cand["rgb"]
+        cand_hex = f"#{cr:02X}{cg:02X}{cb:02X}"
+        cand_bright = self._calculate_brightness(cand["rgb"])
+        cand_fg = "white" if cand_bright < _BRIGHTNESS_TEXT_THRESHOLD else "#111111"
+        available = cand.get("available", True)
+        yr_intro = cand.get("year_introduced")
+
+        ax.add_patch(
+            patches.Rectangle(
+                (0, 0.50),
+                1,
+                0.50,
+                facecolor=cand_hex,
+                linewidth=0,
             )
+        )
 
-            # Pigment name (centered in swatch)
-            ax.text(
-                0.5,
-                0.66,
-                cand["name"],
-                ha="center",
-                va="center",
-                fontsize=7.0,
-                fontweight="bold",
-                color=cand_fg,
-                multialignment="center",
-            )
+        ax.text(
+            0.5,
+            0.66,
+            cand["name"],
+            ha="center",
+            va="center",
+            fontsize=7.0,
+            fontweight="bold",
+            color=cand_fg,
+            multialignment="center",
+        )
 
-            # CI name
-            ci = cand.get("ci_name") or ""
-            ax.text(
-                0.5,
-                0.44,
-                ci,
-                ha="center",
-                va="top",
-                fontsize=6.5,
-                color="#555555",
-            )
+        ci = cand.get("ci_name") or ""
+        ax.text(
+            0.5, 0.44, ci, ha="center", va="top", fontsize=6.5, color=_CI_NAME_COLOR
+        )
 
-            # Year introduced
-            if yr_intro is not None:
-                yr_label = "antiquity" if yr_intro <= 0 else f"est. {yr_intro}"
-            else:
-                yr_label = "date unknown"
-            ax.text(
-                0.5,
-                0.34,
-                yr_label,
-                ha="center",
-                va="top",
-                fontsize=6.0,
-                color="#888888",
-            )
+        if yr_intro is not None:
+            yr_label = "antiquity" if yr_intro <= 0 else f"est. {yr_intro}"
+        else:
+            yr_label = "date unknown"
+        ax.text(
+            0.5,
+            0.34,
+            yr_label,
+            ha="center",
+            va="top",
+            fontsize=6.0,
+            color=_YEAR_LABEL_COLOR,
+        )
 
-            # Probability bar
-            bar_y, bar_h = 0.17, 0.07
-            ax.add_patch(
-                patches.Rectangle(
-                    (0.05, bar_y),
-                    0.90,
-                    bar_h,
-                    facecolor="#E0E0E0",
-                    linewidth=0,
-                )
+        bar_y, bar_h = 0.17, 0.07
+        ax.add_patch(
+            patches.Rectangle(
+                (0.05, bar_y),
+                0.90,
+                bar_h,
+                facecolor=_BAR_BACKGROUND_COLOR,
+                linewidth=0,
             )
-            fill_w = 0.90 * (cand["probability"] / max_prob)
-            bar_col = _ACTIVE_COL if available else _INACTIVE_COL
-            ax.add_patch(
-                patches.Rectangle(
-                    (0.05, bar_y),
-                    fill_w,
-                    bar_h,
-                    facecolor=bar_col,
-                    linewidth=0,
-                )
+        )
+        fill_w = 0.90 * (cand["probability"] / max_prob)
+        bar_col = _ACTIVE_BAR_COLOR if available else _INACTIVE_BAR_COLOR
+        ax.add_patch(
+            patches.Rectangle(
+                (0.05, bar_y),
+                fill_w,
+                bar_h,
+                facecolor=bar_col,
+                linewidth=0,
             )
+        )
 
-            # Probability value
-            ax.text(
-                0.5,
-                bar_y - 0.03,
-                f"p = {cand['probability']:.3f}",
-                ha="center",
-                va="top",
-                fontsize=6.0,
-                color="#555555",
-            )
+        ax.text(
+            0.5,
+            bar_y - 0.03,
+            f"p = {cand['probability']:.3f}",
+            ha="center",
+            va="top",
+            fontsize=6.0,
+            color=_CI_NAME_COLOR,
+        )
 
-            # Availability badge
-            badge_col = "#2E7D32" if available else "#B71C1C"
-            badge_txt = "Available" if available else "Not yet available"
-            ax.text(
-                0.5,
-                0.04,
-                badge_txt,
-                ha="center",
-                va="bottom",
-                fontsize=6.0,
-                fontweight="bold",
-                color=badge_col,
-            )
-
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"HPP figure saved: {save_path}")
-        if show:
-            plt.show()
-        return fig
+        badge_col = _AVAILABLE_BADGE_COLOR if available else _UNAVAILABLE_BADGE_COLOR
+        badge_txt = "Available" if available else "Not yet available"
+        ax.text(
+            0.5,
+            0.04,
+            badge_txt,
+            ha="center",
+            va="bottom",
+            fontsize=6.0,
+            fontweight="bold",
+            color=badge_col,
+        )
 
     def plot_pemd_comparison(
         self,
@@ -1025,8 +953,7 @@ class ColorVisualizer:
             save_path: File path for saving (PNG at 300 dpi or PDF).
             show: If True, display the figure with plt.show().
         """
-        from .analysis import ColorAnalyzer
-
+        analyzer = self._get_analyzer()
         n_pairs = len(pairs)
         if labels is None:
             labels = [
@@ -1038,7 +965,6 @@ class ColorVisualizer:
             raise ValueError(
                 f"pemd_values has {len(pemd_values)} entries but pairs has {n_pairs}."
             )
-        analyzer = ColorAnalyzer()
         computed: List[Optional[float]] = (
             list(pemd_values) if pemd_values is not None else [None] * n_pairs
         )
@@ -1052,7 +978,7 @@ class ColorVisualizer:
             fontsize=10,
             fontweight="bold",
             y=0.97,
-            color="#1A1A1A",
+            color=_FIGURE_TITLE_COLOR,
         )
 
         # Each pair: 2 strip rows (strip1, strip2), gap between pairs
@@ -1072,7 +998,7 @@ class ColorVisualizer:
             ax.set_xticks([])
             ax.set_yticks([])
             for sp in ax.spines.values():
-                sp.set_edgecolor("#CCCCCC")
+                sp.set_edgecolor(_SPINE_COLOR)
                 sp.set_linewidth(0.6)
             ax.set_facecolor("white")
             total_w = sum(prop for _, prop in palette) or 1.0
@@ -1081,7 +1007,7 @@ class ColorVisualizer:
                 seg_w = prop / total_w
                 rr, gg, bb = rgb
                 bright = self._calculate_brightness(rgb)
-                seg_fg = "white" if bright < 140 else "#111111"
+                seg_fg = "white" if bright < _BRIGHTNESS_TEXT_THRESHOLD else "#111111"
                 ax.add_patch(
                     patches.Rectangle(
                         (x, 0),
@@ -1091,7 +1017,7 @@ class ColorVisualizer:
                         linewidth=0,
                     )
                 )
-                if seg_w > 0.10:
+                if seg_w > _MIN_SEGMENT_WIDTH_FOR_LABEL:
                     ax.text(
                         x + seg_w / 2,
                         0.5,
@@ -1110,7 +1036,7 @@ class ColorVisualizer:
                 ha="right",
                 va="center",
                 fontsize=8,
-                color="#333333",
+                color=_LABEL_COLOR,
             )
 
         for pair_idx, (p1, p2) in enumerate(pairs):
@@ -1141,12 +1067,7 @@ class ColorVisualizer:
                 ),
             )
 
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"PEMD figure saved: {save_path}")
-        if show:
-            plt.show()
-        return fig
+        return self._finalize_figure(fig, save_path, show, "PEMD figure")
 
     def plot_cross_vocabulary_naming(
         self,
@@ -1174,14 +1095,11 @@ class ColorVisualizer:
         """
         from .namer import ColorNamer
 
-        _VOCABS = ["artist", "resene", "natural", "xkcd"]
-        if vocabulary_labels is None:
-            vocabulary_labels = {
-                "artist": "Artist pigments",
-                "resene": "Resene",
-                "natural": "Werner's Nomenclature",
-                "xkcd": "xkcd",
-            }
+        _VOCABS = _CROSS_VOCAB_VOCABULARIES
+        _labels = dict(_CROSS_VOCAB_DEFAULT_LABELS)
+        if vocabulary_labels:
+            _labels.update(vocabulary_labels)
+        vocabulary_labels = _labels
 
         # Gather names + matched RGB for each vocabulary
         vocab_data: Dict[str, List[Dict]] = {}
@@ -1215,7 +1133,7 @@ class ColorVisualizer:
             fontsize=10,
             fontweight="bold",
             y=0.96,
-            color="#1A1A1A",
+            color=_FIGURE_TITLE_COLOR,
         )
 
         # Column headers: input color hex
@@ -1224,7 +1142,7 @@ class ColorVisualizer:
             axes[0, col_idx].set_title(
                 f"#{rr:02X}{gg:02X}{bb:02X}",
                 fontsize=7.5,
-                color="#444444",
+                color=_HEADER_COLOR,
                 pad=3,
             )
 
@@ -1233,7 +1151,7 @@ class ColorVisualizer:
             axes[row_idx, 0].set_ylabel(
                 vocabulary_labels[v],
                 fontsize=7.5,
-                color="#333333",
+                color=_LABEL_COLOR,
                 rotation=0,
                 ha="right",
                 va="center",
@@ -1243,66 +1161,70 @@ class ColorVisualizer:
         # Cells
         for row_idx, v in enumerate(_VOCABS):
             for col_idx, rgb in enumerate(colors):
-                ax = axes[row_idx, col_idx]
-                ax.set_xlim(0, 1)
-                ax.set_ylim(0, 1)
-                ax.set_xticks([])
-                ax.set_yticks([])
-                for sp in ax.spines.values():
-                    sp.set_edgecolor("#E0E0E0")
-                    sp.set_linewidth(0.6)
-
-                meta = vocab_data[v][col_idx]
-                if isinstance(meta, dict):
-                    name_str = meta.get("name", "—")
-                    mr, mg, mb = meta.get("rgb", rgb)
-                else:
-                    name_str = str(meta)
-                    mr, mg, mb = rgb
-
-                # Left half: input color
-                ax.add_patch(
-                    patches.Rectangle(
-                        (0, 0),
-                        0.5,
-                        1,
-                        facecolor=f"#{rgb[0]:02X}{rgb[1]:02X}{rgb[2]:02X}",
-                        linewidth=0,
-                    )
-                )
-                # Right half: matched color from vocabulary
-                ax.add_patch(
-                    patches.Rectangle(
-                        (0.5, 0),
-                        0.5,
-                        1,
-                        facecolor=f"#{mr:02X}{mg:02X}{mb:02X}",
-                        linewidth=0,
-                    )
-                )
-                # Vertical divider
-                ax.axvline(0.5, color="white", linewidth=0.8)
-
-                # Name label below cell
-                bright_match = self._calculate_brightness((mr, mg, mb))
-                txt_col = "white" if bright_match < 140 else "#1A1A1A"
-                ax.text(
-                    0.75,
-                    0.5,
-                    name_str,
-                    ha="center",
-                    va="center",
-                    fontsize=5.5,
-                    color=txt_col,
-                    multialignment="center",
+                self._draw_cross_vocab_cell(
+                    axes[row_idx, col_idx], rgb, vocab_data[v][col_idx]
                 )
 
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"Cross-vocabulary figure saved: {save_path}")
-        if show:
-            plt.show()
-        return fig
+        return self._finalize_figure(fig, save_path, show, "Cross-vocabulary figure")
+
+    def _draw_cross_vocab_cell(
+        self,
+        ax,
+        rgb: Tuple[int, int, int],
+        meta,
+    ) -> None:
+        """Draw a single cell in the cross-vocabulary naming grid."""
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        for sp in ax.spines.values():
+            sp.set_edgecolor(_CELL_SPINE_COLOR)
+            sp.set_linewidth(0.6)
+
+        if isinstance(meta, dict):
+            name_str = meta.get("name", "—")
+            mr, mg, mb = meta.get("rgb", rgb)
+        else:
+            name_str = str(meta)
+            mr, mg, mb = rgb
+
+        ax.add_patch(
+            patches.Rectangle(
+                (0, 0),
+                0.5,
+                1,
+                facecolor=f"#{rgb[0]:02X}{rgb[1]:02X}{rgb[2]:02X}",
+                linewidth=0,
+            )
+        )
+        ax.add_patch(
+            patches.Rectangle(
+                (0.5, 0),
+                0.5,
+                1,
+                facecolor=f"#{mr:02X}{mg:02X}{mb:02X}",
+                linewidth=0,
+            )
+        )
+        ax.axvline(0.5, color="white", linewidth=0.8)
+
+        bright_match = self._calculate_brightness((mr, mg, mb))
+        txt_col = (
+            "white"
+            if bright_match < _BRIGHTNESS_TEXT_THRESHOLD
+            else _FIGURE_TITLE_COLOR
+        )
+        ax.text(
+            0.75,
+            0.5,
+            name_str,
+            ha="center",
+            va="center",
+            fontsize=5.5,
+            color=txt_col,
+            multialignment="center",
+        )
 
 
 def check_visualization_support() -> bool:
@@ -1313,15 +1235,16 @@ def check_visualization_support() -> bool:
         True if matplotlib is available, False otherwise
     """
     try:
-        import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt  # noqa: F401
 
-        print("✅ Color visualization fully supported (matplotlib available)")
+        logger.info("Color visualization fully supported (matplotlib available)")
         if SEABORN_AVAILABLE:
-            print("✅ Enhanced styling available (seaborn available)")
+            logger.info("Enhanced styling available (seaborn available)")
         else:
-            print("ℹ️  Basic styling (seaborn not installed, but not required)")
+            logger.info("Basic styling (seaborn not installed, but not required)")
         return True
     except ImportError:
-        print("❌ Visualization not available")
-        print("   Install with: pip install matplotlib")
+        logger.warning(
+            "Visualization not available. Install with: pip install matplotlib"
+        )
         return False

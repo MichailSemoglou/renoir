@@ -229,6 +229,13 @@ def test_export_palette_css(extractor):
             os.remove(css_path)
 
 
+def test_export_palette_css_prefix_with_newline(extractor, tmp_path):
+    """Prefix ending with a newline must be rejected (re.fullmatch regression)."""
+    save_path = str(tmp_path / "out.css")
+    with pytest.raises(ValueError, match="prefix"):
+        extractor.export_palette_css([(255, 0, 0)], save_path, prefix="color\n")
+
+
 def test_export_palette_json(extractor):
     """Test JSON palette export."""
     colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]

@@ -8,9 +8,12 @@ and digital humanities courses.
 
 from typing import List, Dict, Optional, Any, Tuple, TYPE_CHECKING
 from collections import Counter, defaultdict
+import logging
 from datasets import load_dataset
 
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from renoir.color import ColorAnalyzer, ColorNamer
@@ -51,17 +54,17 @@ class ArtistAnalyzer:
         """
         if self._dataset is None:
             try:
-                print("Loading WikiArt dataset...")
+                logger.info("Loading WikiArt dataset...")
                 self._dataset = load_dataset(
                     "huggan/wikiart", split="train", cache_dir=self.cache_dir
                 )
-                print(f"✓ Loaded {len(self._dataset)} artworks")
-            except Exception as e:
+                logger.info("Loaded %d artworks", len(self._dataset))
+            except (ConnectionError, OSError, ValueError, RuntimeError) as e:
                 raise RuntimeError(
                     f"Failed to load WikiArt dataset. "
                     f"Please check your internet connection and try again. "
                     f"Error: {str(e)}"
-                )
+                ) from e
         return self._dataset
 
     def load_dataset(self):
@@ -91,10 +94,12 @@ class ArtistAnalyzer:
         dataset = self._load_dataset()
 
         if not hasattr(dataset, "features"):
+            logger.warning("list_artists(): dataset has no features attribute")
             return []
 
         artist_feature = dataset.features.get("artist")
         if artist_feature is None or not hasattr(artist_feature, "names"):
+            logger.warning("list_artists(): dataset features have no 'artist' column")
             return []
 
         names = list(artist_feature.names)
@@ -129,11 +134,7 @@ class ArtistAnalyzer:
             ['artist', 'genre', 'image', 'style']
         """
         # Input validation
-        if not artist_name or not isinstance(artist_name, str):
-            raise ValueError("artist_name must be a non-empty string")
-
-        if artist_name.strip() == "":
-            raise ValueError("artist_name cannot be empty or whitespace")
+        self._validate_artist_name(artist_name)
 
         if limit is not None:
             if not isinstance(limit, int):
@@ -145,22 +146,19 @@ class ArtistAnalyzer:
 
         try:
             dataset = self._load_dataset()
-        except Exception as e:
-            # Re-raise with more context
-            raise RuntimeError(f"Failed to load dataset: {str(e)}")
+        except (ConnectionError, OSError, ValueError, RuntimeError) as e:
+            raise RuntimeError(f"Failed to load dataset: {str(e)}") from e
 
-        # Check if dataset has features (HuggingFace dataset) or is a simple list (tests)
         has_features = hasattr(dataset, "features")
 
         if has_features:
-            # HuggingFace dataset with ClassLabel encoding
+            artist_feature = dataset.features.get("artist")
             artist_names = (
-                dataset.features["artist"].names
-                if hasattr(dataset.features["artist"], "names")
+                artist_feature.names
+                if artist_feature is not None and hasattr(artist_feature, "names")
                 else []
             )
 
-            # Find the target artist's index
             target_artist_idx = None
             for idx, name in enumerate(artist_names):
                 if name.lower() == artist_name.lower():
@@ -168,40 +166,35 @@ class ArtistAnalyzer:
                     break
 
             if target_artist_idx is None:
-                print(f"⚠ Artist '{artist_name}' not found in dataset")
-                print(
-                    f"  Tip: Check spelling and use lowercase with hyphens (e.g., 'claude-monet')"
+                logger.warning(
+                    "Artist '%s' not found in dataset. "
+                    "Check spelling and use lowercase with hyphens "
+                    "(e.g., 'claude-monet')",
+                    artist_name,
                 )
                 return []
 
-            # Filter for specific artist by integer index
-            artist_works = []
-            try:
-                for item in dataset:
-                    artist_field = item.get("artist")
-                    if artist_field == target_artist_idx:
-                        artist_works.append(item)
-                        if limit and len(artist_works) >= limit:
-                            break
-            except Exception as e:
-                raise RuntimeError(f"Error while filtering artworks: {str(e)}")
-        else:
-            # Simple list (tests) - artist field is a string
-            artist_works = []
-            try:
-                for item in dataset:
-                    artist_field = item.get("artist", "")
-                    if (
-                        isinstance(artist_field, str)
-                        and artist_field.lower() == artist_name.lower()
-                    ):
-                        artist_works.append(item)
-                        if limit and len(artist_works) >= limit:
-                            break
-            except Exception as e:
-                raise RuntimeError(f"Error while filtering artworks: {str(e)}")
+            def _matches(item):
+                return item.get("artist") == target_artist_idx
 
-        print(f"✓ Found {len(artist_works)} works by {artist_name}")
+        else:
+            target_lower = artist_name.lower()
+
+            def _matches(item):
+                field = item.get("artist", "")
+                return isinstance(field, str) and field.lower() == target_lower
+
+        artist_works = []
+        try:
+            for item in dataset:
+                if _matches(item):
+                    artist_works.append(item)
+                    if limit and len(artist_works) >= limit:
+                        break
+        except (KeyError, TypeError, RuntimeError) as e:
+            raise RuntimeError(f"Error while filtering artworks: {str(e)}") from e
+
+        logger.info("Found %d works by %s", len(artist_works), artist_name)
 
         return artist_works
 
@@ -224,20 +217,12 @@ class ArtistAnalyzer:
             >>> genres = analyzer.analyze_genres(works)
             >>> print(f"Most common genre: {genres[0][0]} ({genres[0][1]} works)")
         """
-        if not isinstance(works, list):
-            raise ValueError("works must be a list")
+        self._validate_works_list(works)
 
         if not works:
             return []
 
-        # Validate that all items are dictionaries
-        for i, work in enumerate(works):
-            if not isinstance(work, dict):
-                raise TypeError(f"Item at index {i} is not a dictionary")
-
-        genres = [work.get("genre", "Unknown") for work in works]
-        genre_counts = Counter(genres).most_common()
-        return genre_counts
+        return self._count_field(works, "genre")
 
     def analyze_styles(self, works: List[Dict[str, Any]]) -> List[tuple]:
         """
@@ -259,20 +244,12 @@ class ArtistAnalyzer:
             >>> for style, count in styles[:3]:
             ...     print(f"{style}: {count} works")
         """
-        if not isinstance(works, list):
-            raise ValueError("works must be a list")
+        self._validate_works_list(works)
 
         if not works:
             return []
 
-        # Validate that all items are dictionaries
-        for i, work in enumerate(works):
-            if not isinstance(work, dict):
-                raise TypeError(f"Item at index {i} is not a dictionary")
-
-        styles = [work.get("style", "Unknown") for work in works]
-        style_counts = Counter(styles).most_common()
-        return style_counts
+        return self._count_field(works, "style")
 
     def analyze_temporal_distribution(
         self, works: List[Dict[str, Any]]
@@ -294,14 +271,10 @@ class ArtistAnalyzer:
         """
         decades = {}
         for work in works:
-            date = work.get("date")
-            if date and isinstance(date, (int, str)):
-                try:
-                    year = int(str(date)[:4]) if isinstance(date, str) else date
-                    decade = (year // 10) * 10
-                    decades[decade] = decades.get(decade, 0) + 1
-                except (ValueError, IndexError):
-                    pass
+            year = self._parse_year(work)
+            if year is not None:
+                decade = (year // 10) * 10
+                decades[decade] = decades.get(decade, 0) + 1
         return decades
 
     def get_work_summary(self, works: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -372,6 +345,86 @@ class ArtistAnalyzer:
         except ImportError:
             return False
 
+    @staticmethod
+    def _validate_artist_name(artist_name: Any) -> None:
+        if not artist_name or not isinstance(artist_name, str):
+            raise ValueError("artist_name must be a non-empty string")
+        if artist_name.strip() == "":
+            raise ValueError("artist_name cannot be empty or whitespace")
+
+    @staticmethod
+    def _validate_works_list(works: Any) -> None:
+        if not isinstance(works, list):
+            raise ValueError("works must be a list")
+        for i, work in enumerate(works):
+            if not isinstance(work, dict):
+                raise TypeError(f"Item at index {i} is not a dictionary")
+
+    @staticmethod
+    def _count_field(works: List[Dict[str, Any]], field: str) -> List[tuple]:
+        values = [work.get(field, "Unknown") for work in works]
+        return Counter(values).most_common()
+
+    def _check_viz_or_warn(self) -> bool:
+        if not self._check_visualization_available():
+            logger.warning(
+                "Visualization libraries not available. "
+                "Install with: pip install 'renoir-wikiart[visualization]'"
+            )
+            return False
+        return True
+
+    def _plot_distribution(
+        self,
+        artist_name: str,
+        analyze_fn,
+        field_label: str,
+        palette_name: str,
+        limit: Optional[int],
+        save_path: Optional[str],
+        figsize: tuple,
+        show: bool,
+    ) -> Any:
+        if not self._check_viz_or_warn():
+            return None
+
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+
+        works = self.extract_artist_works(artist_name, limit=limit)
+        counts = analyze_fn(works)
+
+        if not counts:
+            logger.warning(
+                "No %s data available for %s",
+                field_label.lower(),
+                artist_name,
+            )
+            return None
+
+        names = [c[0] for c in counts]
+        values = [c[1] for c in counts]
+
+        fig, ax = plt.subplots(figsize=figsize)
+        sns.barplot(x=values, y=names, ax=ax, palette=palette_name)
+
+        ax.set_xlabel("Number of Works", fontsize=12)
+        ax.set_ylabel(field_label, fontsize=12)
+        ax.set_title(
+            f"{field_label} Distribution: {artist_name}",
+            fontsize=14,
+            fontweight="bold",
+        )
+
+        plt.tight_layout()
+
+        if save_path:
+            fig.savefig(save_path, dpi=300, bbox_inches="tight")
+            logger.info("Figure saved to %s", save_path)
+        if show:
+            plt.show()
+        return fig
+
     def plot_genre_distribution(
         self,
         artist_name: str,
@@ -390,48 +443,24 @@ class ArtistAnalyzer:
             figsize: Figure size as (width, height)
             show: If True, display the figure with plt.show()
 
+        Returns:
+            matplotlib Figure on success, ``None`` when visualization
+            libraries are unavailable or the artist has no genre data.
+
         Example:
             >>> analyzer = ArtistAnalyzer()
             >>> fig = analyzer.plot_genre_distribution('pierre-auguste-renoir')
         """
-        if not self._check_visualization_available():
-            print("Visualization libraries not available.")
-            print("Install with: pip install 'renoir-wikiart[visualization]'")
-            return None
-
-        import matplotlib.pyplot as plt
-        import seaborn as sns
-
-        # Extract and analyze works
-        works = self.extract_artist_works(artist_name, limit=limit)
-        genres = self.analyze_genres(works)
-
-        if not genres:
-            print(f"No genre data available for {artist_name}")
-            return
-
-        # Prepare data for plotting
-        genre_names = [g[0] for g in genres]
-        genre_counts = [g[1] for g in genres]
-
-        # Create plot
-        fig, ax = plt.subplots(figsize=figsize)
-        sns.barplot(x=genre_counts, y=genre_names, ax=ax, palette="viridis")
-
-        ax.set_xlabel("Number of Works", fontsize=12)
-        ax.set_ylabel("Genre", fontsize=12)
-        ax.set_title(
-            f"Genre Distribution: {artist_name}", fontsize=14, fontweight="bold"
+        return self._plot_distribution(
+            artist_name,
+            self.analyze_genres,
+            "Genre",
+            "viridis",
+            limit,
+            save_path,
+            figsize,
+            show,
         )
-
-        plt.tight_layout()
-
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"Figure saved to {save_path}")
-        if show:
-            plt.show()
-        return fig
 
     def plot_style_distribution(
         self,
@@ -451,48 +480,24 @@ class ArtistAnalyzer:
             figsize: Figure size as (width, height)
             show: If True, display the figure with plt.show()
 
+        Returns:
+            matplotlib Figure on success, ``None`` when visualization
+            libraries are unavailable or the artist has no style data.
+
         Example:
             >>> analyzer = ArtistAnalyzer()
             >>> fig = analyzer.plot_style_distribution('pablo-picasso')
         """
-        if not self._check_visualization_available():
-            print("Visualization libraries not available.")
-            print("Install with: pip install 'renoir-wikiart[visualization]'")
-            return None
-
-        import matplotlib.pyplot as plt
-        import seaborn as sns
-
-        # Extract and analyze works
-        works = self.extract_artist_works(artist_name, limit=limit)
-        styles = self.analyze_styles(works)
-
-        if not styles:
-            print(f"No style data available for {artist_name}")
-            return
-
-        # Prepare data for plotting
-        style_names = [s[0] for s in styles]
-        style_counts = [s[1] for s in styles]
-
-        # Create plot
-        fig, ax = plt.subplots(figsize=figsize)
-        sns.barplot(x=style_counts, y=style_names, ax=ax, palette="mako")
-
-        ax.set_xlabel("Number of Works", fontsize=12)
-        ax.set_ylabel("Style", fontsize=12)
-        ax.set_title(
-            f"Style Distribution: {artist_name}", fontsize=14, fontweight="bold"
+        return self._plot_distribution(
+            artist_name,
+            self.analyze_styles,
+            "Style",
+            "mako",
+            limit,
+            save_path,
+            figsize,
+            show,
         )
-
-        plt.tight_layout()
-
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"Figure saved to {save_path}")
-        if show:
-            plt.show()
-        return fig
 
     def compare_artists_genres(
         self,
@@ -512,17 +517,18 @@ class ArtistAnalyzer:
             figsize: Figure size as (width, height)
             show: If True, display the figure with plt.show()
 
+        Returns:
+            matplotlib Figure on success, ``None`` when visualization
+            libraries are unavailable or no genre data exists.
+
         Example:
             >>> analyzer = ArtistAnalyzer()
             >>> fig = analyzer.compare_artists_genres(['claude-monet', 'pierre-auguste-renoir', 'edgar-degas'])
         """
-        if not self._check_visualization_available():
-            print("Visualization libraries not available.")
-            print("Install with: pip install 'renoir-wikiart[visualization]'")
+        if not self._check_viz_or_warn():
             return None
 
         import matplotlib.pyplot as plt
-        import seaborn as sns
         import pandas as pd
 
         # Collect data for all artists
@@ -535,8 +541,8 @@ class ArtistAnalyzer:
                 all_data.append({"Artist": artist_name, "Genre": genre, "Count": count})
 
         if not all_data:
-            print("No data available for comparison")
-            return
+            logger.warning("No data available for comparison")
+            return None
 
         # Create DataFrame for easier plotting
         df = pd.DataFrame(all_data)
@@ -557,9 +563,9 @@ class ArtistAnalyzer:
         plt.tight_layout()
 
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"Figure saved to {save_path}")
-        elif show:
+            fig.savefig(save_path, dpi=300, bbox_inches="tight")
+            logger.info("Figure saved to %s", save_path)
+        if show:
             plt.show()
         return fig
 
@@ -584,13 +590,15 @@ class ArtistAnalyzer:
             figsize: Figure size as (width, height)
             show: If True, display the figure with plt.show()
 
+        Returns:
+            matplotlib Figure on success, ``None`` when visualization
+            libraries are unavailable.
+
         Example:
             >>> analyzer = ArtistAnalyzer()
             >>> fig = analyzer.create_artist_overview('vincent-van-gogh')
         """
-        if not self._check_visualization_available():
-            print("Visualization libraries not available.")
-            print("Install with: pip install 'renoir-wikiart[visualization]'")
+        if not self._check_viz_or_warn():
             return None
 
         import matplotlib.pyplot as plt
@@ -615,11 +623,13 @@ class ArtistAnalyzer:
         # Summary text
         ax_summary = fig.add_subplot(gs[0, :])
         ax_summary.axis("off")
+        dr = summary["date_range"]
+        date_str = f"{dr[0]}-{dr[1]}" if dr else "N/A"
         summary_text = f"""
         Total Works: {summary['total_works']}
         Primary Style: {summary['primary_style']}
         Primary Genre: {summary['primary_genre']}
-        Date Range: {summary['date_range'][0]}-{summary['date_range'][1] if summary['date_range'] else 'N/A'}
+        Date Range: {date_str}
         """
         ax_summary.text(
             0.5,
@@ -664,8 +674,8 @@ class ArtistAnalyzer:
             ax_temporal.grid(True, alpha=0.3)
 
         if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches="tight")
-            print(f"Figure saved to {save_path}")
+            fig.savefig(save_path, dpi=300, bbox_inches="tight")
+            logger.info("Figure saved to %s", save_path)
         if show:
             plt.show()
         return fig
@@ -678,9 +688,14 @@ class ArtistAnalyzer:
         """
         Extract a four-digit year from an artwork dict.
 
-        Mirrors the parsing logic in :meth:`analyze_temporal_distribution`
-        so that synthetic and augmented datasets with date fields work
-        consistently with the rest of the package.
+        Canonical date-parsing helper used by
+        :meth:`analyze_temporal_distribution` and the portfolio color
+        signature methods. Accepts ``date`` as either an ``int`` or a
+        string whose first four characters form a valid year.
+
+        Returns:
+            The parsed year as an ``int``, or ``None`` if no parseable
+            date is present.
         """
         date = work.get("date")
         if date and isinstance(date, (int, str)):
@@ -804,7 +819,14 @@ class ArtistAnalyzer:
 
         labs = np.array([namer._rgb_to_lab(c) for c in colors])
 
-        from sklearn.cluster import KMeans
+        try:
+            from sklearn.cluster import KMeans
+        except ImportError:
+            logger.warning(
+                "scikit-learn not available; returning unique colors instead of "
+                "clustering. Install with: pip install scikit-learn"
+            )
+            return unique_colors[:n_colors]
 
         kmeans = KMeans(n_clusters=n_colors, random_state=random_state, n_init=10)
         kmeans.fit(labs)
@@ -856,9 +878,7 @@ class ArtistAnalyzer:
         show: bool = False,
     ) -> Any:
         """Build a multi-panel overview figure for a color signature."""
-        if not self._check_visualization_available():
-            print("Visualization libraries not available.")
-            print("Install with: pip install 'renoir-wikiart[visualization]'")
+        if not self._check_viz_or_warn():
             return None
 
         from renoir.color import ColorVisualizer
@@ -911,8 +931,8 @@ class ArtistAnalyzer:
             plt.tight_layout()
 
             if save_path:
-                plt.savefig(save_path, dpi=300, bbox_inches="tight")
-                print(f"Figure saved to {save_path}")
+                fig.savefig(save_path, dpi=300, bbox_inches="tight")
+                logger.info("Figure saved to %s", save_path)
             if show:
                 plt.show()
 
@@ -922,6 +942,56 @@ class ArtistAnalyzer:
         return visualizer.create_artist_color_report(
             palette, title, save_path=save_path, show=show
         )
+
+    def _extract_work_palettes(
+        self,
+        works: List[Dict[str, Any]],
+        n_colors: int,
+        random_state: int,
+        verbose: bool,
+        extractor: Any,
+    ) -> List[Tuple[Dict[str, Any], List[Tuple[int, int, int]], Optional[int]]]:
+        """Extract dominant-color palettes from a list of artwork dicts.
+
+        Returns a list of ``(work, palette, year)`` tuples for works
+        where extraction succeeded. Works without images or where
+        extraction fails are skipped with a logged warning.
+        """
+        import warnings
+
+        try:
+            from sklearn.exceptions import ConvergenceWarning as _ConvergenceWarning
+        except ImportError:
+            _ConvergenceWarning = None
+
+        work_palettes: List[
+            Tuple[Dict[str, Any], List[Tuple[int, int, int]], Optional[int]]
+        ] = []
+        for i, work in enumerate(works):
+            image = work.get("image")
+            year = self._parse_year(work)
+
+            if image is None:
+                logger.warning("Work %d has no image; skipping", i)
+                continue
+
+            try:
+                with warnings.catch_warnings():
+                    if _ConvergenceWarning is not None:
+                        warnings.simplefilter("ignore", _ConvergenceWarning)
+                    palette = extractor.extract_dominant_colors(
+                        image,
+                        n_colors=n_colors,
+                        random_state=random_state,
+                    )
+                work_palettes.append((work, palette, year))
+                if verbose and (i + 1) % 5 == 0:
+                    logger.info("Processed %d/%d works...", i + 1, len(works))
+            except (RuntimeError, ValueError, MemoryError) as e:
+                logger.warning("Failed to extract palette for work %d: %s", i, e)
+                continue
+
+        return work_palettes
 
     def analyze_works_color_signature(
         self,
@@ -955,19 +1025,10 @@ class ArtistAnalyzer:
             Dictionary with aggregated palette, metrics, optional per-period
             breakdown, and optional figure.
         """
-        if not isinstance(works, list):
-            raise ValueError("works must be a list")
-
-        for i, work in enumerate(works):
-            if not isinstance(work, dict):
-                raise TypeError(f"Item at index {i} is not a dictionary")
+        self._validate_works_list(works)
 
         if not works:
             return self._empty_signature()
-
-        import warnings
-
-        from sklearn.exceptions import ConvergenceWarning
 
         from renoir.color import ColorExtractor, ColorAnalyzer, ColorNamer
 
@@ -975,33 +1036,15 @@ class ArtistAnalyzer:
         analyzer = ColorAnalyzer()
         namer = ColorNamer()
 
-        work_palettes = []
-        for i, work in enumerate(works):
-            image = work.get("image")
-            year = self._parse_year(work)
-
-            if image is None:
-                if verbose:
-                    print(f"Warning: work {i} has no image; skipping")
-                continue
-
-            try:
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore", ConvergenceWarning)
-                    palette = extractor.extract_dominant_colors(
-                        image,
-                        n_colors=n_colors,
-                        random_state=random_state,
-                    )
-                work_palettes.append((work, palette, year))
-                if verbose and (i + 1) % 5 == 0:
-                    print(f"  Processed {i + 1}/{len(works)} works...")
-            except Exception as e:
-                if verbose:
-                    print(f"Warning: failed to extract palette for work {i}: {e}")
-                continue
+        work_palettes = self._extract_work_palettes(
+            works, n_colors, random_state, verbose, extractor
+        )
 
         if not work_palettes:
+            logger.warning(
+                "analyze_works_color_signature: no palettes extracted from %d works",
+                len(works),
+            )
             return self._empty_signature()
 
         all_colors = [color for _, palette, _ in work_palettes for color in palette]
@@ -1097,11 +1140,7 @@ class ArtistAnalyzer:
             Dictionary with artist color signature, metrics, optional
             per-period breakdown, and optional figure.
         """
-        if not artist_name or not isinstance(artist_name, str):
-            raise ValueError("artist_name must be a non-empty string")
-
-        if artist_name.strip() == "":
-            raise ValueError("artist_name cannot be empty or whitespace")
+        self._validate_artist_name(artist_name)
 
         if not isinstance(limit, int):
             raise ValueError("limit must be an integer")
@@ -1110,7 +1149,7 @@ class ArtistAnalyzer:
             raise ValueError("limit must be at least 1")
 
         if verbose:
-            print(f"Computing color signature for {artist_name}...")
+            logger.info("Computing color signature for %s...", artist_name)
 
         # For "first" strategy we can avoid loading the full corpus.
         extract_limit = limit if strategy == "first" else None
@@ -1125,13 +1164,15 @@ class ArtistAnalyzer:
         )
 
         if effective_strategy != strategy and verbose:
-            print(
-                f"Note: '{strategy}' sampling not possible (no parseable dates). "
-                f"Using '{effective_strategy}' instead."
+            logger.info(
+                "'%s' sampling not possible (no parseable dates). "
+                "Using '%s' instead.",
+                strategy,
+                effective_strategy,
             )
 
         if verbose:
-            print(f"Analyzing {len(selected)} works...")
+            logger.info("Analyzing %d works...", len(selected))
 
         result = self.analyze_works_color_signature(
             selected,
@@ -1175,15 +1216,10 @@ def quick_analysis(
 
     Examples:
         >>> works = quick_analysis('claude-monet', limit=20)
-        Loading WikiArt dataset...
-        ✓ Loaded 103250 artworks
-        ✓ Found 20 works by claude-monet
-
-        Artist Summary:
-        - Total works: 20
-        - Primary style: Impressionism
-        - Primary genre: landscape
-        - Date range: 1865-1926
+        >>> len(works) <= 20
+        True
+        >>> isinstance(works, list)
+        True
 
         >>> works = quick_analysis('claude-monet', limit=20, show_plots=True)
         # Displays visualization plots
@@ -1193,13 +1229,15 @@ def quick_analysis(
 
     if show_summary and works:
         summary = analyzer.get_work_summary(works)
-        print("\nArtist Summary:")
-        print(f"- Total works: {summary['total_works']}")
-        print(f"- Primary style: {summary['primary_style']}")
-        print(f"- Primary genre: {summary['primary_genre']}")
+        logger.info("Artist Summary:")
+        logger.info("- Total works: %d", summary["total_works"])
+        logger.info("- Primary style: %s", summary["primary_style"])
+        logger.info("- Primary genre: %s", summary["primary_genre"])
         if summary["date_range"]:
-            print(
-                f"- Date range: {summary['date_range'][0]}-{summary['date_range'][1]}"
+            logger.info(
+                "- Date range: %d-%d",
+                summary["date_range"][0],
+                summary["date_range"][1],
             )
 
     if show_plots:

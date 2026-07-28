@@ -7,7 +7,21 @@ Runway, Sora). Bridges the gap between computational color analysis and
 AI-assisted design workflows.
 """
 
-from typing import List, Dict, Tuple, Optional, Union
+from typing import List, Tuple, Optional
+import logging
+
+logger = logging.getLogger(__name__)
+
+_CCI_LOW_THRESHOLD = 0.3
+_CCI_MODERATE_THRESHOLD = 0.6
+_WARM_PALETTE_THRESHOLD = 60
+_COOL_PALETTE_THRESHOLD = 60
+_WARM_COOL_CONTRAST_THRESHOLD = 20
+_VIBRANT_SATURATION_THRESHOLD = 70
+_MUTED_SATURATION_THRESHOLD = 30
+_VARIATION_BASE_PROPORTION = 0.1
+_MIDJOURNEY_SUFFIX = " --v 6"
+_STABLE_DIFFUSION_SUFFIX = ", highly detailed, professional color grading"
 
 
 class PromptGenerator:
@@ -29,14 +43,34 @@ class PromptGenerator:
         >>> print(prompt)
     """
 
-    def __init__(self, vocabulary: str = "artist"):
+    def __init__(self, vocabulary: str = "artist", namer=None, analyzer=None):
         """
         Initialize PromptGenerator.
 
         Args:
             vocabulary: Color naming vocabulary to use (default: 'artist').
+            namer: Optional pre-configured ``ColorNamer`` instance.
+                When ``None``, one is created lazily on first use.
+            analyzer: Optional pre-configured ``ColorAnalyzer`` instance.
+                When ``None``, one is created lazily on first use.
         """
         self.vocabulary = vocabulary
+        self._namer = namer
+        self._analyzer = analyzer
+
+    def _get_namer(self):
+        if self._namer is None:
+            from .namer import ColorNamer
+
+            self._namer = ColorNamer(vocabulary=self.vocabulary)
+        return self._namer
+
+    def _get_analyzer(self):
+        if self._analyzer is None:
+            from .analysis import ColorAnalyzer
+
+            self._analyzer = ColorAnalyzer()
+        return self._analyzer
 
     def generate(
         self,
@@ -81,54 +115,40 @@ class PromptGenerator:
             ...                       medium='oil painting')
             >>> print(prompt)
         """
-        from .namer import ColorNamer
-        from .analysis import ColorAnalyzer
-
-        namer = ColorNamer(vocabulary=self.vocabulary)
-        analyzer = ColorAnalyzer()
-
         if not colors:
+            logger.warning(
+                "generate() called with empty colors list; returning empty prompt"
+            )
             return ""
+
+        namer = self._get_namer()
+        analyzer = self._get_analyzer()
 
         if proportions is None:
             proportions = [1.0 / len(colors)] * len(colors)
 
-        # Name each color
         named = []
         for color, prop in zip(colors, proportions):
             name = namer.name(color)
             pct = round(prop * 100)
             named.append((name, pct, color))
 
-        # Sort by proportion descending
         named.sort(key=lambda x: x[1], reverse=True)
 
-        # Build palette description
         parts = []
 
-        # Subject + medium + style opener
-        opener_parts = []
-        if subject:
-            opener_parts.append(subject.capitalize())
-        if medium:
-            opener_parts.append(medium)
-        if style:
-            opener_parts.append(f"in {style} style")
+        opener = self._build_opener(subject, medium, style)
+        if opener:
+            parts.append(opener)
 
-        if opener_parts:
-            parts.append(" ".join(opener_parts) + ".")
-
-        # Color palette
         palette_desc = "Color palette: " + ", ".join(
             f"{name} ({pct}%)" if pct > 0 else name for name, pct, _ in named
         )
         parts.append(palette_desc + ".")
 
-        # Dominant color
         dominant_name, _, _ = named[0]
         parts.append(f"Dominant color: {dominant_name}.")
 
-        # Harmony analysis
         if include_harmony and len(colors) >= 2:
             harmony = analyzer.analyze_color_harmony(colors)
             dominant_harmony = harmony["dominant_harmony"]
@@ -136,42 +156,58 @@ class PromptGenerator:
                 harmony_desc = dominant_harmony.replace("_", " ")
                 parts.append(f"Color harmony: {harmony_desc}.")
 
-        # Temperature distribution
         if include_temperature:
             temp = analyzer.analyze_color_temperature_distribution(colors)
-            warm_pct = temp["warm_percentage"]
-            cool_pct = temp["cool_percentage"]
-            dom_temp = temp["dominant_temperature"]
             parts.append(
-                f"Color temperature: {dom_temp}-dominant "
-                f"({warm_pct:.0f}% warm, {cool_pct:.0f}% cool)."
+                f"Color temperature: {temp['dominant_temperature']}-dominant "
+                f"({temp['warm_percentage']:.0f}% warm, "
+                f"{temp['cool_percentage']:.0f}% cool)."
             )
 
-        # Complexity
         if include_complexity and len(colors) >= 2:
-            complexity = analyzer.calculate_color_complexity(colors, proportions)
-            cci = complexity["cci"]
-            if cci < 0.3:
-                complexity_word = "Low"
-            elif cci < 0.6:
-                complexity_word = "Moderate"
-            else:
-                complexity_word = "High"
-            parts.append(f"{complexity_word} color complexity (CCI: {cci:.2f}).")
+            complexity_desc = self._describe_complexity(analyzer, colors, proportions)
+            if complexity_desc:
+                parts.append(complexity_desc)
 
-        # Mood
         if mood:
             parts.append(f"Mood: {mood}.")
 
-        # Model-specific formatting
         prompt = " ".join(parts)
+        return self._apply_model_suffixes(prompt, target_model)
 
+    @staticmethod
+    def _build_opener(
+        subject: Optional[str],
+        medium: Optional[str],
+        style: Optional[str],
+    ) -> Optional[str]:
+        opener_parts = []
+        if subject:
+            opener_parts.append(subject.capitalize())
+        if medium:
+            opener_parts.append(medium)
+        if style:
+            opener_parts.append(f"in {style} style")
+        return " ".join(opener_parts) + "." if opener_parts else None
+
+    @staticmethod
+    def _describe_complexity(analyzer, colors, proportions) -> Optional[str]:
+        complexity = analyzer.calculate_color_complexity(colors, proportions)
+        cci = complexity["cci"]
+        if cci < _CCI_LOW_THRESHOLD:
+            word = "Low"
+        elif cci < _CCI_MODERATE_THRESHOLD:
+            word = "Moderate"
+        else:
+            word = "High"
+        return f"{word} color complexity (CCI: {cci:.2f})."
+
+    @staticmethod
+    def _apply_model_suffixes(prompt: str, target_model: str) -> str:
         if target_model == "midjourney":
-            prompt = prompt + " --v 6"
-        elif target_model == "stable_diffusion":
-            # SD prefers comma-separated keywords at the end
-            prompt = prompt + ", highly detailed, professional color grading"
-
+            return prompt + _MIDJOURNEY_SUFFIX
+        if target_model == "stable_diffusion":
+            return prompt + _STABLE_DIFFUSION_SUFFIX
         return prompt
 
     def generate_variation_prompts(
@@ -201,14 +237,10 @@ class PromptGenerator:
             >>> for i, p in enumerate(prompts):
             ...     print(f"Variation {i+1}: {p[:80]}...")
         """
-        from .namer import ColorNamer
-
-        namer = ColorNamer(vocabulary=self.vocabulary)
         variations = []
 
         for i in range(min(n_variations, len(colors))):
-            # Emphasize color i; give every other color a small uniform base
-            base = 0.1
+            base = _VARIATION_BASE_PROPORTION
             proportions = [base] * len(colors)
             proportions[i % len(colors)] = 1.0 - base * (len(colors) - 1)
             # Renormalize to sum to 1.0
@@ -241,11 +273,12 @@ class PromptGenerator:
             >>> print(keywords)
             ['Cadmium Red Light', 'Prussian Blue', 'complementary', 'warm-cool contrast']
         """
-        from .namer import ColorNamer
-        from .analysis import ColorAnalyzer
+        if not colors:
+            logger.warning("palette_to_prompt_keywords() called with empty colors list")
+            return []
 
-        namer = ColorNamer(vocabulary=self.vocabulary)
-        analyzer = ColorAnalyzer()
+        namer = self._get_namer()
+        analyzer = self._get_analyzer()
 
         keywords = []
 
@@ -266,18 +299,18 @@ class PromptGenerator:
         warm_pct = temp["warm_percentage"]
         cool_pct = temp["cool_percentage"]
 
-        if warm_pct > 60:
+        if warm_pct > _WARM_PALETTE_THRESHOLD:
             keywords.append("warm palette")
-        elif cool_pct > 60:
+        elif cool_pct > _COOL_PALETTE_THRESHOLD:
             keywords.append("cool palette")
-        elif abs(warm_pct - cool_pct) < 20:
+        elif abs(warm_pct - cool_pct) < _WARM_COOL_CONTRAST_THRESHOLD:
             keywords.append("warm-cool contrast")
 
         # Saturation
         sat = analyzer.calculate_saturation_score(colors)
-        if sat > 70:
+        if sat > _VIBRANT_SATURATION_THRESHOLD:
             keywords.append("vibrant")
-        elif sat < 30:
+        elif sat < _MUTED_SATURATION_THRESHOLD:
             keywords.append("muted")
 
         return keywords

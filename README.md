@@ -284,7 +284,7 @@ prompt = generator.generate(
 print(prompt)
 
 # Generate variations
-variations = generator.generate_variation_prompts(colors, n=3)
+variations = generator.generate_variation_prompts(colors, n_variations=3)
 ```
 
 ## Advanced Usage
@@ -424,7 +424,7 @@ Uses the [WikiArt dataset](https://huggingface.co/datasets/huggan/wikiart) from 
 
 - Python 3.9+
 - datasets >= 2.0.0
-- Pillow >= 8.0.0
+- Pillow >= 10.3.0
 - numpy >= 1.20.0
 - scikit-learn >= 1.0.0
 - pandas >= 1.3.0
@@ -471,7 +471,7 @@ If you use this software in your research or teaching, please cite:
   author = {Semoglou, Michail},
   title = {renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt},
   year = {2026},
-  version = {3.6.0},
+  version = {3.7.0},
   doi = {10.5281/zenodo.17355170},
   url = {https://github.com/MichailSemoglou/renoir}
 }

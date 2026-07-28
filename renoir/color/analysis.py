@@ -5,10 +5,14 @@ This module provides tools for analyzing color distributions, converting
 between color spaces, and computing color statistics from artworks.
 """
 
+import logging
+
 import numpy as np
-from typing import List, Dict, Tuple, Optional, Union
+from typing import Any, List, Dict, Tuple, Optional
 from collections import Counter
 import colorsys
+
+logger = logging.getLogger(__name__)
 
 try:
     from scipy.optimize import linear_sum_assignment
@@ -16,6 +20,51 @@ try:
     SCIPY_AVAILABLE = True
 except ImportError:
     SCIPY_AVAILABLE = False
+
+_NEUTRAL_SATURATION_THRESHOLD = 10
+_WARM_HUE_LOW = 0
+_WARM_HUE_HIGH = 60
+_WARM_HUE_WRAP_LOW = 300
+_WARM_HUE_WRAP_HIGH = 360
+_COOL_HUE_LOW = 120
+_COOL_HUE_HIGH = 300
+_DEFAULT_HARMONY_TOLERANCE = 30
+_DEFAULT_ANALOGOUS_HUE_RANGE = 60
+_TRIADIC_TARGET_ANGLE = 120
+_COMPLEMENTARY_TARGET_ANGLE = 180
+_SPLIT_COMPLEMENTARY_OFFSET = 30
+_HUE_HISTOGRAM_BINS = 12
+_PEMD_RESOLUTION_MULTIPLIER = 10
+_CIEDE2000_NORMALIZATION_CAP = 100.0
+_CCI_DEFAULT_WEIGHTS = {
+    "hue_entropy": 0.3,
+    "perceptual_spread": 0.3,
+    "proportion_evenness": 0.2,
+    "harmony_penalty": 0.2,
+}
+_PROVENANCE_ANACHRONISM_THRESHOLD = 0.1
+
+
+def _largest_remainder(weights: np.ndarray, total: int) -> np.ndarray:
+    """Discretise continuous weights into integer counts using the
+    largest-remainder method. Guarantees at least 1 unit for every
+    positive weight and that the sum equals ``total``."""
+    raw = weights * total
+    floors = np.floor(raw).astype(int)
+    floors = np.where((weights > 0) & (floors == 0), 1, floors)
+    remainder = total - floors.sum()
+    if remainder > 0:
+        fracs = raw - np.floor(raw)
+        order = np.argsort(-fracs)
+        for idx in order[:remainder]:
+            floors[idx] += 1
+    elif remainder < 0:
+        fracs = raw - np.floor(raw)
+        order = np.argsort(fracs)
+        for idx in order[:-remainder]:
+            if floors[idx] > 1:
+                floors[idx] -= 1
+    return floors
 
 
 class ColorAnalyzer:
@@ -28,9 +77,15 @@ class ColorAnalyzer:
     art and design students.
     """
 
-    def __init__(self):
-        """Initialize the ColorAnalyzer."""
-        pass
+    def __init__(self, namer: Optional[Any] = None):
+        """Initialize the ColorAnalyzer.
+
+        Args:
+            namer: Optional pre-configured ``ColorNamer`` instance for
+                CIEDE2000 calculations. When ``None``, one is created
+                lazily on first use.
+        """
+        self._namer = namer
 
     def rgb_to_hsv(self, rgb: Tuple[int, int, int]) -> Tuple[float, float, float]:
         """
@@ -232,7 +287,7 @@ class ColorAnalyzer:
         hues = [hsv[0] for hsv in hsv_values]
 
         # Bin hues into 12 categories (like a color wheel)
-        bins = np.linspace(0, 360, 13)
+        bins = np.linspace(0, 360, _HUE_HISTOGRAM_BINS + 1)
         hist, _ = np.histogram(hues, bins=bins)
 
         # Calculate Shannon entropy
@@ -241,7 +296,7 @@ class ColorAnalyzer:
         entropy = -np.sum(hist * np.log2(hist))
 
         # Normalize to 0-1 (max entropy for 12 bins is log2(12))
-        max_entropy = np.log2(12)
+        max_entropy = np.log2(_HUE_HISTOGRAM_BINS)
         diversity = entropy / max_entropy
 
         return float(diversity)
@@ -318,6 +373,16 @@ class ColorAnalyzer:
         stats1 = self.analyze_palette_statistics(palette1)
         stats2 = self.analyze_palette_statistics(palette2)
 
+        if not stats1 or not stats2:
+            return {
+                "palette1_stats": stats1,
+                "palette2_stats": stats2,
+                "hue_diff": 0.0,
+                "saturation_diff": 0.0,
+                "brightness_diff": 0.0,
+                "diversity_diff": 0.0,
+            }
+
         comparison = {
             "palette1_stats": stats1,
             "palette2_stats": stats2,
@@ -357,14 +422,16 @@ class ColorAnalyzer:
         saturation = hsv[1]
 
         # Low saturation colors are neutral
-        if saturation < 10:
+        if saturation < _NEUTRAL_SATURATION_THRESHOLD:
             return "neutral"
 
         # Warm: red-orange-yellow (0-60 and 300-360)
         # Cool: green-blue-purple (120-300)
-        if (hue >= 0 and hue <= 60) or (hue >= 300 and hue <= 360):
+        if (hue >= _WARM_HUE_LOW and hue <= _WARM_HUE_HIGH) or (
+            hue >= _WARM_HUE_WRAP_LOW and hue <= _WARM_HUE_WRAP_HIGH
+        ):
             return "warm"
-        elif hue >= 120 and hue <= 300:
+        elif hue >= _COOL_HUE_LOW and hue <= _COOL_HUE_HIGH:
             return "cool"
         else:
             return "neutral"
@@ -387,6 +454,17 @@ class ColorAnalyzer:
             >>> temp_dist = analyzer.analyze_color_temperature_distribution(colors)
             >>> print(temp_dist)
         """
+        if not colors:
+            return {
+                "warm_count": 0,
+                "cool_count": 0,
+                "neutral_count": 0,
+                "warm_percentage": 0.0,
+                "cool_percentage": 0.0,
+                "neutral_percentage": 0.0,
+                "dominant_temperature": "none",
+            }
+
         temperatures = [self.classify_color_temperature(color) for color in colors]
         temp_counts = Counter(temperatures)
 
@@ -405,7 +483,9 @@ class ColorAnalyzer:
         }
 
     def detect_complementary_colors(
-        self, colors: List[Tuple[int, int, int]], tolerance: float = 30
+        self,
+        colors: List[Tuple[int, int, int]],
+        tolerance: float = _DEFAULT_HARMONY_TOLERANCE,
     ) -> List[Tuple[Tuple[int, int, int], Tuple[int, int, int]]]:
         """
         Detect complementary color pairs in a palette.
@@ -440,7 +520,7 @@ class ColorAnalyzer:
                     hue_diff = 360 - hue_diff
 
                 # Check if approximately 180° apart
-                if abs(hue_diff - 180) <= tolerance:
+                if abs(hue_diff - _COMPLEMENTARY_TARGET_ANGLE) <= tolerance:
                     complementary_pairs.append((color1, color2))
 
         return complementary_pairs
@@ -490,7 +570,9 @@ class ColorAnalyzer:
         return float(ratio)
 
     def detect_triadic_harmony(
-        self, colors: List[Tuple[int, int, int]], tolerance: float = 30
+        self,
+        colors: List[Tuple[int, int, int]],
+        tolerance: float = _DEFAULT_HARMONY_TOLERANCE,
     ) -> List[Tuple[Tuple[int, int, int], Tuple[int, int, int], Tuple[int, int, int]]]:
         """
         Detect triadic color harmonies in a palette.
@@ -533,19 +615,28 @@ class ColorAnalyzer:
                         diffs.append(diff)
 
                     # Check if all approximately 120° apart
-                    if all(abs(d - 120) <= tolerance for d in diffs):
+                    if all(abs(d - _TRIADIC_TARGET_ANGLE) <= tolerance for d in diffs):
                         triadic_sets.append((color1, color2, color3))
 
         return triadic_sets
 
     def detect_analogous_harmony(
-        self, colors: List[Tuple[int, int, int]], max_hue_range: float = 60
+        self,
+        colors: List[Tuple[int, int, int]],
+        max_hue_range: float = _DEFAULT_ANALOGOUS_HUE_RANGE,
     ) -> List[List[Tuple[int, int, int]]]:
         """
         Detect analogous color schemes in a palette.
 
         Analogous colors are adjacent on the color wheel (within 60° typically).
         Creates harmonious, serene color schemes. Common in nature and landscapes.
+
+        Note:
+            Colors are sorted by hue before grouping. Each group anchors on its
+            first member's hue. Wrap-around reds (e.g., 350° and 10°) are
+            detected correctly when they appear adjacent after sorting, but
+            may be separated if intervening hues break the current group before
+            the algorithm reaches the wrap-around color.
 
         Args:
             colors: List of RGB tuples
@@ -594,7 +685,9 @@ class ColorAnalyzer:
         return analogous_groups
 
     def detect_split_complementary(
-        self, colors: List[Tuple[int, int, int]], tolerance: float = 30
+        self,
+        colors: List[Tuple[int, int, int]],
+        tolerance: float = _DEFAULT_HARMONY_TOLERANCE,
     ) -> List[Tuple[Tuple[int, int, int], Tuple[int, int, int], Tuple[int, int, int]]]:
         """
         Detect split-complementary color schemes.
@@ -624,11 +717,11 @@ class ColorAnalyzer:
         # For each color, look for two colors ~150° and ~210° away (or ±150°)
         for i, (base_color, base_hsv) in enumerate(hsv_colors):
             base_hue = base_hsv[0]
-            complement_hue = (base_hue + 180) % 360
+            complement_hue = (base_hue + _COMPLEMENTARY_TARGET_ANGLE) % 360
 
             # Look for colors 30° on either side of complement
-            target_hue1 = (complement_hue - 30) % 360
-            target_hue2 = (complement_hue + 30) % 360
+            target_hue1 = (complement_hue - _SPLIT_COMPLEMENTARY_OFFSET) % 360
+            target_hue2 = (complement_hue + _SPLIT_COMPLEMENTARY_OFFSET) % 360
 
             candidates1 = []
             candidates2 = []
@@ -662,7 +755,9 @@ class ColorAnalyzer:
         return split_comp_sets
 
     def detect_tetradic_harmony(
-        self, colors: List[Tuple[int, int, int]], tolerance: float = 30
+        self,
+        colors: List[Tuple[int, int, int]],
+        tolerance: float = _DEFAULT_HARMONY_TOLERANCE,
     ) -> List[
         Tuple[
             Tuple[int, int, int],
@@ -677,6 +772,12 @@ class ColorAnalyzer:
         Tetradic uses two complementary pairs, forming a rectangle on the
         color wheel. Creates rich, diverse palettes. Used in complex
         compositions and modern art.
+
+        Note:
+            The heuristic accepts when the two smallest circular gaps are
+            mutually within tolerance and the two largest are as well. This
+            is necessary but not sufficient for a true rectangle; coincidental
+            gap pairings may produce false positives.
 
         Args:
             colors: List of RGB tuples
@@ -728,7 +829,7 @@ class ColorAnalyzer:
 
     def analyze_color_harmony(
         self, colors: List[Tuple[int, int, int]]
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Comprehensive analysis of color harmonies present in a palette.
 
@@ -796,7 +897,7 @@ class ColorAnalyzer:
 
     def _get_namer(self):
         """Lazy-load a ColorNamer instance for CIEDE2000 calculations."""
-        if not hasattr(self, "_namer"):
+        if self._namer is None:
             from .namer import ColorNamer
 
             self._namer = ColorNamer()
@@ -814,6 +915,12 @@ class ColorAnalyzer:
         as weights, solved via optimal transport. This provides a structurally
         aware comparison that accounts for both color similarity and proportion
         differences.
+
+        Note:
+            The continuous transport problem is discretized into a balanced
+            assignment solved by ``scipy.optimize.linear_sum_assignment`` in
+            O(total^3), where ``total = max(n, m) * 10``. Negligible for
+            typical palettes (n, m <= 8) but grows cubically with palette size.
 
         Args:
             palette1: List of (RGB tuple, proportion) pairs.
@@ -867,28 +974,7 @@ class ColorAnalyzer:
         # Expand to balanced assignment problem:
         # Discretise weights into N units using largest-remainder method so
         # totals are guaranteed equal and no positive weight is zeroed out.
-        resolution = max(n, m) * 10  # granularity
-
-        def _largest_remainder(weights: np.ndarray, total: int) -> np.ndarray:
-            raw = weights * total
-            floors = np.floor(raw).astype(int)
-            # Guarantee at least 1 unit for every positive weight
-            floors = np.where((weights > 0) & (floors == 0), 1, floors)
-            remainder = total - floors.sum()
-            if remainder > 0:
-                fracs = raw - np.floor(raw)
-                # Indices sorted by descending fractional part
-                order = np.argsort(-fracs)
-                for idx in order[:remainder]:
-                    floors[idx] += 1
-            elif remainder < 0:
-                # Over-allocated (can happen when forced minimums push sum above total)
-                fracs = raw - np.floor(raw)
-                order = np.argsort(fracs)  # smallest fracs donated first
-                for idx in order[:-remainder]:
-                    if floors[idx] > 1:
-                        floors[idx] -= 1
-            return floors
+        resolution = max(n, m) * _PEMD_RESOLUTION_MULTIPLIER
 
         counts1 = _largest_remainder(w1, resolution)
         counts2 = _largest_remainder(w2, resolution)
@@ -968,12 +1054,7 @@ class ColorAnalyzer:
                 "components": {},
             }
 
-        default_weights = {
-            "hue_entropy": 0.3,
-            "perceptual_spread": 0.3,
-            "proportion_evenness": 0.2,
-            "harmony_penalty": 0.2,
-        }
+        default_weights = dict(_CCI_DEFAULT_WEIGHTS)
         w = weights if weights else default_weights
 
         # 1. Hue entropy (reuse existing method, already normalized 0–1)
@@ -988,8 +1069,7 @@ class ColorAnalyzer:
                 distances.append(namer._ciede2000(labs[i], labs[j]))
 
         mean_distance = float(np.mean(distances)) if distances else 0.0
-        # Normalize: CIEDE2000 of 100 is extreme; cap at 100
-        perceptual_spread = min(1.0, mean_distance / 100.0)
+        perceptual_spread = min(1.0, mean_distance / _CIEDE2000_NORMALIZATION_CAP)
 
         # 3. Proportion evenness (1 - Gini coefficient)
         if proportions is None:
@@ -1011,10 +1091,13 @@ class ColorAnalyzer:
 
         # Composite CCI
         cci = (
-            w.get("hue_entropy", 0.3) * hue_entropy
-            + w.get("perceptual_spread", 0.3) * perceptual_spread
-            + w.get("proportion_evenness", 0.2) * proportion_evenness
-            - w.get("harmony_penalty", 0.2) * harmony_score
+            w.get("hue_entropy", _CCI_DEFAULT_WEIGHTS["hue_entropy"]) * hue_entropy
+            + w.get("perceptual_spread", _CCI_DEFAULT_WEIGHTS["perceptual_spread"])
+            * perceptual_spread
+            + w.get("proportion_evenness", _CCI_DEFAULT_WEIGHTS["proportion_evenness"])
+            * proportion_evenness
+            - w.get("harmony_penalty", _CCI_DEFAULT_WEIGHTS["harmony_penalty"])
+            * harmony_score
         )
         cci = max(0.0, min(1.0, cci))
 
@@ -1025,15 +1108,30 @@ class ColorAnalyzer:
             "proportion_evenness": float(proportion_evenness),
             "harmony_penalty": float(harmony_score),
             "components": {
-                "hue_entropy_weighted": float(w.get("hue_entropy", 0.3) * hue_entropy),
+                "hue_entropy_weighted": float(
+                    w.get("hue_entropy", _CCI_DEFAULT_WEIGHTS["hue_entropy"])
+                    * hue_entropy
+                ),
                 "perceptual_spread_weighted": float(
-                    w.get("perceptual_spread", 0.3) * perceptual_spread
+                    w.get(
+                        "perceptual_spread",
+                        _CCI_DEFAULT_WEIGHTS["perceptual_spread"],
+                    )
+                    * perceptual_spread
                 ),
                 "proportion_evenness_weighted": float(
-                    w.get("proportion_evenness", 0.2) * proportion_evenness
+                    w.get(
+                        "proportion_evenness",
+                        _CCI_DEFAULT_WEIGHTS["proportion_evenness"],
+                    )
+                    * proportion_evenness
                 ),
                 "harmony_penalty_weighted": float(
-                    w.get("harmony_penalty", 0.2) * harmony_score
+                    w.get(
+                        "harmony_penalty",
+                        _CCI_DEFAULT_WEIGHTS["harmony_penalty"],
+                    )
+                    * harmony_score
                 ),
             },
         }
@@ -1071,9 +1169,7 @@ class ColorAnalyzer:
             >>> for flag in result['flagged']:
             ...     print(f"  ⚠ {flag['color']}: {flag['reason']}")
         """
-        from .namer import ColorNamer
-
-        namer = ColorNamer(vocabulary="artist")
+        namer = self._get_namer()
 
         if not colors:
             raise ValueError("colors must not be empty")
@@ -1106,8 +1202,7 @@ class ColorAnalyzer:
             }
             per_color.append(entry)
 
-            # Flag if no pigments available or very low probability
-            if prob < 0.1:
+            if prob < _PROVENANCE_ANACHRONISM_THRESHOLD:
                 flagged.append(
                     {
                         "color": color,

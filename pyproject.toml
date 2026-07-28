@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "renoir-wikiart"
-version = "3.6.0"
+version = "3.7.0"
 description = "A pedagogical tool for analyzing artist-specific works from WikiArt with computational color theory and harmony analysis capabilities"
 readme = "README.md"
 authors = [
@@ -28,7 +28,7 @@ keywords = ["art-history", "dataset-analysis", "digital-humanities", "education"
 requires-python = ">=3.9"
 dependencies = [
     "datasets>=2.0.0",
-    "Pillow>=8.0.0",
+    "Pillow>=10.3.0",
     "numpy>=1.20.0",
     "scikit-learn>=1.0.0",
     "pandas>=1.3.0",
@@ -49,6 +49,7 @@ dev = [
     "pytest-cov>=4.0",
     "black>=22.0",
     "flake8>=4.0",
+    "mypy>=1.0",
     "jupyter>=1.0.0",
     "sphinx>=7.0",
     "furo>=2024.0",
@@ -64,3 +65,33 @@ Homepage = "https://github.com/MichailSemoglou/renoir"
 Documentation = "https://renoir-wikiart.readthedocs.io"
 Repository = "https://github.com/MichailSemoglou/renoir"
 "Bug Tracker" = "https://github.com/MichailSemoglou/renoir/issues"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: marks tests requiring the WikiArt dataset (deselect with '-m \"not integration\"')",
+]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["renoir"]
+omit = ["tests/*", "examples/*"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__",
+]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+check_untyped_defs = false
+disallow_untyped_defs = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true

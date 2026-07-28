@@ -41,6 +41,11 @@ jobs:
           pip install black
           black --check renoir tests
 
+      - name: Type check with mypy
+        run: |
+          pip install mypy
+          mypy renoir
+
       - name: Run tests
         run: |
           pytest tests/ -v --tb=short --cov=renoir --cov-report=xml --cov-report=html
