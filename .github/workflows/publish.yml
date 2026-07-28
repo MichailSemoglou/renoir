@@ -24,7 +24,7 @@ jobs:
       - name: Verify tag matches package version
         run: |
           TAG_VERSION=${GITHUB_REF_NAME#v}
-          PKG_VERSION=$(python -c "import renoir; print(renoir.__version__)")
+          PKG_VERSION=$(python -c "import re; m=re.search(r'__version__\s*=\s*\"([^\"]+)\"', open('renoir/__init__.py').read()); print(m.group(1))")
           echo "Tag version: $TAG_VERSION"
           echo "Package version: $PKG_VERSION"
           if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
