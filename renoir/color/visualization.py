@@ -517,7 +517,7 @@ class ColorVisualizer:
             rgb_array[:, 1],
             rgb_array[:, 2],
             c=normalized_colors,
-            s=200,
+            s=200,  # type: ignore[misc]
             alpha=0.8,
             edgecolors="black",
             linewidths=2,
@@ -525,13 +525,13 @@ class ColorVisualizer:
 
         ax.set_xlabel("Red", fontsize=12, fontweight="bold")
         ax.set_ylabel("Green", fontsize=12, fontweight="bold")
-        ax.set_zlabel("Blue", fontsize=12, fontweight="bold")
+        ax.set_zlabel("Blue", fontsize=12, fontweight="bold")  # type: ignore[attr-defined]
         ax.set_title(title, fontsize=14, fontweight="bold", pad=20)
 
         # Set limits
         ax.set_xlim(0, 255)
         ax.set_ylim(0, 255)
-        ax.set_zlim(0, 255)
+        ax.set_zlim(0, 255)  # type: ignore[attr-defined]
 
         plt.tight_layout()
         return self._finalize_figure(fig, save_path, show, "3D RGB space")
