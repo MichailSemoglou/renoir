@@ -28,6 +28,7 @@ def sample_image_path(tmp_path, sample_image):
 
 def _runner():
     from click.testing import CliRunner
+
     return CliRunner()
 
 
@@ -38,6 +39,7 @@ def _runner():
 
 def test_artist_help():
     from renoir.cli import cli
+
     runner = _runner()
     result = runner.invoke(cli, ["artist", "--help"])
     assert result.exit_code == 0
@@ -51,6 +53,7 @@ def test_artist_help():
 
 def test_extract_json_stdout(sample_image_path):
     from renoir.cli import cli
+
     runner = _runner()
     result = runner.invoke(cli, ["extract", sample_image_path, "--n-colors", "3"])
     assert result.exit_code == 0
@@ -64,6 +67,7 @@ def test_extract_json_stdout(sample_image_path):
 
 def test_extract_css_stdout(sample_image_path):
     from renoir.cli import cli
+
     runner = _runner()
     result = runner.invoke(
         cli, ["extract", sample_image_path, "--n-colors", "2", "--format", "css"]
@@ -75,6 +79,7 @@ def test_extract_css_stdout(sample_image_path):
 
 def test_extract_json_to_file(sample_image_path, tmp_path):
     from renoir.cli import cli
+
     runner = _runner()
     out = tmp_path / "out.json"
     result = runner.invoke(
@@ -88,6 +93,7 @@ def test_extract_json_to_file(sample_image_path, tmp_path):
 
 def test_extract_missing_file():
     from renoir.cli import cli
+
     runner = _runner()
     result = runner.invoke(cli, ["extract", "/nonexistent/image.png"])
     assert result.exit_code != 0
@@ -100,6 +106,7 @@ def test_extract_missing_file():
 
 def test_name_hex():
     from renoir.cli import cli
+
     runner = _runner()
     result = runner.invoke(cli, ["name", "#FF0000"])
     assert result.exit_code == 0
@@ -108,6 +115,7 @@ def test_name_hex():
 
 def test_name_rgb():
     from renoir.cli import cli
+
     runner = _runner()
     result = runner.invoke(cli, ["name", "255,0,0"])
     assert result.exit_code == 0
@@ -115,6 +123,7 @@ def test_name_rgb():
 
 def test_name_with_metadata():
     from renoir.cli import cli
+
     runner = _runner()
     result = runner.invoke(cli, ["name", "#FF0000", "--metadata"])
     assert result.exit_code == 0
@@ -124,6 +133,7 @@ def test_name_with_metadata():
 
 def test_name_bad_input():
     from renoir.cli import cli
+
     runner = _runner()
     result = runner.invoke(cli, ["name", "not-a-color"])
     assert result.exit_code != 0
@@ -131,6 +141,7 @@ def test_name_bad_input():
 
 def test_name_vocabulary():
     from renoir.cli import cli
+
     runner = _runner()
     result = runner.invoke(cli, ["name", "#FFFFFF", "--vocabulary", "xkcd"])
     assert result.exit_code == 0
@@ -143,6 +154,7 @@ def test_name_vocabulary():
 
 def test_prompt_basic(sample_image_path):
     from renoir.cli import cli
+
     runner = _runner()
     result = runner.invoke(cli, ["prompt", sample_image_path, "--n-colors", "3"])
     assert result.exit_code == 0
@@ -151,6 +163,7 @@ def test_prompt_basic(sample_image_path):
 
 def test_prompt_with_style(sample_image_path):
     from renoir.cli import cli
+
     runner = _runner()
     result = runner.invoke(
         cli,
@@ -172,15 +185,18 @@ def test_prompt_with_style(sample_image_path):
 
 def test_prompt_target_model(sample_image_path):
     from renoir.cli import cli
+
     runner = _runner()
     result = runner.invoke(
-        cli, ["prompt", sample_image_path, "--n-colors", "2", "--target-model", "dall-e"]
+        cli,
+        ["prompt", sample_image_path, "--n-colors", "2", "--target-model", "dall-e"],
     )
     assert result.exit_code == 0
 
 
 def test_prompt_missing_image():
     from renoir.cli import cli
+
     runner = _runner()
     result = runner.invoke(cli, ["prompt", "/nonexistent/image.png"])
     assert result.exit_code != 0

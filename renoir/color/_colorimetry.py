@@ -78,11 +78,13 @@ def srgb_to_lab(rgb: NDArray) -> NDArray[np.float64]:
         rgb_norm / 12.92,
         ((rgb_norm + 0.055) / 1.055) ** 2.4,
     )
-    M = np.array([
-        [0.4124564, 0.3575761, 0.1804375],
-        [0.2126729, 0.7151522, 0.0721750],
-        [0.0193339, 0.1191920, 0.9503041],
-    ])
+    M = np.array(
+        [
+            [0.4124564, 0.3575761, 0.1804375],
+            [0.2126729, 0.7151522, 0.0721750],
+            [0.0193339, 0.1191920, 0.9503041],
+        ]
+    )
     xyz = linear @ M.T * 100.0
     xyz_norm = xyz / _D65_XYZ
     eps = 0.008856
@@ -129,15 +131,15 @@ def delta_e2000(
     L1, a1, b1 = (float(x) for x in lab1)
     L2, a2, b2 = (float(x) for x in lab2)
 
-    C1 = math.sqrt(a1 ** 2 + b1 ** 2)
-    C2 = math.sqrt(a2 ** 2 + b2 ** 2)
+    C1 = math.sqrt(a1**2 + b1**2)
+    C2 = math.sqrt(a2**2 + b2**2)
     C_avg7 = ((C1 + C2) / 2) ** 7
-    G = 0.5 * (1 - math.sqrt(C_avg7 / (C_avg7 + 25 ** 7)))
+    G = 0.5 * (1 - math.sqrt(C_avg7 / (C_avg7 + 25**7)))
     a1p = a1 * (1 + G)
     a2p = a2 * (1 + G)
 
-    C1p = math.sqrt(a1p ** 2 + b1 ** 2)
-    C2p = math.sqrt(a2p ** 2 + b2 ** 2)
+    C1p = math.sqrt(a1p**2 + b1**2)
+    C2p = math.sqrt(a2p**2 + b2**2)
     h1p = math.degrees(math.atan2(b1, a1p)) % 360
     h2p = math.degrees(math.atan2(b2, a2p)) % 360
 
@@ -157,7 +159,7 @@ def delta_e2000(
 
     Lp_avg = (L1 + L2) / 2
     Cp_avg = (C1p + C2p) / 2
-    Cp_avg7 = Cp_avg ** 7
+    Cp_avg7 = Cp_avg**7
 
     if C1p * C2p == 0:
         hp_avg = h1p + h2p
@@ -180,7 +182,7 @@ def delta_e2000(
     SH = 1 + 0.015 * Cp_avg * T
 
     d_theta = 30 * math.exp(-(((hp_avg - 275) / 25) ** 2))
-    RC = 2 * math.sqrt(Cp_avg7 / (Cp_avg7 + 25 ** 7))
+    RC = 2 * math.sqrt(Cp_avg7 / (Cp_avg7 + 25**7))
     RT = -math.sin(math.radians(2 * d_theta)) * RC
 
     return math.sqrt(

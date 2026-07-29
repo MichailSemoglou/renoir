@@ -422,6 +422,7 @@ class ArtistAnalyzer:
         if save_path:
             import os
             from renoir.color.extraction import _validate_export_filename
+
             _validate_export_filename(os.path.basename(save_path))
             fig.savefig(save_path, dpi=300, bbox_inches="tight")
             logger.info("Figure saved to %s", save_path)
@@ -569,6 +570,7 @@ class ArtistAnalyzer:
         if save_path:
             import os
             from renoir.color.extraction import _validate_export_filename
+
             _validate_export_filename(os.path.basename(save_path))
             fig.savefig(save_path, dpi=300, bbox_inches="tight")
             logger.info("Figure saved to %s", save_path)
@@ -683,6 +685,7 @@ class ArtistAnalyzer:
         if save_path:
             import os
             from renoir.color.extraction import _validate_export_filename
+
             _validate_export_filename(os.path.basename(save_path))
             fig.savefig(save_path, dpi=300, bbox_inches="tight")
             logger.info("Figure saved to %s", save_path)
@@ -943,6 +946,7 @@ class ArtistAnalyzer:
             if save_path:
                 import os
                 from renoir.color.extraction import _validate_export_filename
+
                 _validate_export_filename(os.path.basename(save_path))
                 fig.savefig(save_path, dpi=300, bbox_inches="tight")
                 logger.info("Figure saved to %s", save_path)
@@ -1065,7 +1069,11 @@ class ArtistAnalyzer:
         namer = ColorNamer()
 
         work_palettes = self._extract_work_palettes(
-            works, n_colors, random_state, verbose, extractor,
+            works,
+            n_colors,
+            random_state,
+            verbose,
+            extractor,
             progress_callback=progress_callback,
         )
 

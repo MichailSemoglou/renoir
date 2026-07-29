@@ -541,7 +541,9 @@ class TestAnalyzeWorksColorSignature:
         ]
         calls = []
         analyzer.analyze_works_color_signature(
-            works, n_colors=2, verbose=False,
+            works,
+            n_colors=2,
+            verbose=False,
             progress_callback=lambda c, t: calls.append((c, t)),
         )
         assert len(calls) == 3

@@ -474,7 +474,9 @@ class TestProgressCallback:
         namer = ColorNamer()
         calls = []
         namer.historical_pigment_probability(
-            (255, 0, 0), year=1800, top_k=3,
+            (255, 0, 0),
+            year=1800,
+            top_k=3,
             progress_callback=lambda c, t: calls.append((c, t)),
         )
         assert len(calls) > 0

@@ -101,10 +101,7 @@ class SelectionResult:
         ]
 
     def to_rgb_tuples(self) -> List[Tuple[int, int, int]]:
-        return [
-            (int(r), int(g), int(b))
-            for r, g, b in self.palette_rgb
-        ]
+        return [(int(r), int(g), int(b)) for r, g, b in self.palette_rgb]
 
 
 @dataclass
@@ -157,9 +154,7 @@ def _quantize_to_candidates(
 ) -> Tuple[NDArray[np.uint8], NDArray[np.float64]]:
     if image.mode != "RGB":
         image = image.convert("RGB")
-    quantized = image.quantize(
-        colors=max_candidates, method=Image.Quantize.MEDIANCUT
-    )
+    quantized = image.quantize(colors=max_candidates, method=Image.Quantize.MEDIANCUT)
     quantized_rgb = quantized.convert("RGB")
     pixels = np.array(quantized_rgb, dtype=np.uint8).reshape(-1, 3)
     unique, counts = np.unique(pixels, axis=0, return_counts=True)
@@ -226,9 +221,13 @@ def select_palette(
     """
     candidates_rgb, freqs = _quantize_to_candidates(image, max_candidates)
     return _select_from_candidates(
-        candidates_rgb, freqs,
-        n=n, alpha=alpha, beta=beta,
-        tau_dist=tau_dist, wcag_step=wcag_step,
+        candidates_rgb,
+        freqs,
+        n=n,
+        alpha=alpha,
+        beta=beta,
+        tau_dist=tau_dist,
+        wcag_step=wcag_step,
     )
 
 
@@ -248,18 +247,28 @@ def _select_from_candidates(
     K = len(candidates_rgb)
 
     palette_indices, in_palette = _greedy_expand_palette(
-        candidates_rgb, candidates_lab, freqs,
-        n=n, alpha=alpha, beta=beta, tau_dist=tau_dist,
+        candidates_rgb,
+        candidates_lab,
+        freqs,
+        n=n,
+        alpha=alpha,
+        beta=beta,
+        tau_dist=tau_dist,
     )
 
     (
-        palette_indices, in_palette,
-        wcag_guaranteed, wcag_replacement_applied,
+        palette_indices,
+        in_palette,
+        wcag_guaranteed,
+        wcag_replacement_applied,
         wcag_distinctness_compromised,
     ) = _apply_wcag_replacement(
-        candidates_rgb, candidates_lab,
-        palette_indices, in_palette,
-        tau_dist=tau_dist, wcag_step=wcag_step,
+        candidates_rgb,
+        candidates_lab,
+        palette_indices,
+        in_palette,
+        tau_dist=tau_dist,
+        wcag_step=wcag_step,
     )
 
     final_rgb = candidates_rgb[palette_indices]
@@ -312,8 +321,14 @@ def _greedy_expand_palette(
 
         if best_idx is None:
             best_score, best_idx = _relax_and_retry(
-                candidates_lab, freqs, palette_indices,
-                in_palette, alpha, beta, tau_dist, best_score,
+                candidates_lab,
+                freqs,
+                palette_indices,
+                in_palette,
+                alpha,
+                beta,
+                tau_dist,
+                best_score,
             )
 
             if best_idx is None:
@@ -389,8 +404,10 @@ def _apply_wcag_replacement(
 
     if not wcag_step or wcag_guaranteed:
         return (
-            palette_indices, in_palette,
-            wcag_guaranteed, wcag_replacement_applied,
+            palette_indices,
+            in_palette,
+            wcag_guaranteed,
+            wcag_replacement_applied,
             wcag_distinctness_compromised,
         )
 
@@ -399,16 +416,12 @@ def _apply_wcag_replacement(
 
     least_distinct_pos = min(
         range(len(palette_indices)),
-        key=lambda pos: _intra_min_de(
-            palette_indices, palette_lab_list, pos
-        ),
+        key=lambda pos: _intra_min_de(palette_indices, palette_lab_list, pos),
     )
     victim_idx = palette_indices[least_distinct_pos]
 
     remaining_indices = [
-        idx
-        for k, idx in enumerate(palette_indices)
-        if k != least_distinct_pos
+        idx for k, idx in enumerate(palette_indices) if k != least_distinct_pos
     ]
     remaining_lab = [candidates_lab[idx] for idx in remaining_indices]
 
@@ -422,9 +435,7 @@ def _apply_wcag_replacement(
         cand_lab = candidates_lab[cand]
         max_cr_with_remaining = max(
             (
-                wcag_contrast(
-                    candidates_rgb[cand], candidates_rgb[pal_idx]
-                )
+                wcag_contrast(candidates_rgb[cand], candidates_rgb[pal_idx])
                 for pal_idx in remaining_indices
             ),
             default=0.0,
@@ -469,8 +480,10 @@ def _apply_wcag_replacement(
         )
 
     return (
-        palette_indices, in_palette,
-        wcag_guaranteed, wcag_replacement_applied,
+        palette_indices,
+        in_palette,
+        wcag_guaranteed,
+        wcag_replacement_applied,
         wcag_distinctness_compromised,
     )
 
@@ -480,10 +493,7 @@ def _palette_has_aa_pair(
     palette_indices: List[int],
 ) -> bool:
     for a, b in combinations(palette_indices, 2):
-        if (
-            wcag_contrast(candidates_rgb[a], candidates_rgb[b])
-            >= WCAG_AA_NORMAL
-        ):
+        if wcag_contrast(candidates_rgb[a], candidates_rgb[b]) >= WCAG_AA_NORMAL:
             return True
     return False
 
@@ -493,11 +503,7 @@ def _intra_min_de(
     palette_lab_list: list,
     pos: int,
 ) -> float:
-    others = [
-        palette_lab_list[k]
-        for k in range(len(palette_indices))
-        if k != pos
-    ]
+    others = [palette_lab_list[k] for k in range(len(palette_indices)) if k != pos]
     if not others:
         return 0.0
     return min(delta_e2000(palette_lab_list[pos], o) for o in others)
@@ -544,8 +550,12 @@ def assign_roles(
     n = len(palette_rgb)
     if n == 0:
         return RoleAssignment(
-            surface=None, on_surface=None, primary=None,
-            secondary=None, accent=None, extras=[],
+            surface=None,
+            on_surface=None,
+            primary=None,
+            secondary=None,
+            accent=None,
+            extras=[],
         )
 
     available = list(range(n))
@@ -557,9 +567,7 @@ def assign_roles(
             mean_L = float(
                 sum(frequencies[i] * float(palette_lab[i, 0]) for i in range(n))
             )
-        effective_mode: Literal["light", "dark"] = (
-            "dark" if mean_L < 40.0 else "light"
-        )
+        effective_mode: Literal["light", "dark"] = "dark" if mean_L < 40.0 else "light"
     else:
         effective_mode = mode
 
@@ -571,8 +579,12 @@ def assign_roles(
 
     if not available:
         return RoleAssignment(
-            surface=surface_idx, on_surface=None, primary=None,
-            secondary=None, accent=None, extras=[],
+            surface=surface_idx,
+            on_surface=None,
+            primary=None,
+            secondary=None,
+            accent=None,
+            extras=[],
         )
 
     on_surface_idx = max(
@@ -583,8 +595,12 @@ def assign_roles(
 
     if not available:
         return RoleAssignment(
-            surface=surface_idx, on_surface=on_surface_idx,
-            primary=None, secondary=None, accent=None, extras=[],
+            surface=surface_idx,
+            on_surface=on_surface_idx,
+            primary=None,
+            secondary=None,
+            accent=None,
+            extras=[],
         )
 
     eligible_primary = [
@@ -600,23 +616,31 @@ def assign_roles(
 
     if not available:
         return RoleAssignment(
-            surface=surface_idx, on_surface=on_surface_idx,
-            primary=primary_idx, secondary=None, accent=None, extras=[],
+            surface=surface_idx,
+            on_surface=on_surface_idx,
+            primary=primary_idx,
+            secondary=None,
+            accent=None,
+            extras=[],
         )
 
-    primary_hue = math.degrees(
-        math.atan2(
-            float(palette_lab[primary_idx, 2]),
-            float(palette_lab[primary_idx, 1]),
+    primary_hue = (
+        math.degrees(
+            math.atan2(
+                float(palette_lab[primary_idx, 2]),
+                float(palette_lab[primary_idx, 1]),
+            )
         )
-    ) % 360.0
+        % 360.0
+    )
 
     def _hue_distance(idx: int) -> float:
-        h = math.degrees(
-            math.atan2(
-                float(palette_lab[idx, 2]), float(palette_lab[idx, 1])
+        h = (
+            math.degrees(
+                math.atan2(float(palette_lab[idx, 2]), float(palette_lab[idx, 1]))
             )
-        ) % 360.0
+            % 360.0
+        )
         diff = abs(h - primary_hue)
         return min(diff, 360.0 - diff)
 
@@ -625,14 +649,17 @@ def assign_roles(
 
     if not available:
         return RoleAssignment(
-            surface=surface_idx, on_surface=on_surface_idx,
-            primary=primary_idx, secondary=secondary_idx,
-            accent=None, extras=[],
+            surface=surface_idx,
+            on_surface=on_surface_idx,
+            primary=primary_idx,
+            secondary=secondary_idx,
+            accent=None,
+            extras=[],
         )
 
     def _chroma(idx: int) -> float:
         a, b = float(palette_lab[idx, 1]), float(palette_lab[idx, 2])
-        return math.sqrt(a ** 2 + b ** 2)
+        return math.sqrt(a**2 + b**2)
 
     accent_idx = max(available, key=_chroma)
     available.remove(accent_idx)
@@ -640,7 +667,10 @@ def assign_roles(
     extras = sorted(available, key=lambda i: frequencies[i], reverse=True)
 
     return RoleAssignment(
-        surface=surface_idx, on_surface=on_surface_idx,
-        primary=primary_idx, secondary=secondary_idx,
-        accent=accent_idx, extras=extras,
+        surface=surface_idx,
+        on_surface=on_surface_idx,
+        primary=primary_idx,
+        secondary=secondary_idx,
+        accent=accent_idx,
+        extras=extras,
     )

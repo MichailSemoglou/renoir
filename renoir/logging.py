@@ -49,7 +49,5 @@ def setup_notebook_logging(
 
     handler = logging.StreamHandler(stream)
     handler.setLevel(level)
-    handler.setFormatter(
-        logging.Formatter("%(name)s [%(levelname)s] %(message)s")
-    )
+    handler.setFormatter(logging.Formatter("%(name)s [%(levelname)s] %(message)s"))
     root.addHandler(handler)

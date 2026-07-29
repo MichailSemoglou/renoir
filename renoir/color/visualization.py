@@ -114,6 +114,7 @@ class ColorVisualizer:
     ):
         if save_path:
             from ..color.extraction import _validate_export_filename
+
             _validate_export_filename(os.path.basename(save_path))
             fig.savefig(save_path, dpi=300, bbox_inches="tight")
             logger.info("%s saved to: %s", label, save_path)

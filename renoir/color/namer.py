@@ -127,6 +127,7 @@ class ColorNamer:
         if rgb in self._lab_cache:
             return self._lab_cache[rgb]
         from ._colorimetry import srgb_to_lab_tuple
+
         lab = srgb_to_lab_tuple(rgb)
         self._lab_cache[rgb] = lab
         return lab
@@ -479,10 +480,12 @@ class ColorNamer:
 
     def _hex_to_rgb(self, hex_color: str) -> Tuple[int, int, int]:
         from ._colorimetry import hex_to_rgb as _hex
+
         return _hex(hex_color)
 
     def _rgb_to_hex(self, rgb: Tuple[int, int, int]) -> str:
         from ._colorimetry import rgb_to_hex as _hex
+
         return _hex(rgb)
 
     def set_vocabulary(self, vocabulary: str) -> None:

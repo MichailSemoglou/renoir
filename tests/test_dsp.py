@@ -26,17 +26,20 @@ def colorful():
 class TestSelectPalette:
     def test_returns_n_colors(self, colorful):
         from renoir.color.dsp import select_palette
+
         result = select_palette(colorful, n=4)
         assert result.n == 4
         assert len(result.palette_rgb) == 4
 
     def test_monochrome_does_not_crash(self, solid_red):
         from renoir.color.dsp import select_palette
+
         result = select_palette(solid_red, n=3)
         assert result.n > 0
 
     def test_to_hex(self, colorful):
         from renoir.color.dsp import select_palette
+
         result = select_palette(colorful, n=3)
         hexes = result.to_hex()
         assert len(hexes) == 3
@@ -44,6 +47,7 @@ class TestSelectPalette:
 
     def test_to_rgb_tuples(self, colorful):
         from renoir.color.dsp import select_palette
+
         result = select_palette(colorful, n=3)
         tuples = result.to_rgb_tuples()
         assert len(tuples) == 3
@@ -51,6 +55,7 @@ class TestSelectPalette:
 
     def test_frequencies_sum_to_one(self, colorful):
         from renoir.color.dsp import select_palette
+
         result = select_palette(colorful, n=3)
         assert len(result.frequencies) == 3
         assert all(0 <= f <= 1 for f in result.frequencies)
@@ -62,16 +67,19 @@ class TestSelectPalette:
         arr[:, 15:] = (0, 0, 0)
         result = Image.fromarray(arr)
         from renoir.color.dsp import select_palette
+
         palette = select_palette(result, n=2, tau_dist=5)
         assert palette.wcag_guaranteed
 
     def test_wcag_step_can_be_disabled(self, colorful):
         from renoir.color.dsp import select_palette
+
         result = select_palette(colorful, n=3, wcag_step=False)
         assert isinstance(result.wcag_guaranteed, bool)
 
     def test_tau_dist_respected(self, colorful):
         from renoir.color.dsp import select_palette, delta_e2000, srgb_to_lab
+
         result = select_palette(colorful, n=3, tau_dist=15)
         lab = srgb_to_lab(result.palette_rgb)
         for i in range(len(lab)):
@@ -84,19 +92,25 @@ class TestSelectPalette:
 class TestExtractDominantColorsDSP:
     def test_method_dsp(self, colorful):
         from renoir.color import ColorExtractor
+
         extractor = ColorExtractor()
         colors = extractor.extract_dominant_colors(
-            colorful, n_colors=3, method="dsp",
+            colorful,
+            n_colors=3,
+            method="dsp",
         )
         assert len(colors) == 3
         flat = [(int(c[0]), int(c[1]), int(c[2])) for c in colors]
 
     def test_method_dsp_on_numpy_array(self, colorful):
         from renoir.color import ColorExtractor
+
         arr = np.array(colorful)
         extractor = ColorExtractor()
         colors = extractor.extract_dominant_colors(
-            arr, n_colors=2, method="dsp",
+            arr,
+            n_colors=2,
+            method="dsp",
         )
         assert len(colors) == 2
 
@@ -107,7 +121,9 @@ class TestRoleAssignment:
 
         result = select_palette(_gradient_image(), n=5)
         roles = assign_roles(
-            result.palette_rgb, result.palette_lab, result.frequencies,
+            result.palette_rgb,
+            result.palette_lab,
+            result.frequencies,
             mode="light",
         )
         assert roles.surface is not None
@@ -119,7 +135,9 @@ class TestRoleAssignment:
 
         result = select_palette(_gradient_image(), n=5)
         roles = assign_roles(
-            result.palette_rgb, result.palette_lab, result.frequencies,
+            result.palette_rgb,
+            result.palette_lab,
+            result.frequencies,
             mode="dark",
         )
         assert roles.surface is not None
@@ -129,7 +147,9 @@ class TestRoleAssignment:
 
         result = select_palette(_gradient_image(), n=5)
         roles = assign_roles(
-            result.palette_rgb, result.palette_lab, result.frequencies,
+            result.palette_rgb,
+            result.palette_lab,
+            result.frequencies,
             mode="light",
         )
         surface_L = result.palette_lab[roles.surface, 0]
@@ -141,7 +161,9 @@ class TestRoleAssignment:
 
         result = select_palette(_gradient_image(), n=5)
         roles = assign_roles(
-            result.palette_rgb, result.palette_lab, result.frequencies,
+            result.palette_rgb,
+            result.palette_lab,
+            result.frequencies,
         )
         rmap = roles.roles_map
         assert result.n == len(rmap)
@@ -150,8 +172,11 @@ class TestRoleAssignment:
     def test_empty_palette(self):
         from renoir.color.dsp import assign_roles
         import numpy as np
+
         roles = assign_roles(
-            np.empty((0, 3)), np.empty((0, 3)), [],
+            np.empty((0, 3)),
+            np.empty((0, 3)),
+            [],
         )
         assert roles.surface is None
 

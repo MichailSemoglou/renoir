@@ -346,11 +346,13 @@ class ColorExtractor:
     def rgb_to_hex(self, rgb: Tuple[int, int, int]) -> str:
         """Convert RGB tuple to hexadecimal color code."""
         from renoir.color._colorimetry import rgb_to_hex
+
         return rgb_to_hex(rgb)
 
     def hex_to_rgb(self, hex_color: str) -> Tuple[int, int, int]:
         """Convert hexadecimal color code to RGB tuple."""
         from renoir.color._colorimetry import hex_to_rgb
+
         return hex_to_rgb(hex_color)
 
     def palette_to_dict(

@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 _CLICK_AVAILABLE = False
 try:
     import click
+
     _CLICK_AVAILABLE = True
 except ImportError:
     click = None  # type: ignore[assignment]
@@ -67,7 +68,10 @@ if _CLICK_AVAILABLE:
     @cli.command()
     @click.argument("artist_id")
     @click.option(
-        "--limit", default=20, type=int, help="Maximum works to return.",
+        "--limit",
+        default=20,
+        type=int,
+        help="Maximum works to return.",
     )
     @click.option(
         "--json",
@@ -151,7 +155,9 @@ if _CLICK_AVAILABLE:
         pil_image = _load_image(image)
         extractor = ColorExtractor()
         colors = extractor.extract_dominant_colors(
-            pil_image, n_colors=n_colors, method=method,
+            pil_image,
+            n_colors=n_colors,
+            method=method,
         )
         colors = [(int(c[0]), int(c[1]), int(c[2])) for c in colors]
 
@@ -163,8 +169,7 @@ if _CLICK_AVAILABLE:
                 payload = {
                     "n_colors": n_colors,
                     "colors": [
-                        {"rgb": list(c), "hex": extractor.rgb_to_hex(c)}
-                        for c in colors
+                        {"rgb": list(c), "hex": extractor.rgb_to_hex(c)} for c in colors
                     ],
                 }
                 click.echo(json.dumps(payload, indent=2))
@@ -176,8 +181,7 @@ if _CLICK_AVAILABLE:
             else:
                 hex_colors = [extractor.rgb_to_hex(c) for c in colors]
                 lines = [
-                    f"  --{prefix}-{i + 1}: {h};"
-                    for i, h in enumerate(hex_colors)
+                    f"  --{prefix}-{i + 1}: {h};" for i, h in enumerate(hex_colors)
                 ]
                 click.echo(":root {")
                 click.echo("\n".join(lines))
@@ -284,7 +288,9 @@ if _CLICK_AVAILABLE:
         pil_image = _load_image(image)
         extractor = ColorExtractor()
         colors = extractor.extract_dominant_colors(
-            pil_image, n_colors=n_colors, method=method,
+            pil_image,
+            n_colors=n_colors,
+            method=method,
         )
         colors = [(int(c[0]), int(c[1]), int(c[2])) for c in colors]
 
@@ -298,7 +304,7 @@ if _CLICK_AVAILABLE:
         )
         click.echo(result)
 
-
 else:
+
     def cli() -> None:  # type: ignore[misc]
         _check_click()
