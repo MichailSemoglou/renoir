@@ -5,6 +5,15 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -13,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v7
@@ -30,25 +39,17 @@ jobs:
 
       - name: Lint with flake8
         run: |
-          pip install flake8
-          # Stop the build if there are Python syntax errors or undefined names
           flake8 renoir --count --select=E9,F63,F7,F82 --show-source --statistics
-          # Exit-zero treats all errors as warnings
           flake8 renoir --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
       - name: Check code formatting with black
-        run: |
-          pip install black
-          black --check --target-version py39 renoir tests
+        run: black --check --target-version py39 renoir tests
 
       - name: Type check with mypy
-        run: |
-          pip install mypy
-          mypy renoir
+        run: mypy renoir
 
       - name: Run tests
-        run: |
-          pytest tests/ -v --tb=short --cov=renoir --cov-report=xml --cov-report=html
+        run: pytest tests/ -v --tb=short --cov=renoir --cov-report=xml --cov-report=html
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
@@ -56,6 +57,33 @@ jobs:
           file: ./coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
+
+  build-check:
+    name: Build check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install build tools
+        run: python -m pip install build
+
+      - name: Build package
+        run: python -m build --sdist --wheel
+
+      - name: Verify wheel contents
+        run: |
+          wheel=$(ls dist/*.whl | head -1)
+          echo "Checking $wheel ..."
+          python -m zipfile --list "$wheel" | grep -q "renoir/__init__.py" || { echo "ERROR: Missing renoir/__init__.py in wheel"; exit 1; }
+          python -m zipfile --list "$wheel" | grep -q "renoir/py.typed" || echo "Warning: py.typed marker not found in wheel"
+          python -m zipfile --list "$wheel" | grep -q "renoir/color/__init__.py" || { echo "ERROR: Missing color subpackage in wheel"; exit 1; }
+          python -m zipfile --list "$wheel" | grep -q "renoir/logging.py" || echo "Warning: logging.py not found in wheel"
+          echo "$wheel passes structural checks."
 
   docs-check:
     runs-on: ubuntu-latest

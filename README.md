@@ -35,7 +35,7 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 
 ### Color analysis
 
-- **Color extraction**: K-means clustering for intelligent palette extraction
+- **Color extraction**: K-means clustering for intelligent palette extraction; also supports **DSP** (Distinctness-First Palette Selection) for perceptually maximally distinct palettes with guaranteed WCAG AA contrast
 - **Color naming**: Evocative, artist-friendly color names (Burnt Sienna, Prussian Blue, etc.)
   - 4 naming vocabularies: artist pigments, Resene, Werner's, XKCD
   - CIEDE2000 perceptually accurate color matching
@@ -77,6 +77,12 @@ pip install renoir-wikiart
 pip install 'renoir-wikiart[visualization]'
 ```
 
+### With CLI Support
+
+```bash
+pip install 'renoir-wikiart[cli]'
+```
+
 ### From Source
 
 ```bash
@@ -116,6 +122,24 @@ colors = extractor.extract_dominant_colors(works[0]['image'], n_colors=5)
 # Visualize with evocative names
 visualizer = ColorVisualizer()
 visualizer.plot_palette(colors, title="Monet's Palette", show_names=True, vocabulary="artist")
+```
+
+### Accessible Palette Extraction (DSP)
+
+```python
+from renoir.color import ColorExtractor
+
+extractor = ColorExtractor()
+
+# Extract a perceptually distinct palette with guaranteed WCAG AA contrast
+colors = extractor.extract_dominant_colors(works[0]['image'], n_colors=5, method="dsp")
+
+# Or use DSP directly for full metadata
+from renoir.color.dsp import select_palette, assign_roles
+result = select_palette(works[0]['image'], n=5)
+roles = assign_roles(result.palette_rgb, result.palette_lab, result.frequencies)
+print(f"WCAG AA guaranteed: {result.wcag_guaranteed}")
+print(f"Surface color: {result.palette_rgb[roles.surface]}")
 ```
 
 ### Color Naming

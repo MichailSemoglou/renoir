@@ -108,6 +108,13 @@ class PromptGenerator:
         Returns:
             Structured prompt string.
 
+        Security note:
+            The ``style``, ``medium``, ``mood``, and ``subject`` parameters are
+            interpolated directly into the returned prompt string.  This library
+            does not call any LLM API; callers that pipe the returned string to
+            an external API are responsible for sanitising those values before
+            transmission.
+
         Example:
             >>> gen = PromptGenerator()
             >>> colors = [(255, 87, 51), (0, 50, 200), (255, 255, 240)]

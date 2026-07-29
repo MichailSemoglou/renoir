@@ -5,6 +5,59 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.0] - 2026-07-29
+
+### Added
+
+- **Structured logging helper** `renoir.setup_notebook_logging()`: attaches a
+  `StreamHandler` to the `renoir` logger namespace so progress messages
+  appear in Jupyter notebooks without extra configuration. The handler is
+  idempotent; calling the function multiple times does not add duplicates.
+  Exported from `renoir.__init__` and implemented in `renoir/logging.py`.
+- **Progress callback** on long-running methods:
+  `ArtistAnalyzer._extract_work_palettes`, `ArtistAnalyzer.artist_color_signature`,
+  `ArtistAnalyzer.analyze_works_color_signature`, and
+  `ColorNamer.historical_pigment_probability` now accept an optional
+  `progress_callback: Callable[[int, int], None]` parameter. The callback
+  is invoked as `callback(completed, total)` after each item, enabling
+  integration with `tqdm`, `rich`, or custom progress reporters.
+- **CLI with subcommands** in `renoir/cli.py`, using `click` as an
+  optional `cli` extra. Four subcommands:
+  - `renoir artist <slug>` — metadata and genre/style distributions
+  - `renoir extract <image>` — dominant-color palette as JSON or CSS
+  - `renoir name <color>` — perceptually accurate color naming via CIEDE2000
+  - `renoir prompt <image>` — GenAI prompt from image palette
+    Stdout is machine-readable; progress writes to stderr. Install with
+    `pip install renoir-wikiart[cli]`.
+- **DSP palette extraction** in `renoir/color/dsp.py` — Distinctness-First
+  Palette Selection, a constrained greedy algorithm that maximises perceptual
+  distinctness (minimum pairwise ΔE₂₀₀₀) and guarantees at least one WCAG
+  AA-compliant contrast pair. Available via
+  `ColorExtractor.extract_dominant_colors(method="dsp")` and the CLI
+  `--method dsp` flag. Includes semantic role assignment (Surface,
+  On-Surface, Primary, Secondary, Accent) for design-token schemas.
+- **Shared colorimetry module** `renoir/color/_colorimetry.py`: consolidated
+  six duplicated implementations of `srgb_to_lab`, `delta_e2000`,
+  `relative_luminance`, `wcag_contrast`, `hex_to_rgb`, and
+  `rgb_to_hex` into a single source of truth. `dsp.py`, `namer.py`,
+  `analysis.py`, and `extraction.py` now import from this module.
+- **DSP refactor**: `_select_from_candidates` split into six single-purpose
+  functions (`_greedy_expand_palette`, `_relax_and_retry`,
+  `_apply_wcag_replacement`, `_palette_has_aa_pair`, `_intra_min_de`).
+  Zero nested closures remain.
+- **Progress callback tests**: `historical_pigment_probability` and
+  `analyze_works_color_signature` now have unit tests verifying that
+  `progress_callback` is invoked and that the final call reports
+  `completed == total`.
+
+### Fixed
+
+- **WCAG contrast gamma threshold**: `ColorAnalyzer.calculate_contrast_ratio`
+  used an sRGB linearisation threshold of `0.03928` (an approximation)
+  instead of the correct IEC 61966-2-1 value of `0.04045`. This could
+  produce different contrast ratios from the same input as the DSP module
+  and is now unified via `_colorimetry.py`.
+
 ## [3.7.0] - 2026-07-28
 
 ### Added

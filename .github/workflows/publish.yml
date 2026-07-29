@@ -5,10 +5,23 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
+  test:
+    name: Pre-publish tests
+    uses: ./.github/workflows/tests.yml
+    secrets: inherit
+
   publish:
     name: Build and publish
     runs-on: ubuntu-latest
+    needs: test
     environment: release
     permissions:
       id-token: write
@@ -33,10 +46,35 @@ jobs:
           fi
 
       - name: Install build tools
-        run: pip install build
+        run: python -m pip install build
 
       - name: Build package
-        run: python -m build
+        run: python -m build --sdist --wheel
+
+      - name: Verify wheel structure
+        run: |
+          wheel=$(ls dist/*.whl | head -1)
+          echo "Built: $wheel"
+          python -m zipfile --list "$wheel" | grep -q "renoir/__init__.py" || { echo "ERROR: Missing renoir/__init__.py"; exit 1; }
+          python -m zipfile --list "$wheel" | grep -q "renoir/color/__init__.py" || { echo "ERROR: Missing color subpackage"; exit 1; }
+          echo "Wheel structure verified."
+
+      - name: Smoke-test wheel
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          wheel=$(ls dist/*.whl | head -1)
+          pip install "$wheel"
+          python -c "
+          import renoir
+          print(f'renoir {renoir.__version__} imported successfully')
+          from renoir.color import ColorExtractor, ColorAnalyzer, ColorNamer, ColorVisualizer, PromptGenerator
+          from renoir import ArtistAnalyzer, quick_analysis, setup_notebook_logging
+          print('All public modules imported.')
+          from renoir.color.dsp import select_palette, assign_roles
+          print('DSP module imported.')
+          assert renoir.__version__ == '$TAG_VERSION', f'Version mismatch: {renoir.__version__} != $TAG_VERSION'
+          print('Version matches tag.')
+          "
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

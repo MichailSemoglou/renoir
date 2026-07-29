@@ -6,6 +6,7 @@ of color data, palettes, and distributions.
 """
 
 import logging
+import os
 
 import numpy as np
 from typing import Any, Dict, List, Optional, Tuple, cast
@@ -112,6 +113,8 @@ class ColorVisualizer:
         label: str = "Figure",
     ):
         if save_path:
+            from ..color.extraction import _validate_export_filename
+            _validate_export_filename(os.path.basename(save_path))
             fig.savefig(save_path, dpi=300, bbox_inches="tight")
             logger.info("%s saved to: %s", label, save_path)
         if show:

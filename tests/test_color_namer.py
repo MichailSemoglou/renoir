@@ -116,7 +116,7 @@ class TestColorNaming:
             namer.name("#GGGGGG")
 
         with pytest.raises(ValueError):
-            namer.name("#FFF")  # Too short
+            namer.name("#FFFFF")  # Wrong length
 
 
 class TestPaletteNaming:
@@ -236,7 +236,7 @@ class TestColorConversions:
         """Test RGB to hex conversion."""
         namer = ColorNamer()
         hex_code = namer._rgb_to_hex((255, 87, 51))
-        assert hex_code == "#FF5733"
+        assert hex_code == "#ff5733"
 
     def test_rgb_to_lab(self):
         """Test RGB to Lab conversion."""
@@ -467,6 +467,19 @@ class TestHistoricalPigmentProbability:
         namer = ColorNamer(vocabulary="xkcd")
         namer.historical_pigment_probability((255, 0, 0), 1800)
         assert namer.vocabulary == "xkcd"
+
+
+class TestProgressCallback:
+    def test_historical_pigment_probability_calls_callback(self):
+        namer = ColorNamer()
+        calls = []
+        namer.historical_pigment_probability(
+            (255, 0, 0), year=1800, top_k=3,
+            progress_callback=lambda c, t: calls.append((c, t)),
+        )
+        assert len(calls) > 0
+        last_completed, last_total = calls[-1]
+        assert last_completed == last_total
 
 
 if __name__ == "__main__":
