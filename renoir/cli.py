@@ -221,7 +221,11 @@ if _CLICK_AVAILABLE:
                     "COLOR must be a hex string (#FF5733) or "
                     "comma-separated RGB (255,87,51)."
                 )
-            rgb_value = (int(parts[0].strip()), int(parts[1].strip()), int(parts[2].strip()))
+            rgb_value = (
+                int(parts[0].strip()),
+                int(parts[1].strip()),
+                int(parts[2].strip()),
+            )
 
         namer = ColorNamer(vocabulary=vocabulary)
         result = namer.name(rgb_value, return_metadata=metadata)
