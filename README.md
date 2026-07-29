@@ -495,7 +495,7 @@ If you use this software in your research or teaching, please cite:
   author = {Semoglou, Michail},
   title = {renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt},
   year = {2026},
-  version = {3.7.0},
+  version = {3.8.0},
   doi = {10.5281/zenodo.17355170},
   url = {https://github.com/MichailSemoglou/renoir}
 }
