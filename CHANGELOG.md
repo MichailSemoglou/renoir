@@ -41,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `relative_luminance`, `wcag_contrast`, `hex_to_rgb`, and
   `rgb_to_hex` into a single source of truth. `dsp.py`, `namer.py`,
   `analysis.py`, and `extraction.py` now import from this module.
-- **DSP refactor**: `_select_from_candidates` split into six single-purpose
+- **DSP refactor**: `_select_from_candidates` split into five single-purpose
   functions (`_greedy_expand_palette`, `_relax_and_retry`,
   `_apply_wcag_replacement`, `_palette_has_aa_pair`, `_intra_min_de`).
   Zero nested closures remain.

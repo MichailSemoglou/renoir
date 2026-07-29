@@ -215,13 +215,13 @@ if _CLICK_AVAILABLE:
         if color.startswith("#"):
             rgb_value: "str | tuple[int, int, int]" = color
         else:
-            parts = [int(c.strip()) for c in color.split(",")]
+            parts = color.split(",")
             if len(parts) != 3:
                 raise click.ClickException(
                     "COLOR must be a hex string (#FF5733) or "
                     "comma-separated RGB (255,87,51)."
                 )
-            rgb_value = (parts[0], parts[1], parts[2])
+            rgb_value = (int(parts[0].strip()), int(parts[1].strip()), int(parts[2].strip()))
 
         namer = ColorNamer(vocabulary=vocabulary)
         result = namer.name(rgb_value, return_metadata=metadata)
@@ -258,7 +258,7 @@ if _CLICK_AVAILABLE:
     @click.option(
         "--target-model",
         default="midjourney",
-        type=click.Choice(["dall-e", "midjourney", "stable-diffusion"]),
+        type=click.Choice(["dalle", "midjourney", "stable_diffusion"]),
         help="Target generative model.",
     )
     @click.option(

@@ -189,7 +189,7 @@ def test_prompt_target_model(sample_image_path):
     runner = _runner()
     result = runner.invoke(
         cli,
-        ["prompt", sample_image_path, "--n-colors", "2", "--target-model", "dall-e"],
+        ["prompt", sample_image_path, "--n-colors", "2", "--target-model", "dalle"],
     )
     assert result.exit_code == 0
 

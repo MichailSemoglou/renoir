@@ -1000,6 +1000,8 @@ class ArtistAnalyzer:
 
             if image is None:
                 logger.warning("Work %d has no image; skipping", i)
+                if progress_callback is not None:
+                    progress_callback(i + 1, len(works))
                 continue
 
             try:
@@ -1014,11 +1016,11 @@ class ArtistAnalyzer:
                 work_palettes.append((work, palette, year))
                 if verbose and (i + 1) % 5 == 0:
                     logger.info("Processed %d/%d works...", i + 1, len(works))
-                if progress_callback is not None:
-                    progress_callback(i + 1, len(works))
             except (RuntimeError, ValueError, MemoryError) as e:
                 logger.warning("Failed to extract palette for work %d: %s", i, e)
-                continue
+            finally:
+                if progress_callback is not None:
+                    progress_callback(i + 1, len(works))
 
         return work_palettes
 
