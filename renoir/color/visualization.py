@@ -10,9 +10,18 @@ import os
 
 import numpy as np
 from typing import Any, Dict, List, Optional, Tuple, cast
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from matplotlib.figure import Figure
+
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as patches
+    from matplotlib.figure import Figure
+
+    _MPL_AVAILABLE = True
+except ImportError:
+    plt = None  # type: ignore[assignment, misc]
+    patches = None  # type: ignore[assignment, misc]
+    Figure = None  # type: ignore[assignment, misc]
+    _MPL_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +30,7 @@ try:
 
     SEABORN_AVAILABLE = True
 except ImportError:
+    sns = None  # type: ignore[assignment, misc]
     SEABORN_AVAILABLE = False
 
 _FIGURE_TITLE_COLOR = "#1A1A1A"
@@ -1242,17 +1252,14 @@ def check_visualization_support() -> bool:
     Returns:
         True if matplotlib is available, False otherwise
     """
-    try:
-        import matplotlib.pyplot as plt  # noqa: F401
-
+    if _MPL_AVAILABLE:
         logger.info("Color visualization fully supported (matplotlib available)")
         if SEABORN_AVAILABLE:
             logger.info("Enhanced styling available (seaborn available)")
         else:
             logger.info("Basic styling (seaborn not installed, but not required)")
         return True
-    except ImportError:
-        logger.warning(
-            "Visualization not available. Install with: pip install matplotlib"
-        )
-        return False
+    logger.warning(
+        "Visualization not available. Install with: pip install matplotlib"
+    )
+    return False
