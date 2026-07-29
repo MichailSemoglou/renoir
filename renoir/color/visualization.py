@@ -1259,7 +1259,5 @@ def check_visualization_support() -> bool:
         else:
             logger.info("Basic styling (seaborn not installed, but not required)")
         return True
-    logger.warning(
-        "Visualization not available. Install with: pip install matplotlib"
-    )
+    logger.warning("Visualization not available. Install with: pip install matplotlib")
     return False
