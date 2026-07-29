@@ -42,10 +42,9 @@ __all__ = [
 
 # Make visualization capabilities easily discoverable
 try:
-    import matplotlib  # noqa: F401
-    import seaborn  # noqa: F401
+    from .color.visualization import _MPL_AVAILABLE, SEABORN_AVAILABLE  # noqa: F401
 
-    VISUALIZATION_AVAILABLE = True
+    VISUALIZATION_AVAILABLE = _MPL_AVAILABLE and SEABORN_AVAILABLE
 except ImportError:
     VISUALIZATION_AVAILABLE = False
 
