@@ -546,17 +546,7 @@ class ColorAnalyzer:
             >>> ratio = analyzer.calculate_contrast_ratio((0, 0, 0), (255, 255, 255))
             >>> print(f"Contrast ratio: {ratio:.2f}:1")  # 21.00:1
         """
-
-        def relative_luminance(rgb):
-            """Calculate relative luminance for contrast."""
-            r, g, b = [x / 255.0 for x in rgb]
-
-            # Apply gamma correction
-            r = r / 12.92 if r <= 0.03928 else ((r + 0.055) / 1.055) ** 2.4
-            g = g / 12.92 if g <= 0.03928 else ((g + 0.055) / 1.055) ** 2.4
-            b = b / 12.92 if b <= 0.03928 else ((b + 0.055) / 1.055) ** 2.4
-
-            return 0.2126 * r + 0.7152 * g + 0.0722 * b
+        from renoir.color._colorimetry import relative_luminance
 
         l1 = relative_luminance(color1)
         l2 = relative_luminance(color2)

@@ -532,6 +532,23 @@ class TestAnalyzeWorksColorSignature:
         assert result["n_works_analyzed"] == 2
         assert len(result["palette"]) > 0
 
+    def test_progress_callback_is_invoked(self):
+        analyzer = ArtistAnalyzer()
+        works = [
+            {"image": make_solid_image((255, 0, 0))},
+            {"image": make_solid_image((0, 255, 0))},
+            {"image": make_solid_image((0, 0, 255))},
+        ]
+        calls = []
+        analyzer.analyze_works_color_signature(
+            works,
+            n_colors=2,
+            verbose=False,
+            progress_callback=lambda c, t: calls.append((c, t)),
+        )
+        assert len(calls) == 3
+        assert calls[-1] == (3, 3)
+
 
 class TestArtistColorSignature:
     """Test the high-level artist color signature method."""

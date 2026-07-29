@@ -74,7 +74,8 @@ class ColorExtractor:
         Args:
             image: PIL Image or numpy array of the artwork
             n_colors: Number of dominant colors to extract (default: 5)
-            method: Extraction method - 'kmeans' or 'frequency' (default: 'kmeans')
+            method: Extraction method — ``'kmeans'`` (default), ``'frequency'``,
+                or ``'dsp'`` (distinctness-first with WCAG AA guarantee)
             sample_size: Number of pixels to sample for faster processing
                         None = use all pixels (default: 10000)
             random_state: Random seed for reproducible pixel sampling and k-means
@@ -116,8 +117,8 @@ class ColorExtractor:
             if sample_size < 1:
                 raise ValueError("sample_size must be positive")
 
-        if method not in ["kmeans", "frequency"]:
-            raise ValueError("method must be 'kmeans' or 'frequency'")
+        if method not in ["kmeans", "frequency", "dsp"]:
+            raise ValueError("method must be 'kmeans', 'frequency', or 'dsp'")
 
         # Validate and convert image
         if isinstance(image, Image.Image):
@@ -185,6 +186,8 @@ class ColorExtractor:
             sampled_pixels = valid_pixels
 
         try:
+            if method == "dsp":
+                return self._extract_dsp(image, n_colors)
             if method == "kmeans" and self.use_sklearn:
                 return self._extract_kmeans(sampled_pixels, n_colors, random_state)
             else:
@@ -249,6 +252,31 @@ class ColorExtractor:
         most_common = color_counts.most_common(n_colors)
 
         return [color for color, count in most_common]
+
+    def _extract_dsp(
+        self,
+        image: "Union[Image.Image, np.ndarray]",
+        n_colors: int,
+    ) -> List[Tuple[int, int, int]]:
+        """Run Distinctness-First Palette Selection (DSP).
+
+        DSP maximises perceptual distinctness (minimum pairwise ΔE₂₀₀₀)
+        while guaranteeing at least one WCAG AA-compliant contrast pair.
+        Processes the full, unfiltered image; ``sample_size``,
+        ``filter_extremes``, and ``random_state`` from
+        :meth:`extract_dominant_colors` do not apply to this method.
+        """
+        from .dsp import select_palette
+
+        if isinstance(image, np.ndarray):
+            pil_image = Image.fromarray(
+                image.astype(np.uint8) if image.dtype != np.uint8 else image
+            )
+        else:
+            pil_image = image
+
+        result = select_palette(pil_image, n=n_colors, wcag_step=True)
+        return result.to_rgb_tuples()
 
     def extract_palette_from_artwork(
         self, artwork_dict: Dict, n_colors: int = 5
@@ -316,43 +344,16 @@ class ColorExtractor:
         return tuple(avg_color)
 
     def rgb_to_hex(self, rgb: Tuple[int, int, int]) -> str:
-        """
-        Convert RGB tuple to hexadecimal color code.
+        """Convert RGB tuple to hexadecimal color code."""
+        from renoir.color._colorimetry import rgb_to_hex
 
-        Args:
-            rgb: Tuple of (R, G, B) values (0-255)
-
-        Returns:
-            Hexadecimal color string (e.g., '#FF5733')
-
-        Example:
-            >>> extractor = ColorExtractor()
-            >>> hex_color = extractor.rgb_to_hex((255, 87, 51))
-            >>> print(hex_color)  # '#FF5733'
-        """
-        return "#{:02x}{:02x}{:02x}".format(rgb[0], rgb[1], rgb[2])
+        return rgb_to_hex(rgb)
 
     def hex_to_rgb(self, hex_color: str) -> Tuple[int, int, int]:
-        """
-        Convert hexadecimal color code to RGB tuple.
+        """Convert hexadecimal color code to RGB tuple."""
+        from renoir.color._colorimetry import hex_to_rgb
 
-        Args:
-            hex_color: Hexadecimal color string (e.g., '#FF5733' or 'FF5733')
-
-        Returns:
-            Tuple of (R, G, B) values (0-255)
-
-        Example:
-            >>> extractor = ColorExtractor()
-            >>> rgb = extractor.hex_to_rgb('#FF5733')
-            >>> print(rgb)  # (255, 87, 51)
-        """
-        # Remove '#' if present
-        hex_color = hex_color.lstrip("#")
-
-        # Convert to RGB
-        r, g, b = (int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
-        return (r, g, b)
+        return hex_to_rgb(hex_color)
 
     def palette_to_dict(
         self, colors: List[Tuple[int, int, int]], include_hex: bool = True

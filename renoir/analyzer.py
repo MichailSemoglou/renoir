@@ -6,7 +6,7 @@ from the WikiArt dataset, designed for educational use in computational design
 and digital humanities courses.
 """
 
-from typing import List, Dict, Optional, Any, Tuple, TYPE_CHECKING
+from typing import List, Dict, Optional, Any, Tuple, Callable, TYPE_CHECKING
 from collections import Counter, defaultdict
 import logging
 
@@ -420,6 +420,10 @@ class ArtistAnalyzer:
         plt.tight_layout()
 
         if save_path:
+            import os
+            from renoir.color.extraction import _validate_export_filename
+
+            _validate_export_filename(os.path.basename(save_path))
             fig.savefig(save_path, dpi=300, bbox_inches="tight")
             logger.info("Figure saved to %s", save_path)
         if show:
@@ -564,6 +568,10 @@ class ArtistAnalyzer:
         plt.tight_layout()
 
         if save_path:
+            import os
+            from renoir.color.extraction import _validate_export_filename
+
+            _validate_export_filename(os.path.basename(save_path))
             fig.savefig(save_path, dpi=300, bbox_inches="tight")
             logger.info("Figure saved to %s", save_path)
         if show:
@@ -675,6 +683,10 @@ class ArtistAnalyzer:
             ax_temporal.grid(True, alpha=0.3)
 
         if save_path:
+            import os
+            from renoir.color.extraction import _validate_export_filename
+
+            _validate_export_filename(os.path.basename(save_path))
             fig.savefig(save_path, dpi=300, bbox_inches="tight")
             logger.info("Figure saved to %s", save_path)
         if show:
@@ -932,6 +944,10 @@ class ArtistAnalyzer:
             plt.tight_layout()
 
             if save_path:
+                import os
+                from renoir.color.extraction import _validate_export_filename
+
+                _validate_export_filename(os.path.basename(save_path))
                 fig.savefig(save_path, dpi=300, bbox_inches="tight")
                 logger.info("Figure saved to %s", save_path)
             if show:
@@ -951,12 +967,22 @@ class ArtistAnalyzer:
         random_state: int,
         verbose: bool,
         extractor: Any,
+        progress_callback: Optional[Callable[[int, int], None]] = None,
     ) -> List[Tuple[Dict[str, Any], List[Tuple[int, int, int]], Optional[int]]]:
         """Extract dominant-color palettes from a list of artwork dicts.
 
         Returns a list of ``(work, palette, year)`` tuples for works
         where extraction succeeded. Works without images or where
         extraction fails are skipped with a logged warning.
+
+        Args:
+            works: List of artwork dicts with ``image`` key.
+            n_colors: Number of dominant colors to extract per work.
+            random_state: Seed for reproducible extraction.
+            verbose: If True, log progress messages.
+            extractor: A ``ColorExtractor`` instance.
+            progress_callback: Optional callback called after each work is
+                processed with ``(completed, total)``.
         """
         import warnings
 
@@ -974,6 +1000,8 @@ class ArtistAnalyzer:
 
             if image is None:
                 logger.warning("Work %d has no image; skipping", i)
+                if progress_callback is not None:
+                    progress_callback(i + 1, len(works))
                 continue
 
             try:
@@ -990,7 +1018,9 @@ class ArtistAnalyzer:
                     logger.info("Processed %d/%d works...", i + 1, len(works))
             except (RuntimeError, ValueError, MemoryError) as e:
                 logger.warning("Failed to extract palette for work %d: %s", i, e)
-                continue
+            finally:
+                if progress_callback is not None:
+                    progress_callback(i + 1, len(works))
 
         return work_palettes
 
@@ -1003,6 +1033,7 @@ class ArtistAnalyzer:
         save_path: Optional[str] = None,
         random_state: int = 42,
         verbose: bool = True,
+        progress_callback: Optional[Callable[[int, int], None]] = None,
     ) -> Dict[str, Any]:
         """
         Compute a color signature from a provided list of artwork dictionaries.
@@ -1021,6 +1052,8 @@ class ArtistAnalyzer:
             save_path: Optional path to save the figure instead of displaying it.
             random_state: Random seed for reproducible extraction and sampling.
             verbose: If True, print progress messages.
+            progress_callback: Optional callback called after each work is
+                processed with ``(completed, total)``.
 
         Returns:
             Dictionary with aggregated palette, metrics, optional per-period
@@ -1038,7 +1071,12 @@ class ArtistAnalyzer:
         namer = ColorNamer()
 
         work_palettes = self._extract_work_palettes(
-            works, n_colors, random_state, verbose, extractor
+            works,
+            n_colors,
+            random_state,
+            verbose,
+            extractor,
+            progress_callback=progress_callback,
         )
 
         if not work_palettes:
@@ -1117,6 +1155,7 @@ class ArtistAnalyzer:
         save_path: Optional[str] = None,
         random_state: int = 42,
         verbose: bool = True,
+        progress_callback: Optional[Callable[[int, int], None]] = None,
     ) -> Dict[str, Any]:
         """
         Compute a color signature for an artist from WikiArt.
@@ -1136,6 +1175,8 @@ class ArtistAnalyzer:
             save_path: Optional path to save the figure.
             random_state: Seed for reproducible sampling and extraction.
             verbose: If True, print progress messages.
+            progress_callback: Optional callback called after each work is
+                processed with ``(completed, total)``.
 
         Returns:
             Dictionary with artist color signature, metrics, optional
@@ -1183,6 +1224,7 @@ class ArtistAnalyzer:
             save_path=save_path,
             random_state=random_state,
             verbose=verbose,
+            progress_callback=progress_callback,
         )
 
         result["artist"] = artist_name

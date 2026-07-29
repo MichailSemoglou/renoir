@@ -8,7 +8,7 @@ technical codes. Uses perceptually accurate color matching (CIEDE2000).
 
 import json
 import logging
-from typing import Any, List, Dict, Tuple, Optional, Union
+from typing import Any, List, Dict, Tuple, Optional, Union, Callable
 from pathlib import Path
 import numpy as np
 
@@ -124,62 +124,11 @@ class ColorNamer:
         return self._colors
 
     def _rgb_to_lab(self, rgb: Tuple[int, int, int]) -> Tuple[float, float, float]:
-        """
-        Convert RGB color to CIE Lab color space for perceptual matching.
-
-        Uses D65 illuminant and 2° standard observer.
-
-        Args:
-            rgb: Tuple of (R, G, B) values (0-255)
-
-        Returns:
-            Tuple of (L, a, b) values in CIE Lab space
-        """
-        # Check cache first
         if rgb in self._lab_cache:
             return self._lab_cache[rgb]
+        from ._colorimetry import srgb_to_lab_tuple
 
-        # Normalize RGB to 0-1
-        r, g, b = rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0
-
-        # Apply gamma correction (sRGB to linear RGB)
-        def gamma_correct(channel):
-            if channel <= 0.04045:
-                return channel / 12.92
-            else:
-                return ((channel + 0.055) / 1.055) ** 2.4
-
-        r_linear = gamma_correct(r)
-        g_linear = gamma_correct(g)
-        b_linear = gamma_correct(b)
-
-        # Convert to XYZ using D65 illuminant matrix
-        x = r_linear * 0.4124564 + g_linear * 0.3575761 + b_linear * 0.1804375
-        y = r_linear * 0.2126729 + g_linear * 0.7151522 + b_linear * 0.0721750
-        z = r_linear * 0.0193339 + g_linear * 0.1191920 + b_linear * 0.9503041
-
-        # Normalize by D65 white point
-        x = x / 0.95047
-        y = y / 1.00000
-        z = z / 1.08883
-
-        # Convert to Lab
-        def f(t):
-            delta = 6.0 / 29.0
-            if t > delta**3:
-                return t ** (1.0 / 3.0)
-            else:
-                return t / (3 * delta**2) + 4.0 / 29.0
-
-        fx = f(x)
-        fy = f(y)
-        fz = f(z)
-
-        L = 116.0 * fy - 16.0
-        a = 500.0 * (fx - fy)
-        b_lab = 200.0 * (fy - fz)
-
-        lab = (L, a, b_lab)
+        lab = srgb_to_lab_tuple(rgb)
         self._lab_cache[rgb] = lab
         return lab
 
@@ -530,44 +479,14 @@ class ColorNamer:
         }
 
     def _hex_to_rgb(self, hex_color: str) -> Tuple[int, int, int]:
-        """
-        Convert hex color string to RGB tuple.
+        from ._colorimetry import hex_to_rgb as _hex
 
-        Args:
-            hex_color: Hex string like '#FF5733' or 'FF5733'
-
-        Returns:
-            RGB tuple (R, G, B)
-
-        Raises:
-            ValueError: If hex format is invalid
-        """
-        hex_color = hex_color.lstrip("#")
-
-        if len(hex_color) != 6:
-            raise ValueError(
-                f"Hex color must be 6 characters (got {len(hex_color)}): {hex_color}"
-            )
-
-        try:
-            r = int(hex_color[0:2], 16)
-            g = int(hex_color[2:4], 16)
-            b = int(hex_color[4:6], 16)
-            return (r, g, b)
-        except ValueError as e:
-            raise ValueError(f"Invalid hex color format: {hex_color}") from e
+        return _hex(hex_color)
 
     def _rgb_to_hex(self, rgb: Tuple[int, int, int]) -> str:
-        """
-        Convert RGB tuple to hex string.
+        from ._colorimetry import rgb_to_hex as _hex
 
-        Args:
-            rgb: RGB tuple (R, G, B)
-
-        Returns:
-            Hex string like '#FF5733'
-        """
-        return "#{:02X}{:02X}{:02X}".format(*rgb)
+        return _hex(rgb)
 
     def set_vocabulary(self, vocabulary: str) -> None:
         """
@@ -756,6 +675,7 @@ class ColorNamer:
         year: int,
         temperature: float = 15.0,
         top_k: int = 5,
+        progress_callback: Optional[Callable[[int, int], None]] = None,
     ) -> List[Dict]:
         """
         Estimate probability of historical pigments for a color at a given date.
@@ -773,6 +693,8 @@ class ColorNamer:
             temperature: Softmax temperature for perceptual match (lower = stricter).
                          Default 15.0 gives reasonable discrimination.
             top_k: Number of top pigments to return (default: 5)
+            progress_callback: Optional callback called after each pigment is
+                scored with ``(completed, total)``.
 
         Returns:
             List of dicts sorted by probability, each containing:
@@ -801,7 +723,8 @@ class ColorNamer:
         pigments = artist_namer._load_colors()
 
         scored = []
-        for p in pigments:
+        total_pigments = len(pigments)
+        for i, p in enumerate(pigments):
             p_rgb = tuple(p["rgb"])
             p_lab = artist_namer._rgb_to_lab(p_rgb)
             distance = artist_namer._ciede2000(input_lab, p_lab)
@@ -831,6 +754,8 @@ class ColorNamer:
                     "year_discontinued": p.get("year_discontinued"),
                 }
             )
+            if progress_callback is not None:
+                progress_callback(i + 1, total_pigments)
 
         total = sum(s["raw_score"] for s in scored)
         if total > 0:

@@ -5,13 +5,13 @@ This package provides simple functions for extracting and analyzing works by
 specific artists from the WikiArt dataset, designed for teaching computational
 design and digital humanities courses.
 
-Version 3.7.0 hardens input validation, fixes crashes on dateless datasets,
-eliminated duplicated logic across the codebase, and raises test coverage to 90%.
+Version 3.8.0 adds a CLI with four subcommands, structured logging helpers,
+progress callbacks on long-running methods, and DSP palette extraction (distinctness-first with WCAG AA contrast guarantee).
 """
 
 import logging
 
-__version__ = "3.7.0"
+__version__ = "3.8.0"
 __author__ = "Michail Semoglou"
 
 logger = logging.getLogger(__name__)
@@ -27,6 +27,8 @@ from .color import (
     PromptGenerator,
 )
 
+from .logging import setup_notebook_logging
+
 __all__ = [
     "ArtistAnalyzer",
     "quick_analysis",
@@ -35,6 +37,7 @@ __all__ = [
     "ColorVisualizer",
     "ColorNamer",
     "PromptGenerator",
+    "setup_notebook_logging",
 ]
 
 # Make visualization capabilities easily discoverable
