@@ -5,7 +5,7 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.9.0] - 2026-09-10
 
 ### Added
 
@@ -29,9 +29,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Notebook 18** `examples/color_analysis/18_delta_e_backend_comparison.ipynb`:
   side-by-side PEMD and CCI results under CIEDE2000 and Oklab on
   art-historical palettes.
+- **Match confidence for color naming** in `renoir/color/namer.py`:
+  `ColorNamer.name(..., return_metadata=True)` and
+  `ColorNamer.translate()` results now include a `confidence` dictionary
+  with a tier (exact/high/medium/low/none, banded by CIEDE2000 distance),
+  a 0-100 score on the same exponential scale as
+  `historical_pigment_probability`, the delta-E of the match, and an
+  ambiguity flag that names the runner-up on a near-tie. The module also
+  exports `PIGMENT_MATCH_GUIDANCE`, a plain-language note stating that
+  names are colorimetric approximations, not material guarantees.
+- **Test coverage expansion** (85% to 88% overall; 326 to 395 tests): fallback-path tests
+  for the pure-NumPy colorimetry branches in
+  `tests/test_colorimetry_fallback.py` (pinned to the canonical Sharma
+  CIEDE2000 reference pair), `tests/test_logging.py` for the notebook
+  logging helper (100%), CLI branch tests for `_load_image` errors
+  and `extract --format css -o`, and `tests/test_properties.py` with
+  Hypothesis property tests for color invariants (hex round-trip, Lab
+  bounds, delta-E metric axioms, CCI bounds, PEMD self-distance, DSP
+  WCAG AA guarantee on noise images, and honest single-colour palette
+  reporting on solid images). New dev dependency: `hypothesis>=6.0`.
+- **CI**: new `test-with-cam16` job in `tests.yml` runs the suite with
+  the `cam16` extra installed, so both the accelerated and fallback
+  colorimetry paths are covered on every push.
 - **Tests** in `tests/test_colorimetry.py`: Oklab reference values,
   distance properties, strategy registry, and metric-parameter
-  regression tests (326 to 346 tests).
+  regression tests.
 
 ## [3.8.0] - 2026-07-29
 

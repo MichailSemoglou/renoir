@@ -31,6 +31,7 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 - **Historical Pigment Probability (HPP)**: Bayesian estimation of which historical pigments could produce a given color at a given date
 - **Color Provenance Score (CPS)**: Anomaly detection for anachronistic palettes in art-historical attribution
 - **Cross-vocabulary color translation**: Map color names across Werner's, artist pigments, Resene, and XKCD vocabularies via CIEDE2000
+- **Choice of perceptual distance metric**: PEMD and CCI accept `distance_metric="cie2000"` (default), `"oklab"`, or `"cam16"` (CAM16-UCS requires the `cam16` extra)
 - **GenAI color prompt generation**: Convert color analysis into structured prompts for DALL-E, Midjourney, and Stable Diffusion
 
 ### Color analysis
@@ -40,6 +41,7 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
   - 4 naming vocabularies: artist pigments, Resene, Werner's, XKCD
   - CIEDE2000 perceptually accurate color matching
   - Color Index names for physical paint matching
+  - Match confidence tiers (exact/high/medium/low/none) with 0-100 scores and near-tie ambiguity flags
 - **Color space analysis**: RGB, HSV, and HSL conversions
 - **Statistical metrics**: Color diversity, saturation, brightness, temperature
 - **Color relationships**: Complementary detection, WCAG contrast ratios
@@ -81,6 +83,12 @@ pip install 'renoir-wikiart[visualization]'
 
 ```bash
 pip install 'renoir-wikiart[cli]'
+```
+
+### With CAM16-UCS Support
+
+```bash
+pip install 'renoir-wikiart[cam16]'
 ```
 
 ### From Source
@@ -495,7 +503,7 @@ If you use this software in your research or teaching, please cite:
   author = {Semoglou, Michail},
   title = {renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt},
   year = {2026},
-  version = {3.8.0},
+  version = {3.9.0},
   doi = {10.5281/zenodo.17355170},
   url = {https://github.com/MichailSemoglou/renoir}
 }
