@@ -5,13 +5,21 @@ This package provides simple functions for extracting and analyzing works by
 specific artists from the WikiArt dataset, designed for teaching computational
 design and digital humanities courses.
 
-Version 3.8.0 adds a CLI with four subcommands, structured logging helpers,
-progress callbacks on long-running methods, and DSP palette extraction (distinctness-first with WCAG AA contrast guarantee).
+Version 3.9.0 adds pluggable delta-E backends (CIEDE2000, Oklab, CAM16-UCS)
+for the PEMD and CCI metrics, and confidence tiers for color naming and
+translation.
 """
 
 import logging
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _distribution_version
 
-__version__ = "3.8.0"
+try:
+    __version__ = _distribution_version("renoir-wikiart")
+except PackageNotFoundError:
+    # Source tree without an installed distribution
+    __version__ = "0.0.0+unknown"
+
 __author__ = "Michail Semoglou"
 
 logger = logging.getLogger(__name__)

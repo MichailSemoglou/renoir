@@ -15,7 +15,13 @@ project = 'renoir'
 project_copyright = '2026, Michail Semoglou'
 copyright = project_copyright  # noqa: A001 - required by Sphinx
 author = 'Michail Semoglou'
-release = '3.6.0'
+import importlib.metadata
+
+try:
+    release = importlib.metadata.version('renoir-wikiart')
+except importlib.metadata.PackageNotFoundError:
+    # Docs build from an uninstalled checkout
+    release = '0.0.0+unknown'
 
 # -- General configuration ---------------------------------------------------
 
