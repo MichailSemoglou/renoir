@@ -38,7 +38,7 @@ dependencies = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["renoir*"]
-exclude = ["tests*", "examples*", "Research*", "test_env*", "Pierre-Auguste Renoir*"]
+exclude = ["tests*", "examples*"]
 
 [tool.setuptools.package-data]
 renoir = ["data/colors/*.json", "py.typed"]
