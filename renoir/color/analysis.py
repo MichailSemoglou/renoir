@@ -12,6 +12,8 @@ from typing import Any, List, Dict, Tuple, Optional
 from collections import Counter
 import colorsys
 
+from renoir.color._colorimetry import get_delta_e_strategy
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -35,7 +37,6 @@ _COMPLEMENTARY_TARGET_ANGLE = 180
 _SPLIT_COMPLEMENTARY_OFFSET = 30
 _HUE_HISTOGRAM_BINS = 12
 _PEMD_RESOLUTION_MULTIPLIER = 10
-_CIEDE2000_NORMALIZATION_CAP = 100.0
 _CCI_DEFAULT_WEIGHTS = {
     "hue_entropy": 0.3,
     "perceptual_spread": 0.3,
@@ -897,14 +898,15 @@ class ColorAnalyzer:
         self,
         palette1: List[Tuple[Tuple[int, int, int], float]],
         palette2: List[Tuple[Tuple[int, int, int], float]],
+        distance_metric: str = "cie2000",
     ) -> float:
         """
         Calculate Palette Earth Mover's Distance (PEMD) between two palettes.
 
-        Uses CIEDE2000 as the perceptual ground distance and color proportions
-        as weights, solved via optimal transport. This provides a structurally
-        aware comparison that accounts for both color similarity and proportion
-        differences.
+        Uses a perceptual ground distance (CIEDE2000 by default, optionally
+        Euclidean distance in Oklab) and color proportions as weights, solved
+        via optimal transport. This provides a structurally aware comparison
+        that accounts for both color similarity and proportion differences.
 
         Note:
             The continuous transport problem is discretized into a balanced
@@ -917,14 +919,22 @@ class ColorAnalyzer:
                       Proportions should sum to 1.0.
             palette2: List of (RGB tuple, proportion) pairs.
                       Proportions should sum to 1.0.
+            distance_metric: Perceptual ground metric: ``"cie2000"``
+                      (CIEDE2000 in CIELAB, default), ``"oklab"``
+                      (Euclidean distance in Oklab; Ottosson, 2020), or
+                      ``"cam16"`` (Euclidean distance in CAM16-UCS;
+                      Li et al., 2017, requires the colour-science extra).
 
         Returns:
-            PEMD distance (lower = more similar). Scale depends on CIEDE2000
-            units (typically 0–100+, where <2 is imperceptible).
+            PEMD distance (lower = more similar). Scale depends on the
+            chosen metric: CIEDE2000 units for ``"cie2000"`` (typically
+            0–100+, where <2 is imperceptible), Oklab units for
+            ``"oklab"`` (black to white is approximately 1.0).
 
         Raises:
             ImportError: If scipy is not installed.
-            ValueError: If palettes are empty.
+            ValueError: If palettes are empty or ``distance_metric`` is
+                not a registered strategy.
 
         Example:
             >>> analyzer = ColorAnalyzer()
@@ -941,17 +951,17 @@ class ColorAnalyzer:
         if not palette1 or not palette2:
             raise ValueError("Both palettes must be non-empty")
 
-        namer = self._get_namer()
+        strategy = get_delta_e_strategy(distance_metric)
         n = len(palette1)
         m = len(palette2)
 
-        # Build cost matrix using CIEDE2000
+        # Build cost matrix in the strategy's perceptual space
+        points1 = [strategy.to_space(c) for c, _ in palette1]
+        points2 = [strategy.to_space(c) for c, _ in palette2]
         cost_matrix = np.zeros((n, m))
-        for i, (c1, _) in enumerate(palette1):
-            lab1 = namer._rgb_to_lab(c1)
-            for j, (c2, _) in enumerate(palette2):
-                lab2 = namer._rgb_to_lab(c2)
-                cost_matrix[i, j] = namer._ciede2000(lab1, lab2)
+        for i in range(n):
+            for j in range(m):
+                cost_matrix[i, j] = strategy.distance(points1[i], points2[j])
 
         # Extract weights
         w1 = np.array([w for _, w in palette1], dtype=float)
@@ -1000,13 +1010,15 @@ class ColorAnalyzer:
         colors: List[Tuple[int, int, int]],
         proportions: Optional[List[float]] = None,
         weights: Optional[Dict[str, float]] = None,
+        distance_metric: str = "cie2000",
     ) -> Dict:
         """
         Calculate the Color Complexity Index (CCI) for a palette.
 
         A multi-dimensional information-theoretic measure combining:
         - Hue entropy (spread across the color wheel)
-        - Perceptual spread (mean pairwise CIEDE2000 distance)
+        - Perceptual spread (mean pairwise distance in the chosen
+          perceptual space)
         - Proportion evenness (1 - Gini coefficient)
         - Harmony penalty (lower complexity if colors follow harmony rules)
 
@@ -1017,12 +1029,20 @@ class ColorAnalyzer:
             weights: Optional dict of component weights with keys:
                      'hue_entropy', 'perceptual_spread', 'proportion_evenness',
                      'harmony_penalty'. Defaults to equal weighting.
+            distance_metric: Perceptual metric for the spread component:
+                     ``"cie2000"`` (CIEDE2000 in CIELAB, default),
+                     ``"oklab"`` (Euclidean distance in Oklab), or
+                     ``"cam16"`` (Euclidean distance in CAM16-UCS,
+                     requires the colour-science extra). The spread
+                     is normalised by the metric's black-to-white distance
+                     (100 for CIEDE2000 and CAM16-UCS, 1 for Oklab), so
+                     CCI values remain comparable across backends.
 
         Returns:
             Dictionary containing:
                 - cci: Composite Color Complexity Index (0-1)
                 - hue_entropy: Normalized hue entropy (0-1)
-                - perceptual_spread: Normalized mean pairwise CIEDE2000 (0-1)
+                - perceptual_spread: Normalized mean pairwise distance (0-1)
                 - proportion_evenness: 1 - Gini coefficient (0-1)
                 - harmony_penalty: Harmony score (0-1, subtracted)
                 - components: Dict of weighted sub-scores
@@ -1050,16 +1070,17 @@ class ColorAnalyzer:
         # 1. Hue entropy (reuse existing method, already normalized 0–1)
         hue_entropy = self.calculate_color_diversity(colors)
 
-        # 2. Perceptual spread: mean pairwise CIEDE2000, normalized
-        namer = self._get_namer()
-        labs = [namer._rgb_to_lab(c) for c in colors]
+        # 2. Perceptual spread: mean pairwise distance in the strategy
+        # space, normalised by the metric's black-to-white distance
+        strategy = get_delta_e_strategy(distance_metric)
+        points = [strategy.to_space(c) for c in colors]
         distances = []
-        for i in range(len(labs)):
-            for j in range(i + 1, len(labs)):
-                distances.append(namer._ciede2000(labs[i], labs[j]))
+        for i in range(len(points)):
+            for j in range(i + 1, len(points)):
+                distances.append(strategy.distance(points[i], points[j]))
 
         mean_distance = float(np.mean(distances)) if distances else 0.0
-        perceptual_spread = min(1.0, mean_distance / _CIEDE2000_NORMALIZATION_CAP)
+        perceptual_spread = min(1.0, mean_distance / strategy.normalization_cap)
 
         # 3. Proportion evenness (1 - Gini coefficient)
         if proportions is None:

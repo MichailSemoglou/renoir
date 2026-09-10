@@ -14,6 +14,90 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Match confidence
+# ---------------------------------------------------------------------------
+
+# Softmax temperature for the numeric confidence score. Matches the
+# historical_pigment_probability default so both metrics share one scale.
+_CONFIDENCE_SCORE_TEMPERATURE = 15.0
+
+# CIEDE2000 bands (delta-E units) for confidence tiers, aligned with the
+# standard interpretation of delta-E 2000 magnitudes.
+_CONFIDENCE_TIERS = (
+    (1.0, "exact", "Perceptually identical to the catalogued color."),
+    (
+        3.0,
+        "high",
+        "Same color family; the difference shows only in side-by-side " "comparison.",
+    ),
+    (6.0, "medium", "A close relative; clearly distinguishable on inspection."),
+    (12.0, "low", "The nearest catalogued entry; a loose match."),
+)
+
+# Delta-E window within which the runner-up counts as a near-tie
+_CONFIDENCE_AMBIGUITY_MARGIN = 1.0
+
+# Plain-language note to accompany naming and translation results.
+PIGMENT_MATCH_GUIDANCE = (
+    "Pigment and color names are colorimetric approximations: a name labels "
+    "the catalogued entry whose reference color is perceptually closest to "
+    "the digital input, not a physical paint. The confidence level reflects "
+    "color proximity only; it says nothing about composition, opacity, or "
+    "lightfastness, and a real paint may match under one light source and "
+    "not another (metamerism). When confidence is low or none, no catalogued "
+    "entry is close; treat the name as a direction, not an answer."
+)
+
+
+def _match_confidence(
+    distance: float,
+    runner_up_distance: Optional[float] = None,
+    runner_up_name: Optional[str] = None,
+    metric: str = "cie2000",
+) -> Dict[str, Any]:
+    """Assign a confidence tier and numeric score to a best-match distance.
+
+    Args:
+        distance: Delta-E of the best match in the space named by ``metric``.
+        runner_up_distance: Optional delta-E of the second-best match.
+        runner_up_name: Optional name of the second-best match.
+        metric: Name of the distance metric used (default ``"cie2000"``).
+
+    Returns:
+        Dictionary with keys ``tier`` (exact/high/medium/low/none),
+        ``score`` (0-100, exponential in distance), ``delta_e``, ``metric``,
+        ``description``, ``ambiguous``, and ``runner_up`` when ambiguous.
+    """
+    tier = "none"
+    description = (
+        "No catalogued entry is colorimetrically close; the name is a "
+        "best-effort label, not a match."
+    )
+    for threshold, label, text in _CONFIDENCE_TIERS:
+        if distance <= threshold:
+            tier, description = label, text
+            break
+
+    ambiguous = bool(
+        runner_up_distance is not None
+        and runner_up_distance - distance <= _CONFIDENCE_AMBIGUITY_MARGIN
+    )
+
+    result: Dict[str, Any] = {
+        "tier": tier,
+        "score": round(
+            100.0 * float(np.exp(-distance / _CONFIDENCE_SCORE_TEMPERATURE)), 1
+        ),
+        "delta_e": round(float(distance), 3),
+        "metric": metric,
+        "description": description,
+        "ambiguous": ambiguous,
+    }
+    if ambiguous:
+        result["runner_up"] = runner_up_name
+    return result
+
 
 class ColorNamer:
     """
@@ -37,9 +121,9 @@ class ColorNamer:
     Example:
         >>> from renoir.color import ColorNamer
         >>> namer = ColorNamer(vocabulary="artist")
-        >>> result = namer.name((255, 87, 51))
-        >>> print(result['name'])
-        'Cadmium Orange'
+        >>> name = namer.name((255, 87, 51))
+        >>> print(name)
+        'Burnt Sienna'
     """
 
     # Class-level vocabulary registry
@@ -326,6 +410,10 @@ class ColorNamer:
                 - family: Color family (if available)
                 - ci_name: Color Index name (if available)
                 - description: Color description (if available)
+                - confidence: Match confidence dictionary with keys tier
+                  (exact/high/medium/low/none), score (0-100), delta_e,
+                  metric, description, ambiguous, and runner_up when the
+                  second-best match is a near-tie
 
         Raises:
             ValueError: If color format is invalid
@@ -333,9 +421,9 @@ class ColorNamer:
         Example:
             >>> namer = ColorNamer(vocabulary="artist")
             >>> namer.name((255, 87, 51))
-            'Cadmium Orange'
+            'Burnt Sienna'
             >>> namer.name("#FF5733", return_metadata=True)
-            {'name': 'Cadmium Orange', 'hex': '#FF6103', ...}
+            {'name': 'Burnt Sienna', 'hex': '#E97451', ...}
         """
         # Convert hex to RGB if needed
         if isinstance(color, str):
@@ -356,10 +444,12 @@ class ColorNamer:
         # Convert input to Lab
         input_lab = self._rgb_to_lab(rgb)
 
-        # Find closest match
+        # Find closest match, tracking the runner-up for ambiguity detection
         colors = self._load_colors()
         best_match = None
         best_distance = float("inf")
+        second_distance = float("inf")
+        second_name = None
 
         for color_data in colors:
             color_rgb = tuple(color_data["rgb"])
@@ -367,8 +457,13 @@ class ColorNamer:
             distance = self._ciede2000(input_lab, color_lab)
 
             if distance < best_distance:
+                second_distance = best_distance
+                second_name = best_match["name"] if best_match else None
                 best_distance = distance
                 best_match = color_data
+            elif distance < second_distance:
+                second_distance = distance
+                second_name = color_data["name"]
 
         if best_match is None:
             raise ValueError("No colors found in vocabulary")
@@ -382,6 +477,13 @@ class ColorNamer:
                 "distance": round(best_distance, 3),
                 "vocabulary": self.vocabulary,
                 "family": best_match.get("family"),
+                "confidence": _match_confidence(
+                    best_distance,
+                    runner_up_distance=(
+                        second_distance if second_name is not None else None
+                    ),
+                    runner_up_name=second_name,
+                ),
             }
 
             # Add optional fields if present
@@ -570,7 +672,8 @@ class ColorNamer:
                 - source_name: Original color name
                 - source_vocabulary: Source vocabulary
                 - source_rgb: RGB of the source color
-                - translations: List of dicts with name, rgb, hex, distance
+                - translations: List of dicts with name, rgb, hex, distance,
+                  and a confidence dictionary per entry
                 - target_vocabulary: Target vocabulary name
 
         Raises:
@@ -627,11 +730,24 @@ class ColorNamer:
 
         scored.sort(key=lambda x: x["distance"])
 
+        # Confidence is computed after sorting so each entry is judged
+        # against the next-best candidate, surfacing near-ties.
+        top = scored[:k]
+        for i, entry in enumerate(top):
+            runner_up = top[i + 1] if i + 1 < len(top) else None
+            entry["confidence"] = _match_confidence(
+                entry["distance"],
+                runner_up_distance=(
+                    runner_up["distance"] if runner_up is not None else None
+                ),
+                runner_up_name=runner_up["name"] if runner_up is not None else None,
+            )
+
         return {
             "source_name": source["name"],
             "source_vocabulary": src_vocab,
             "source_rgb": source_rgb,
-            "translations": scored[:k],
+            "translations": top,
             "target_vocabulary": to_vocabulary,
         }
 

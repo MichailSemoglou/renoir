@@ -5,6 +5,56 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.0] - 2026-09-10
+
+### Added
+
+- **Oklab delta-E backend** in `renoir/color/_colorimetry.py`: pure-NumPy
+  sRGB to Oklab transform (Ottosson, 2020) with `srgb_to_oklab()`,
+  `srgb_to_oklab_tuple()`, and `oklab_distance()`, plus a
+  `DeltaEStrategy` registry resolved via `get_delta_e_strategy()`.
+  Registered strategies: `"cie2000"` (CIEDE2000 in CIELAB), `"oklab"`
+  (Euclidean distance in Oklab), and `"cam16"` (below).
+- **CAM16-UCS delta-E backend** (Li et al., 2017) as the `"cam16"`
+  strategy, backed by the optional `colour-science` dependency (new
+  `cam16` extra: `pip install 'renoir-wikiart[cam16]'`).
+  `srgb_to_cam16ucs()` exposes the CAM16 viewing conditions via optional
+  `L_A` and `surround` parameters.
+- **`distance_metric` parameter** on
+  `ColorAnalyzer.palette_earth_movers_distance()` and
+  `ColorAnalyzer.calculate_color_complexity()`, defaulting to
+  `"cie2000"` for unchanged behavior. CCI normalizes perceptual spread
+  by the metric's black-to-white distance (100 for CIEDE2000, 1 for
+  Oklab) so scores remain comparable across backends.
+- **Notebook 18** `examples/color_analysis/18_delta_e_backend_comparison.ipynb`:
+  side-by-side PEMD and CCI results under CIEDE2000 and Oklab on
+  art-historical palettes.
+- **Match confidence for color naming** in `renoir/color/namer.py`:
+  `ColorNamer.name(..., return_metadata=True)` and
+  `ColorNamer.translate()` results now include a `confidence` dictionary
+  with a tier (exact/high/medium/low/none, banded by CIEDE2000 distance),
+  a 0-100 score on the same exponential scale as
+  `historical_pigment_probability`, the delta-E of the match, and an
+  ambiguity flag that names the runner-up on a near-tie. The module also
+  exports `PIGMENT_MATCH_GUIDANCE`, a plain-language note stating that
+  names are colorimetric approximations, not material guarantees.
+- **Test coverage expansion** (85% to 88% overall; 326 to 395 tests): fallback-path tests
+  for the pure-NumPy colorimetry branches in
+  `tests/test_colorimetry_fallback.py` (pinned to the canonical Sharma
+  CIEDE2000 reference pair), `tests/test_logging.py` for the notebook
+  logging helper (100%), CLI branch tests for `_load_image` errors
+  and `extract --format css -o`, and `tests/test_properties.py` with
+  Hypothesis property tests for color invariants (hex round-trip, Lab
+  bounds, delta-E metric axioms, CCI bounds, PEMD self-distance, DSP
+  WCAG AA guarantee on noise images, and honest single-colour palette
+  reporting on solid images). New dev dependency: `hypothesis>=6.0`.
+- **CI**: new `test-with-cam16` job in `tests.yml` runs the suite with
+  the `cam16` extra installed, so both the accelerated and fallback
+  colorimetry paths are covered on every push.
+- **Tests** in `tests/test_colorimetry.py`: Oklab reference values,
+  distance properties, strategy registry, and metric-parameter
+  regression tests.
+
 ## [3.8.0] - 2026-07-29
 
 ### Added

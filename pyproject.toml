@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "renoir-wikiart"
-version = "3.8.0"
+version = "3.9.0"
 description = "A pedagogical tool for analyzing artist-specific works from WikiArt with computational color theory and harmony analysis capabilities"
 readme = "README.md"
 authors = [
@@ -38,7 +38,7 @@ dependencies = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["renoir*"]
-exclude = ["tests*", "examples*", "Research*", "test_env*", "Pierre-Auguste Renoir*"]
+exclude = ["tests*", "examples*"]
 
 [tool.setuptools.package-data]
 renoir = ["data/colors/*.json", "py.typed"]
@@ -47,6 +47,7 @@ renoir = ["data/colors/*.json", "py.typed"]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
+    "hypothesis>=6.0",
     "black>=22.0",
     "flake8>=4.0",
     "mypy>=1.11",
@@ -61,6 +62,9 @@ visualization = [
 ]
 cli = [
     "click>=8.0",
+]
+cam16 = [
+    "colour-science>=0.4.0",
 ]
 
 [project.scripts]

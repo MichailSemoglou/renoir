@@ -7,6 +7,7 @@ color matching, CIEDE2000 distance calculations, and edge cases.
 
 import pytest
 from renoir.color import ColorNamer
+from renoir.color.namer import PIGMENT_MATCH_GUIDANCE, _match_confidence
 
 
 class TestColorNamerInitialization:
@@ -482,6 +483,107 @@ class TestProgressCallback:
         assert len(calls) > 0
         last_completed, last_total = calls[-1]
         assert last_completed == last_total
+
+
+class TestMatchConfidence:
+    """Test the match confidence tiers, scoring, and ambiguity detection."""
+
+    @pytest.mark.parametrize(
+        "distance,expected",
+        [
+            (0.0, "exact"),
+            (0.5, "exact"),
+            (1.0, "exact"),
+            (2.0, "high"),
+            (3.0, "high"),
+            (5.0, "medium"),
+            (6.0, "medium"),
+            (10.0, "low"),
+            (12.0, "low"),
+            (12.5, "none"),
+            (40.0, "none"),
+        ],
+    )
+    def test_tier_boundaries(self, distance, expected):
+        assert _match_confidence(distance)["tier"] == expected
+
+    def test_score_is_hundred_at_zero_distance(self):
+        assert _match_confidence(0.0)["score"] == 100.0
+
+    def test_score_matches_hpp_exponential_scale(self):
+        # 100 * exp(-15 / 15) = 100 / e
+        assert _match_confidence(15.0)["score"] == pytest.approx(36.8, abs=0.1)
+
+    def test_ambiguous_when_runner_up_is_near_tie(self):
+        result = _match_confidence(
+            2.0, runner_up_distance=2.4, runner_up_name="Burnt Umber"
+        )
+        assert result["ambiguous"] is True
+        assert result["runner_up"] == "Burnt Umber"
+
+    def test_not_ambiguous_when_runner_up_is_distant(self):
+        result = _match_confidence(
+            2.0, runner_up_distance=5.0, runner_up_name="Burnt Umber"
+        )
+        assert result["ambiguous"] is False
+        assert "runner_up" not in result
+
+    def test_none_tier_description_is_honest(self):
+        assert "best-effort" in _match_confidence(25.0)["description"]
+
+    def test_name_metadata_includes_confidence(self):
+        namer = ColorNamer(vocabulary="artist")
+        result = namer.name((255, 255, 255), return_metadata=True)
+        assert result["name"] == "Titanium White"
+        confidence = result["confidence"]
+        assert confidence["tier"] == "exact"
+        assert confidence["score"] == 100.0
+        assert confidence["metric"] == "cie2000"
+
+    def test_name_without_metadata_still_returns_string(self):
+        namer = ColorNamer(vocabulary="artist")
+        assert isinstance(namer.name((255, 255, 255)), str)
+
+    def test_translate_entries_carry_confidence(self):
+        namer = ColorNamer(vocabulary="artist")
+        result = namer.translate("Prussian Blue", to_vocabulary="xkcd", k=3)
+        for entry in result["translations"]:
+            assert "confidence" in entry
+            assert entry["confidence"]["tier"] in {
+                "exact",
+                "high",
+                "medium",
+                "low",
+                "none",
+            }
+            assert 0.0 <= entry["confidence"]["score"] <= 100.0
+
+    def test_guidance_note_states_colorimetric_limitation(self):
+        assert "colorimetric" in PIGMENT_MATCH_GUIDANCE
+        assert "metamerism" in PIGMENT_MATCH_GUIDANCE
+
+    def test_translate_flags_identical_rgb_near_tie(self):
+        """Quinacridone Magenta and Quinacridone Red share RGB (142, 58, 89).
+
+        Translating within the artist vocabulary must surface the tie
+        instead of silently picking one.
+        """
+        namer = ColorNamer(vocabulary="artist")
+        result = namer.translate(
+            "Quinacridone Magenta",
+            from_vocabulary="artist",
+            to_vocabulary="artist",
+            k=2,
+        )
+        first = result["translations"][0]["confidence"]
+        assert first["ambiguous"] is True
+        assert first["runner_up"] in {"Quinacridone Magenta", "Quinacridone Red"}
+
+    def test_name_flags_identical_rgb_ambiguity(self):
+        """Naming the duplicated RGB directly also reports the near-tie."""
+        namer = ColorNamer(vocabulary="artist")
+        result = namer.name((142, 58, 89), return_metadata=True)
+        assert result["confidence"]["ambiguous"] is True
 
 
 if __name__ == "__main__":

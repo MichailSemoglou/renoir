@@ -3,14 +3,26 @@ Shared color-science primitives for the renoir package.
 
 All sRGB → CIELAB conversions use the D65 white point (2° observer)
 per IEC 61966-2-1.  CIEDE2000 follows Sharma, Wu & Dalal (2005).
+Oklab follows Ottosson (2020).
 
 This module is the single source of truth.  Every other module that
-needs sRGB-to-Lab, ΔE₂₀₀₀, relative luminance, WCAG contrast, or
-hex↔RGB conversion imports from here.
+needs sRGB-to-Lab, sRGB-to-Oklab, ΔE₂₀₀₀, pluggable delta-E strategies,
+relative luminance, WCAG contrast, or hex↔RGB conversion imports from
+here.
 """
 
 import math
-from typing import List, Sequence, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 
 import numpy as np
 from numpy.typing import NDArray
@@ -29,6 +41,19 @@ except ImportError:  # pragma: no cover
 # D65 reference white (XYZ, 2° observer)
 # ---------------------------------------------------------------------------
 _D65_XYZ = np.array([95.0489, 100.0, 108.8840])
+
+# sRGB → XYZ matrix (IEC 61966-2-1 primaries, D65 white point)
+_SRGB_TO_XYZ_MATRIX = np.array(
+    [
+        [0.4124564, 0.3575761, 0.1804375],
+        [0.2126729, 0.7151522, 0.0721750],
+        [0.0193339, 0.1191920, 0.9503041],
+    ]
+)
+
+# sRGB D65 white point in XYZ ([0, 1] domain): the row sums of the
+# conversion matrix, used as the CAM16 reference white
+_SRGB_WHITE_XYZ = _SRGB_TO_XYZ_MATRIX.sum(axis=1)
 
 # IEC 61966-2-1 sRGB linearisation constants
 _SRGB_EPSILON = 0.04045
@@ -78,14 +103,7 @@ def srgb_to_lab(rgb: NDArray) -> NDArray[np.float64]:
         rgb_norm / 12.92,
         ((rgb_norm + 0.055) / 1.055) ** 2.4,
     )
-    M = np.array(
-        [
-            [0.4124564, 0.3575761, 0.1804375],
-            [0.2126729, 0.7151522, 0.0721750],
-            [0.0193339, 0.1191920, 0.9503041],
-        ]
-    )
-    xyz = linear @ M.T * 100.0
+    xyz = linear @ _SRGB_TO_XYZ_MATRIX.T * 100.0
     xyz_norm = xyz / _D65_XYZ
     eps = 0.008856
     f_vals = np.where(
@@ -293,3 +311,204 @@ def delta_e2000_batch(
             dtype=np.float64,
         )
     return np.array([delta_e2000(lab_ref, t) for t in targets])
+
+
+# ===================================================================
+# Oklab  (Ottosson, 2020)
+# ===================================================================
+
+# Linear sRGB → LMS (M1) and cube-rooted LMS → Oklab (M2) matrices.
+# Reference: Ottosson (2020), "A perceptual color space for image
+# processing", https://bottosson.github.io/posts/oklab/
+_OKLAB_M1 = np.array(
+    [
+        [0.4122214708, 0.5363325363, 0.0514459929],
+        [0.2119034982, 0.6806995451, 0.1073969566],
+        [0.0883024619, 0.2817188376, 0.6299787005],
+    ]
+)
+_OKLAB_M2 = np.array(
+    [
+        [0.2104542553, 0.7936177850, -0.0040720468],
+        [1.9779984951, -2.4285922050, 0.4505937099],
+        [0.0259040371, 0.7827717662, -0.8086757660],
+    ]
+)
+
+
+def srgb_to_oklab(rgb: NDArray) -> NDArray[np.float64]:
+    """Convert an array of sRGB colours to Oklab.
+
+    Accepts integer uint8 (0–255) or float (0–1) arrays.
+    Returns an NDArray of shape (..., 3) with Oklab L, a, b values;
+    L spans roughly 0 (black) to 1 (white).
+    """
+    orig = np.asarray(rgb)
+    if np.issubdtype(orig.dtype, np.integer) or orig.max() > 1.0:
+        rgb_norm = orig.astype(np.float64) / 255.0
+    else:
+        rgb_norm = orig.astype(np.float64)
+
+    linear = np.where(
+        rgb_norm <= _SRGB_EPSILON,
+        rgb_norm / 12.92,
+        ((rgb_norm + 0.055) / 1.055) ** 2.4,
+    )
+    lms = linear @ _OKLAB_M1.T
+    lms_root = np.cbrt(lms)
+    return np.asarray(lms_root @ _OKLAB_M2.T, dtype=np.float64)
+
+
+def srgb_to_oklab_tuple(rgb: Tuple[int, int, int]) -> Tuple[float, float, float]:
+    """Convert a single sRGB tuple to an Oklab tuple.
+
+    Convenience wrapper around :func:`srgb_to_oklab` for code that
+    expects ``(L, a, b)`` return values rather than NDArrays.
+    """
+    arr = srgb_to_oklab(np.array([rgb], dtype=np.uint8))
+    return (float(arr[0, 0]), float(arr[0, 1]), float(arr[0, 2]))
+
+
+def oklab_distance(
+    lab1: Union[Sequence[float], NDArray[np.float64]],
+    lab2: Union[Sequence[float], NDArray[np.float64]],
+) -> float:
+    """Euclidean distance between two Oklab colours.
+
+    Oklab is designed to be perceptually uniform, so the plain
+    Euclidean distance is the perceptual metric; no CIEDE2000-style
+    correction terms are needed. Black→white measures ≈ 1.0.
+    """
+    a = np.asarray(lab1, dtype=np.float64)
+    b = np.asarray(lab2, dtype=np.float64)
+    return float(np.linalg.norm(a - b))
+
+
+# ===================================================================
+# CAM16-UCS  (Li et al., 2017; requires colour-science)
+# ===================================================================
+
+
+def srgb_to_cam16ucs(
+    rgb: NDArray,
+    L_A: Optional[float] = None,
+    surround: Optional[str] = None,
+) -> NDArray[np.float64]:
+    """Convert an array of sRGB colours to CAM16-UCS (Li et al., 2017).
+
+    Accepts integer uint8 (0–255) or float (0–1) arrays. Returns an
+    NDArray of shape (..., 3) with CAM16-UCS J', a', b' values; J'
+    spans roughly 0 (black) to 100 (white).
+
+    Requires the optional ``colour-science`` dependency; install with
+    ``pip install 'renoir-wikiart[cam16]'``. ``L_A`` (adapting luminance
+    in cd/m²) and ``surround`` (``"Average"``, ``"Dim"``, or ``"Dark"``)
+    expose the CAM16 viewing conditions; both default to the IEC
+    61966-2-1 sRGB viewing conditions used by colour-science.
+    """
+    if not _COLOUR_AVAILABLE:
+        raise ImportError(
+            "CAM16-UCS requires the colour-science package. "
+            "Install with: pip install 'renoir-wikiart[cam16]'"
+        )
+    orig = np.asarray(rgb)
+    if np.issubdtype(orig.dtype, np.integer) or orig.max() > 1.0:
+        rgb_norm = orig.astype(np.float64) / 255.0
+    else:
+        rgb_norm = orig.astype(np.float64)
+
+    linear = np.where(
+        rgb_norm <= _SRGB_EPSILON,
+        rgb_norm / 12.92,
+        ((rgb_norm + 0.055) / 1.055) ** 2.4,
+    )
+    # colour-science expects XYZ in [0, 1] domain; no ×100 scaling here.
+    # discount_illuminant=True forces full adaptation (D=1) so the
+    # matrix-derived D65 white stays exactly achromatic; this is the
+    # standard choice for colour-difference evaluation.
+    xyz = linear @ _SRGB_TO_XYZ_MATRIX.T
+    kwargs: Dict[str, Any] = {"XYZ_w": _SRGB_WHITE_XYZ, "discount_illuminant": True}
+    if L_A is not None:
+        kwargs["L_A"] = L_A
+    if surround is not None:
+        kwargs["surround"] = colour.VIEWING_CONDITIONS_CAM16[surround]
+    return np.asarray(colour.XYZ_to_CAM16UCS(xyz, **kwargs), dtype=np.float64)
+
+
+def srgb_to_cam16ucs_tuple(
+    rgb: Tuple[int, int, int],
+    L_A: Optional[float] = None,
+    surround: Optional[str] = None,
+) -> Tuple[float, float, float]:
+    """Convert a single sRGB tuple to a CAM16-UCS tuple.
+
+    Convenience wrapper around :func:`srgb_to_cam16ucs` for code that
+    expects ``(J', a', b')`` return values rather than NDArrays.
+    """
+    arr = srgb_to_cam16ucs(np.array([rgb], dtype=np.uint8), L_A=L_A, surround=surround)
+    return (float(arr[0, 0]), float(arr[0, 1]), float(arr[0, 2]))
+
+
+def cam16ucs_distance(
+    lab1: Union[Sequence[float], NDArray[np.float64]],
+    lab2: Union[Sequence[float], NDArray[np.float64]],
+) -> float:
+    """Euclidean distance between two CAM16-UCS colours (ΔE′).
+
+    CAM16-UCS is a uniform colour space, so the plain Euclidean
+    distance is the perceptual metric. Black→white measures ≈ 100.
+    """
+    a = np.asarray(lab1, dtype=np.float64)
+    b = np.asarray(lab2, dtype=np.float64)
+    return float(np.linalg.norm(a - b))
+
+
+# ===================================================================
+# Delta-E strategies
+# ===================================================================
+
+
+class DeltaEStrategy(NamedTuple):
+    """A pluggable perceptual-distance backend.
+
+    ``to_space`` converts an sRGB tuple to the strategy's colour space;
+    ``distance`` computes the perceptual distance between two colours in
+    that space; ``normalization_cap`` is the black→white distance, used
+    to normalise distance-based scores onto [0, 1] so composite metrics
+    stay comparable across backends.
+    """
+
+    to_space: Callable[[Tuple[int, int, int]], Tuple[float, float, float]]
+    distance: Callable[
+        [
+            Union[Sequence[float], NDArray[np.float64]],
+            Union[Sequence[float], NDArray[np.float64]],
+        ],
+        float,
+    ]
+    normalization_cap: float
+
+
+_DELTA_E_STRATEGIES: Dict[str, DeltaEStrategy] = {
+    "cie2000": DeltaEStrategy(srgb_to_lab_tuple, delta_e2000, 100.0),
+    "oklab": DeltaEStrategy(srgb_to_oklab_tuple, oklab_distance, 1.0),
+    "cam16": DeltaEStrategy(srgb_to_cam16ucs_tuple, cam16ucs_distance, 100.0),
+}
+
+
+def get_delta_e_strategy(name: str) -> DeltaEStrategy:
+    """Return the delta-E strategy registered under ``name``.
+
+    Available strategies: ``"cie2000"`` (CIEDE2000 in CIELAB, the
+    default across renoir), ``"oklab"`` (Euclidean distance in Oklab),
+    and ``"cam16"`` (Euclidean distance in CAM16-UCS; requires the
+    optional colour-science dependency). Raises ``ValueError`` for
+    unknown names.
+    """
+    try:
+        return _DELTA_E_STRATEGIES[name]
+    except KeyError:
+        available = ", ".join(sorted(_DELTA_E_STRATEGIES))
+        raise ValueError(
+            f"Unknown distance metric: {name!r}. Available: {available}"
+        ) from None

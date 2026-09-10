@@ -31,6 +31,8 @@ env/
 # IDEs
 .vscode/
 .idea/
+.kilo/
+.kimi/
 *.swp
 *.swo
 *~
@@ -68,32 +70,12 @@ datasets/
 # Test artifacts
 test_*.png
 *_test.png
-test_visualization.py
-
-# Virtual environment (for testing)
-test_env/
-
-# Writing profiles (personal, not for public distribution)
-paper/m-semoglou.json
-
-# Old scripts (not part of package)
-analyze_renoir_images.py
-analyze_renoir_images_Gemini.py
-analyze_renoir_images_still-life_Gemini.py
-art_research_renoir.py
-artists_id_distribution.py
-artists_names_in_the_dataset.py
-examine_wikiart_dataset_structure.py
-extract_and_analyse_Renoir_work_Claude.py
-mapping.py
-renoir_dataset.py
-verify.py
-wikiart_data_structure_Claude.py
 
 # XAIxArts 2026 conference artefact (not submitted)
 xaixarts2026/
 
 # Internal planning and strategy documents (not for public repo)
+ACADEMIC_ROADMAP.md
 WOW_ROADMAP.md
 SUBMISSION_STRATEGY.md
 HONEST_REVIEW.md

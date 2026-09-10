@@ -6,7 +6,7 @@ distinctness (minimum pairwise ΔE₂₀₀₀) while guaranteeing at least one
 WCAG AA-compliant Surface/On-Surface contrast pair.
 
 Imported from `dsp-palette <https://github.com/MichailSemoglou/dsp-palette>`_
-(DOI 10.5281/zenodo.20092216), submitted to APSIPA ASC 2026, Track IVM.
+(DOI 10.5281/zenodo.20092216), accepted to APSIPA ASC 2026, Track IVM.
 
 Algorithm
 ---------
@@ -17,7 +17,12 @@ Algorithm
    *minΔE ≥ τ* (default 10 ΔE₂₀₀₀).
 5. Post-selection WCAG AA check: if no pair reaches 4.5:1, replace the
    least-distinct member with a candidate that creates a qualifying pair
-   while preserving distinctness when possible.
+   while preserving distinctness when possible. The guarantee assumes a
+   real design scenario; for degenerate inputs whose pool cannot supply
+   a qualifying pair (e.g. single-colour images, which legitimately
+   yield a single-colour palette), DSP reports
+   ``wcag_guaranteed=False`` and warns rather than inventing colours
+   that are not in the image.
 6. Optionally assign semantic design-token roles (Surface, On-Surface,
    Primary, Secondary, Accent).
 
@@ -32,7 +37,7 @@ Public API
 Reference
 ---------
 Semoglou, M. (2026). Distinctness-First Palette Extraction for Accessible
-Design Systems.  Submitted to *APSIPA ASC 2026*, Track IVM.
+Design Systems.  Accepted to *APSIPA ASC 2026*, Track IVM.
 """
 
 import math
