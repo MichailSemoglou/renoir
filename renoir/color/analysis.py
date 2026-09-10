@@ -920,8 +920,10 @@ class ColorAnalyzer:
             palette2: List of (RGB tuple, proportion) pairs.
                       Proportions should sum to 1.0.
             distance_metric: Perceptual ground metric: ``"cie2000"``
-                      (CIEDE2000 in CIELAB, default) or ``"oklab"``
-                      (Euclidean distance in Oklab; Ottosson, 2020).
+                      (CIEDE2000 in CIELAB, default), ``"oklab"``
+                      (Euclidean distance in Oklab; Ottosson, 2020), or
+                      ``"cam16"`` (Euclidean distance in CAM16-UCS;
+                      Li et al., 2017, requires the colour-science extra).
 
         Returns:
             PEMD distance (lower = more similar). Scale depends on the
@@ -1028,11 +1030,13 @@ class ColorAnalyzer:
                      'hue_entropy', 'perceptual_spread', 'proportion_evenness',
                      'harmony_penalty'. Defaults to equal weighting.
             distance_metric: Perceptual metric for the spread component:
-                     ``"cie2000"`` (CIEDE2000 in CIELAB, default) or
-                     ``"oklab"`` (Euclidean distance in Oklab). The spread
+                     ``"cie2000"`` (CIEDE2000 in CIELAB, default),
+                     ``"oklab"`` (Euclidean distance in Oklab), or
+                     ``"cam16"`` (Euclidean distance in CAM16-UCS,
+                     requires the colour-science extra). The spread
                      is normalised by the metric's black-to-white distance
-                     (100 for CIEDE2000, 1 for Oklab), so CCI values remain
-                     comparable across backends.
+                     (100 for CIEDE2000 and CAM16-UCS, 1 for Oklab), so
+                     CCI values remain comparable across backends.
 
         Returns:
             Dictionary containing:

@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 from renoir.color import ColorAnalyzer
+from renoir.color import _colorimetry
 from renoir.color._colorimetry import (
     delta_e2000,
     get_delta_e_strategy,
@@ -175,3 +176,17 @@ def test_cci_invalid_metric_raises(analyzer):
     """An unknown distance_metric raises ValueError in CCI."""
     with pytest.raises(ValueError, match="Unknown distance metric"):
         analyzer.calculate_color_complexity(COLORS, distance_metric="lab76")
+
+
+def test_cam16_strategy_registered_with_cap():
+    """The cam16 strategy is registered with a black-to-white cap of 100."""
+    assert get_delta_e_strategy("cam16").normalization_cap == 100.0
+
+
+@pytest.mark.skipif(
+    _colorimetry._COLOUR_AVAILABLE, reason="colour-science is installed"
+)
+def test_cam16_requires_colour_extra():
+    """Without colour-science, the cam16 backend raises a clear ImportError."""
+    with pytest.raises(ImportError, match="colour-science"):
+        get_delta_e_strategy("cam16").to_space((255, 0, 0))

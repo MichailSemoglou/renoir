@@ -13,8 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sRGB to Oklab transform (Ottosson, 2020) with `srgb_to_oklab()`,
   `srgb_to_oklab_tuple()`, and `oklab_distance()`, plus a
   `DeltaEStrategy` registry resolved via `get_delta_e_strategy()`.
-  Registered strategies: `"cie2000"` (CIEDE2000 in CIELAB) and
-  `"oklab"` (Euclidean distance in Oklab).
+  Registered strategies: `"cie2000"` (CIEDE2000 in CIELAB), `"oklab"`
+  (Euclidean distance in Oklab), and `"cam16"` (below).
+- **CAM16-UCS delta-E backend** (Li et al., 2017) as the `"cam16"`
+  strategy, backed by the optional `colour-science` dependency (new
+  `cam16` extra: `pip install 'renoir-wikiart[cam16]'`).
+  `srgb_to_cam16ucs()` exposes the CAM16 viewing conditions via optional
+  `L_A` and `surround` parameters.
 - **`distance_metric` parameter** on
   `ColorAnalyzer.palette_earth_movers_distance()` and
   `ColorAnalyzer.calculate_color_complexity()`, defaulting to
