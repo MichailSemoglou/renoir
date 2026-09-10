@@ -5,6 +5,29 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Oklab delta-E backend** in `renoir/color/_colorimetry.py`: pure-NumPy
+  sRGB to Oklab transform (Ottosson, 2020) with `srgb_to_oklab()`,
+  `srgb_to_oklab_tuple()`, and `oklab_distance()`, plus a
+  `DeltaEStrategy` registry resolved via `get_delta_e_strategy()`.
+  Registered strategies: `"cie2000"` (CIEDE2000 in CIELAB) and
+  `"oklab"` (Euclidean distance in Oklab).
+- **`distance_metric` parameter** on
+  `ColorAnalyzer.palette_earth_movers_distance()` and
+  `ColorAnalyzer.calculate_color_complexity()`, defaulting to
+  `"cie2000"` for unchanged behavior. CCI normalizes perceptual spread
+  by the metric's black-to-white distance (100 for CIEDE2000, 1 for
+  Oklab) so scores remain comparable across backends.
+- **Notebook 18** `examples/color_analysis/18_delta_e_backend_comparison.ipynb`:
+  side-by-side PEMD and CCI results under CIEDE2000 and Oklab on
+  art-historical palettes.
+- **Tests** in `tests/test_colorimetry.py`: Oklab reference values,
+  distance properties, strategy registry, and metric-parameter
+  regression tests (326 to 346 tests).
+
 ## [3.8.0] - 2026-07-29
 
 ### Added
