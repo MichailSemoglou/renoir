@@ -562,6 +562,29 @@ class TestMatchConfidence:
         assert "colorimetric" in PIGMENT_MATCH_GUIDANCE
         assert "metamerism" in PIGMENT_MATCH_GUIDANCE
 
+    def test_translate_flags_identical_rgb_near_tie(self):
+        """Quinacridone Magenta and Quinacridone Red share RGB (142, 58, 89).
+
+        Translating within the artist vocabulary must surface the tie
+        instead of silently picking one.
+        """
+        namer = ColorNamer(vocabulary="artist")
+        result = namer.translate(
+            "Quinacridone Magenta",
+            from_vocabulary="artist",
+            to_vocabulary="artist",
+            k=2,
+        )
+        first = result["translations"][0]["confidence"]
+        assert first["ambiguous"] is True
+        assert first["runner_up"] in {"Quinacridone Magenta", "Quinacridone Red"}
+
+    def test_name_flags_identical_rgb_ambiguity(self):
+        """Naming the duplicated RGB directly also reports the near-tie."""
+        namer = ColorNamer(vocabulary="artist")
+        result = namer.name((142, 58, 89), return_metadata=True)
+        assert result["confidence"]["ambiguous"] is True
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

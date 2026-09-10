@@ -725,17 +725,29 @@ class ColorNamer:
                     "rgb": tgt_rgb,
                     "hex": c.get("hex", tgt_namer._rgb_to_hex(tgt_rgb)),
                     "distance": round(dist, 3),
-                    "confidence": _match_confidence(dist),
                 }
             )
 
         scored.sort(key=lambda x: x["distance"])
 
+        # Confidence is computed after sorting so each entry is judged
+        # against the next-best candidate, surfacing near-ties.
+        top = scored[:k]
+        for i, entry in enumerate(top):
+            runner_up = top[i + 1] if i + 1 < len(top) else None
+            entry["confidence"] = _match_confidence(
+                entry["distance"],
+                runner_up_distance=(
+                    runner_up["distance"] if runner_up is not None else None
+                ),
+                runner_up_name=runner_up["name"] if runner_up is not None else None,
+            )
+
         return {
             "source_name": source["name"],
             "source_vocabulary": src_vocab,
             "source_rgb": source_rgb,
-            "translations": scored[:k],
+            "translations": top,
             "target_vocabulary": to_vocabulary,
         }
 
