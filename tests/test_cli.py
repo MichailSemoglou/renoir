@@ -200,3 +200,57 @@ def test_prompt_missing_image():
     runner = _runner()
     result = runner.invoke(cli, ["prompt", "/nonexistent/image.png"])
     assert result.exit_code != 0
+
+
+# ---------------------------------------------------------------------------
+# _load_image error paths
+# ---------------------------------------------------------------------------
+
+
+def test_load_image_file_not_found():
+    import click
+    from renoir.cli import _load_image
+
+    with pytest.raises(click.ClickException, match="File not found"):
+        _load_image("/nonexistent/definitely-missing.png")
+
+
+def test_load_image_not_an_image(tmp_path):
+    import click
+    from renoir.cli import _load_image
+
+    bad = tmp_path / "notes.txt"
+    bad.write_text("not an image")
+    with pytest.raises(click.ClickException, match="Cannot open image"):
+        _load_image(str(bad))
+
+
+def test_extract_css_to_file(sample_image_path, tmp_path):
+    from renoir.cli import cli
+
+    runner = _runner()
+    out = tmp_path / "palette.css"
+    result = runner.invoke(
+        cli,
+        [
+            "extract",
+            sample_image_path,
+            "--n-colors",
+            "2",
+            "--format",
+            "css",
+            "-o",
+            str(out),
+        ],
+    )
+    assert result.exit_code == 0
+    assert "--palette-1" in out.read_text()
+
+
+def test_name_rgb_string_argument():
+    from renoir.cli import cli
+
+    runner = _runner()
+    result = runner.invoke(cli, ["name", "255,0,0"])
+    assert result.exit_code == 0
+    assert len(result.output.strip()) > 0
