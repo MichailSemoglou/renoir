@@ -71,21 +71,21 @@ datasets/
 test_*.png
 *_test.png
 
-# XAIxArts 2026 conference artefact (not submitted)
-xaixarts2026/
+# XAIxArts 2027 conference artefact (CHI workshop pictorial; in preparation)
+xaixarts2027/
 
 # Internal planning and strategy documents (not for public repo)
-ACADEMIC_ROADMAP.md
-WOW_ROADMAP.md
-SUBMISSION_STRATEGY.md
-HONEST_REVIEW.md
-ROADMAP_SOFTWAREX.md
-COMPETITIVE_LANDSCAPE.md
+ROADMAP.md
+REVIEW_DATASET.md
 AGENTS.md
 .github/copilot-instructions.md
 softwarex_paper/
 jose_paper/
 references/
+
+# JOHD data paper and deposit staging (the dataset's canonical public
+# record is the Zenodo deposit, not this repository)
+johd_paper/
 
 # Graphical abstract / pedagogical arc — generator scripts and generated artefacts
 create_graphical_abstract.py
