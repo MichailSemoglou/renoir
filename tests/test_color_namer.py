@@ -533,12 +533,18 @@ class TestMatchConfidence:
 
     def test_name_metadata_includes_confidence(self):
         namer = ColorNamer(vocabulary="artist")
-        result = namer.name((255, 255, 255), return_metadata=True)
+        result = namer.name((228, 228, 228), return_metadata=True)
         assert result["name"] == "Titanium White"
         confidence = result["confidence"]
         assert confidence["tier"] == "exact"
         assert confidence["score"] == 100.0
         assert confidence["metric"] == "cie2000"
+
+    def test_pure_white_names_lead_white(self):
+        # Titanium White's reference (#E4E4E4) sits farther from pure
+        # white than Lead White (#F6F4ED)
+        namer = ColorNamer(vocabulary="artist")
+        assert namer.name((255, 255, 255)) == "Lead White"
 
     def test_name_without_metadata_still_returns_string(self):
         namer = ColorNamer(vocabulary="artist")
@@ -562,27 +568,39 @@ class TestMatchConfidence:
         assert "colorimetric" in PIGMENT_MATCH_GUIDANCE
         assert "metamerism" in PIGMENT_MATCH_GUIDANCE
 
-    def test_translate_flags_identical_rgb_near_tie(self):
-        """Quinacridone Magenta and Quinacridone Red share RGB (142, 58, 89).
+    @pytest.fixture
+    def tied_namer(self, monkeypatch):
+        """Inject a synthetic exact tie into the artist vocabulary."""
+        original = ColorNamer._load_colors
 
-        Translating within the artist vocabulary must surface the tie
-        instead of silently picking one.
-        """
-        namer = ColorNamer(vocabulary="artist")
-        result = namer.translate(
-            "Quinacridone Magenta",
+        def patched(namer):
+            colors = [dict(c) for c in original(namer)]
+            if namer.vocabulary == "artist":
+                duplicate = dict(colors[0])
+                duplicate["name"] = "Synthetic Duplicate"
+                colors.append(duplicate)
+            return colors
+
+        monkeypatch.setattr(ColorNamer, "_load_colors", patched)
+        return ColorNamer(vocabulary="artist")
+
+    def test_translate_flags_identical_rgb_near_tie(self, tied_namer):
+        """An exact RGB tie must surface the ambiguity instead of
+        silently picking one."""
+        result = tied_namer.translate(
+            "Titanium White",
             from_vocabulary="artist",
             to_vocabulary="artist",
             k=2,
         )
         first = result["translations"][0]["confidence"]
         assert first["ambiguous"] is True
-        assert first["runner_up"] in {"Quinacridone Magenta", "Quinacridone Red"}
+        assert first["runner_up"] in {"Titanium White", "Synthetic Duplicate"}
 
-    def test_name_flags_identical_rgb_ambiguity(self):
-        """Naming the duplicated RGB directly also reports the near-tie."""
-        namer = ColorNamer(vocabulary="artist")
-        result = namer.name((142, 58, 89), return_metadata=True)
+    def test_name_flags_identical_rgb_ambiguity(self, tied_namer):
+        """Naming a tied RGB directly also reports the near-tie."""
+        tied_rgb = tuple(tied_namer._load_colors()[0]["rgb"])
+        result = tied_namer.name(tied_rgb, return_metadata=True)
         assert result["confidence"]["ambiguous"] is True
 
 
