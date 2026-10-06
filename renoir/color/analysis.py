@@ -43,7 +43,7 @@ _CCI_DEFAULT_WEIGHTS = {
     "proportion_evenness": 0.2,
     "harmony_penalty": 0.2,
 }
-_PROVENANCE_ANACHRONISM_THRESHOLD = 0.1
+_PROVENANCE_MATCH_DISTANCE_THRESHOLD = 5.0
 
 
 def _largest_remainder(weights: np.ndarray, total: int) -> np.ndarray:
@@ -1157,7 +1157,10 @@ class ColorAnalyzer:
         Calculate Color Provenance Score (CPS) for a palette and attributed date.
 
         Estimates how consistent a palette is with historically available pigments
-        at the given date. Low scores may indicate anachronistic color usage.
+        at the given date. A color is flagged as potentially anachronistic when
+        every pigment it closely matches (CIEDE2000 at or below
+        ``_PROVENANCE_MATCH_DISTANCE_THRESHOLD``) was unavailable at ``year``;
+        colors with a close available substitute are not flagged.
 
         Requires the artist_pigments vocabulary with historical date fields.
 
@@ -1170,7 +1173,8 @@ class ColorAnalyzer:
             Dictionary containing:
                 - score: Overall provenance score (0–1, higher = more consistent)
                 - per_color: List of per-color assessments
-                - flagged: Colors flagged as potentially anachronistic
+                - flagged: Colors whose close pigment matches were all
+                  unavailable at ``year`` (potentially anachronistic)
 
         Example:
             >>> analyzer = ColorAnalyzer()
@@ -1181,6 +1185,7 @@ class ColorAnalyzer:
             ...     print(f"  ⚠ {flag['color']}: {flag['reason']}")
         """
         namer = self._get_namer()
+        top_k = namer.get_vocabulary_info()["count"]
 
         if not colors:
             raise ValueError("colors must not be empty")
@@ -1198,7 +1203,7 @@ class ColorAnalyzer:
         flagged = []
 
         for i, (color, weight) in enumerate(zip(colors, proportions)):
-            result = namer.historical_pigment_probability(color, year)
+            result = namer.historical_pigment_probability(color, year, top_k=top_k)
 
             # Best match probability
             best = result[0] if result else None
@@ -1209,19 +1214,25 @@ class ColorAnalyzer:
                 "weight": weight,
                 "probability": prob,
                 "best_pigment": best["name"] if best else "Unknown",
-                "available_pigments": len(result),
+                "available_pigments": sum(1 for r in result if r["available"]),
             }
             per_color.append(entry)
 
-            if prob < _PROVENANCE_ANACHRONISM_THRESHOLD:
+            close = [
+                r
+                for r in result
+                if r["ciede2000"] <= _PROVENANCE_MATCH_DISTANCE_THRESHOLD
+            ]
+            if close and not any(r["available"] for r in close):
+                nearest = min(close, key=lambda r: r["ciede2000"])
                 flagged.append(
                     {
                         "color": color,
                         "reason": (
-                            f"No historically plausible pigment match for year {year}. "
-                            f"Best match: {best['name']} (prob: {prob:.3f})"
-                            if best
-                            else f"No pigments available for year {year}"
+                            f"Every close pigment match is unavailable in {year}: "
+                            f"nearest is {nearest['name']} "
+                            f"(CIEDE2000 {nearest['ciede2000']:.1f}, "
+                            f"introduced {nearest['year_introduced']})"
                         ),
                     }
                 )

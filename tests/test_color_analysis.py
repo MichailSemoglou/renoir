@@ -390,6 +390,21 @@ class TestColorProvenanceScore:
         assert "score" in result
         assert 0 <= result["score"] <= 1
 
+    def test_modern_pigment_flagged_at_premodern_date(self, analyzer):
+        # Phthalo Blue (introduced 1935) must flag for a stated year of 1700
+        result = analyzer.colour_provenance_score([(0, 15, 137)], 1700)
+        assert len(result["flagged"]) == 1
+
+    def test_modern_pigment_not_flagged_after_introduction(self, analyzer):
+        result = analyzer.colour_provenance_score([(0, 15, 137)], 1950)
+        assert result["flagged"] == []
+
+    def test_historic_palette_not_flagged(self, analyzer):
+        # Ochre, vermilion, and ivory black were all available in 1700
+        palette = [(204, 119, 34), (227, 66, 52), (41, 36, 33)]
+        result = analyzer.colour_provenance_score(palette, 1700)
+        assert result["flagged"] == []
+
     def test_empty_palette(self, analyzer):
         with pytest.raises(ValueError, match="colors must not be empty"):
             analyzer.colour_provenance_score([], 1800)
