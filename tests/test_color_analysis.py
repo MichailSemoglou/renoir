@@ -399,6 +399,12 @@ class TestColorProvenanceScore:
         result = analyzer.colour_provenance_score([(0, 15, 137)], 1950)
         assert result["flagged"] == []
 
+    def test_discontinued_pigment_reports_discontinuation_year(self, analyzer):
+        # Nearest close match is Manganese Blue, discontinued 1990
+        result = analyzer.colour_provenance_score([(0, 155, 150)], 1995)
+        assert len(result["flagged"]) == 1
+        assert "discontinued 1990" in result["flagged"][0]["reason"]
+
     def test_historic_palette_not_flagged(self, analyzer):
         # Ochre, vermilion, and ivory black were all available in 1700
         palette = [(204, 119, 34), (227, 66, 52), (41, 36, 33)]

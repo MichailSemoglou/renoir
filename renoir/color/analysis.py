@@ -1225,6 +1225,12 @@ class ColorAnalyzer:
             ]
             if close and not any(r["available"] for r in close):
                 nearest = min(close, key=lambda r: r["ciede2000"])
+                cutoff_label = "introduced"
+                cutoff_year = nearest["year_introduced"]
+                discontinued = nearest.get("year_discontinued")
+                if discontinued is not None and year > discontinued:
+                    cutoff_label = "discontinued"
+                    cutoff_year = discontinued
                 flagged.append(
                     {
                         "color": color,
@@ -1232,7 +1238,7 @@ class ColorAnalyzer:
                             f"Every close pigment match is unavailable in {year}: "
                             f"nearest is {nearest['name']} "
                             f"(CIEDE2000 {nearest['ciede2000']:.1f}, "
-                            f"introduced {nearest['year_introduced']})"
+                            f"{cutoff_label} {cutoff_year})"
                         ),
                     }
                 )
