@@ -67,7 +67,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Chromium Oxide Green description** no longer calls the synthetic
   oxide a natural earth green.
 - Entries with null `ci_name` (Hooker's Green, Payne's Grey, Olive
-  Green, Permanent Green Light) are excluded from pigment matching.
+  Green, Permanent Green Light) are excluded from
+  `ColorNamer.closest_pigment()` matching; `name()` and
+  `historical_pigment_probability()` still consider them.
 
 ## [3.9.0] - 2026-09-10
 
