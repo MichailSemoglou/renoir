@@ -91,9 +91,9 @@ class TestEntryFields:
 
     def test_years_are_integers(self, pigments):
         for p in pigments:
-            assert isinstance(p["year_introduced"], int), p["name"]
+            assert type(p["year_introduced"]) is int, p["name"]
             if "year_discontinued" in p:
-                assert isinstance(p["year_discontinued"], int), p["name"]
+                assert type(p["year_discontinued"]) is int, p["name"]
                 assert p["year_discontinued"] >= p["year_introduced"], p["name"]
 
     def test_descriptions_non_empty(self, pigments):
