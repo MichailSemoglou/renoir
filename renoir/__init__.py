@@ -5,9 +5,9 @@ This package provides simple functions for extracting and analyzing works by
 specific artists from the WikiArt dataset, designed for teaching computational
 design and digital humanities courses.
 
-Version 3.9.0 adds pluggable delta-E backends (CIEDE2000, Oklab, CAM16-UCS)
-for the PEMD and CCI metrics, and confidence tiers for color naming and
-translation.
+Version 3.10.0 expands the artist pigment vocabulary to 56 entries and
+corrects the Color Provenance Score flag semantics so anachronism flags
+track pigment availability at the stated date.
 """
 
 import logging

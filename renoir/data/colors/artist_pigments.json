@@ -1,11 +1,11 @@
 [
   {
     "name": "Titanium White",
-    "hex": "#FFFFFF",
+    "hex": "#E4E4E4",
     "rgb": [
-      255,
-      255,
-      255
+      228,
+      228,
+      228
     ],
     "ci_name": "PW6",
     "family": "White",
@@ -24,6 +24,19 @@
     "family": "White",
     "description": "Cool, semi-transparent white",
     "year_introduced": 1780
+  },
+  {
+    "name": "Lead White",
+    "hex": "#F6F4ED",
+    "rgb": [
+      246,
+      244,
+      237
+    ],
+    "ci_name": "PW1",
+    "family": "White",
+    "description": "Warm, opaque white; the standard white before the nineteenth century",
+    "year_introduced": -400
   },
   {
     "name": "Cadmium Yellow Light",
@@ -50,6 +63,19 @@
     "family": "Yellow",
     "description": "Rich, warm orange-yellow",
     "year_introduced": 1840
+  },
+  {
+    "name": "Chrome Yellow",
+    "hex": "#FFA700",
+    "rgb": [
+      255,
+      167,
+      0
+    ],
+    "ci_name": "PY34",
+    "family": "Yellow",
+    "description": "Brilliant, opaque yellow-orange; lead chromate",
+    "year_introduced": 1809
   },
   {
     "name": "Lemon Yellow",
@@ -140,7 +166,7 @@
     "ci_name": "PO20",
     "family": "Orange",
     "description": "Brilliant, opaque orange",
-    "year_introduced": 1840
+    "year_introduced": 1907
   },
   {
     "name": "Cadmium Red Light",
@@ -215,7 +241,7 @@
       8,
       21
     ],
-    "ci_name": "PR101",
+    "ci_name": "PR102",
     "family": "Red",
     "description": "Earth red, less intense than cadmium",
     "year_introduced": -40000
@@ -228,7 +254,7 @@
       92,
       92
     ],
-    "ci_name": "PR101",
+    "ci_name": "PR102",
     "family": "Red",
     "description": "Brownish-red earth pigment",
     "year_introduced": -40000
@@ -282,8 +308,34 @@
     ],
     "ci_name": "PB29",
     "family": "Blue",
-    "description": "Warm, intense blue with violet undertones",
-    "year_introduced": 1826
+    "description": "Warm, intense blue with violet undertones; date covers natural ultramarine",
+    "year_introduced": 600
+  },
+  {
+    "name": "Azurite",
+    "hex": "#0066CC",
+    "rgb": [
+      0,
+      102,
+      204
+    ],
+    "ci_name": "PB30",
+    "family": "Blue",
+    "description": "Deep azure blue, the standard blue of medieval panel painting",
+    "year_introduced": -3000
+  },
+  {
+    "name": "Smalt",
+    "hex": "#003399",
+    "rgb": [
+      0,
+      51,
+      153
+    ],
+    "ci_name": "PB32",
+    "family": "Blue",
+    "description": "Ground cobalt glass blue, prone to discoloration",
+    "year_introduced": 1500
   },
   {
     "name": "Cobalt Blue",
@@ -349,7 +401,7 @@
     "family": "Blue",
     "description": "Transparent, greenish-blue",
     "year_introduced": 1907,
-    "year_discontinued": 2000
+    "year_discontinued": 1990
   },
   {
     "name": "Phthalo Green",
@@ -378,6 +430,19 @@
     "year_introduced": 1838
   },
   {
+    "name": "Emerald Green",
+    "hex": "#50C878",
+    "rgb": [
+      80,
+      200,
+      120
+    ],
+    "ci_name": "PG21",
+    "family": "Green",
+    "description": "Brilliant, vivid green; highly toxic arsenic compound",
+    "year_introduced": 1814
+  },
+  {
     "name": "Chromium Oxide Green",
     "hex": "#5D7745",
     "rgb": [
@@ -387,8 +452,34 @@
     ],
     "ci_name": "PG17",
     "family": "Green",
-    "description": "Opaque, natural earth green",
+    "description": "Opaque, dull, slightly grayish green",
     "year_introduced": 1838
+  },
+  {
+    "name": "Verdigris",
+    "hex": "#43B3AE",
+    "rgb": [
+      67,
+      179,
+      174
+    ],
+    "ci_name": "PG20",
+    "family": "Green",
+    "description": "Bright blue-green copper acetate, prone to fading",
+    "year_introduced": -300
+  },
+  {
+    "name": "Malachite",
+    "hex": "#3FCE68",
+    "rgb": [
+      63,
+      206,
+      104
+    ],
+    "ci_name": "PG39",
+    "family": "Green",
+    "description": "Vivid mineral green, used since antiquity",
+    "year_introduced": -3000
   },
   {
     "name": "Sap Green",
@@ -398,10 +489,10 @@
       125,
       42
     ],
-    "ci_name": "PG8",
+    "ci_name": "NG2",
     "family": "Green",
     "description": "Transparent yellow-green",
-    "year_introduced": -500
+    "year_introduced": 1600
   },
   {
     "name": "Hooker's Green",
@@ -427,7 +518,7 @@
     "ci_name": "PG23",
     "family": "Green",
     "description": "Natural earth green, muted",
-    "year_introduced": -40000
+    "year_introduced": -100
   },
   {
     "name": "Naples Yellow",
@@ -437,7 +528,7 @@
       218,
       94
     ],
-    "ci_name": "PY42",
+    "ci_name": "PY41",
     "family": "Yellow",
     "description": "Opaque, warm pale yellow",
     "year_introduced": -500
@@ -515,10 +606,10 @@
       66,
       20
     ],
-    "ci_name": "PBr7",
+    "ci_name": "NBr9",
     "family": "Brown",
     "description": "Deep brown, historic ink color",
-    "year_introduced": -400
+    "year_introduced": 1780
   },
   {
     "name": "Vandyke Brown",
@@ -528,7 +619,7 @@
       46,
       12
     ],
-    "ci_name": "PBr7",
+    "ci_name": "NBr8",
     "family": "Brown",
     "description": "Very dark, transparent brown",
     "year_introduced": 1600
@@ -541,7 +632,7 @@
       205,
       145
     ],
-    "ci_name": "PG7",
+    "ci_name": null,
     "family": "Green",
     "description": "Bright, cool green",
     "year_introduced": 1938
@@ -554,10 +645,10 @@
       184,
       108
     ],
-    "ci_name": "PY42",
+    "ci_name": null,
     "family": "Green",
     "description": "Muted, yellow-green earth tone",
-    "year_introduced": -40000
+    "year_introduced": 1900
   },
   {
     "name": "Cobalt Teal",
@@ -580,7 +671,7 @@
       0,
       130
     ],
-    "ci_name": "PB60",
+    "ci_name": "NB1",
     "family": "Violet",
     "description": "Deep blue-violet",
     "year_introduced": -2000
@@ -593,18 +684,18 @@
       0,
       24
     ],
-    "ci_name": "PR83",
+    "ci_name": "NR4",
     "family": "Red",
     "description": "Deep, cool red",
-    "year_introduced": 1500
+    "year_introduced": 1520
   },
   {
     "name": "Quinacridone Red",
-    "hex": "#8E3A59",
+    "hex": "#EF3753",
     "rgb": [
-      142,
-      58,
-      89
+      239,
+      55,
+      83
     ],
     "ci_name": "PR209",
     "family": "Red",
@@ -622,7 +713,7 @@
     "ci_name": "PR101",
     "family": "Brown",
     "description": "Transparent, warm earth red",
-    "year_introduced": -40000
+    "year_introduced": 1980
   },
   {
     "name": "Hansa Yellow",
@@ -632,7 +723,7 @@
       214,
       107
     ],
-    "ci_name": "PY97",
+    "ci_name": "PY1",
     "family": "Yellow",
     "description": "Bright, transparent yellow",
     "year_introduced": 1910
