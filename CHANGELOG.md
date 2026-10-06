@@ -5,6 +5,70 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.0] - 2026-10-06
+
+### Added
+
+- **Seven pigments** in `renoir/data/colors/artist_pigments.json`:
+  Lead White (PW1, -400; author-assigned reference color `#F6F4ED`,
+  labeled as such in the deposit documentation), Emerald Green (PG21,
+  1814, `#50C878`), Chrome Yellow (PY34, 1809, `#FFA700`), Azurite
+  (PB30, -3000), Smalt (PB32, 1500), Verdigris (PG20, -300), and
+  Malachite (PG39, -3000). These close the systematic gaps for
+  pre-1800 whites and the nineteenth-century palette, and add the
+  medieval and Renaissance backbone of the European easel tradition.
+- **Dataset schema validation** in `tests/test_artist_pigments.py`:
+  every entry in `artist_pigments.json` is checked against the
+  documented field semantics (required fields, hex/rgb consistency,
+  closed family vocabulary, Color Index name format) and round-tripped
+  through the naming pipeline, so malformed entries fail the build.
+  Value-level regression checks lock every externally verified
+  designation, date, and reference color, so a corrected value cannot
+  regress silently.
+
+### Changed
+
+- **CPS flag semantics** in `ColorAnalyzer.colour_provenance_score()`:
+  a color is now flagged as potentially anachronistic when every pigment
+  it closely matches (CIEDE2000 <= 5.0) was unavailable at the stated
+  year. The previous rule thresholded the best-match softmax
+  probability, which tracked colorimetric distance rather than
+  availability: an all-modern palette scored at 1700 produced no flags.
+  The aggregate score is unchanged.
+
+### Fixed
+
+- **Color Index designations** in `renoir/data/colors/artist_pigments.json`,
+  verified against Colour Index conventions and conservation sources:
+  Carmine is NR4 (cochineal; PR83 is alizarin), Naples Yellow is PY41
+  (lead antimonate; PY42 is synthetic hydrated iron oxide), Indigo is
+  NB1 (natural indigo; PB60 is synthetic indanthrone), Venetian Red and
+  Indian Red are PR102 (natural red iron oxide; PR101 is synthetic),
+  Vandyke Brown is NBr8 (genuine Van Dyke brown), Sap Green is NG2 (the
+  buckthorn lake), Sepia is NBr9 (cuttlefish ink), and Hansa Yellow is
+  PY1 (the original 1909 arylide; PY97 is a later generation). Olive
+  Green and Permanent Green Light carry null `ci_name` as mixtures
+  without a catalogued identifier.
+- **Introduction and discontinuation dates**: Ultramarine Blue is dated
+  by natural ultramarine (600; the synthetic form of 1826 is chemically
+  identical and indistinguishable by color), Carmine is 1520 (cochineal
+  reached Europe in the 1520s), Cadmium Orange is 1907 (first artist
+  sales), Sap Green is 1600, Sepia is 1780 (adoption as an artists'
+  pigment), Olive Green is 1900 (a convenience mixture), Terre Verte is
+  -100 (classical antiquity), Transparent Red Oxide is 1980
+  (transparent iron oxides are modern synthetics), and Manganese Blue's
+  `year_discontinued` is 1990.
+- **Reference colors**: Quinacridone Red changed from `#8E3A59` (shared
+  with Quinacridone Magenta) to `#EF3753`, the Winsor & Newton Artists'
+  Oil Colour swatch, and Titanium White from `#FFFFFF` (author-chosen)
+  to `#E4E4E4`, the named-color-list value. Every entry now has a
+  distinct reference color; pure-white queries in the naming pipeline
+  return Lead White.
+- **Chromium Oxide Green description** no longer calls the synthetic
+  oxide a natural earth green.
+- Entries with null `ci_name` (Hooker's Green, Payne's Grey, Olive
+  Green, Permanent Green Light) are excluded from pigment matching.
+
 ## [3.9.0] - 2026-09-10
 
 ### Added
