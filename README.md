@@ -13,7 +13,7 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 
 ## Overview
 
-`renoir` is a pedagogical Python package for computational color analysis of artworks from WikiArt. Its primary contributions are four interpretable metrics designed for art-historical reasoning: Palette Earth Mover's Distance for perceptual palette comparison, Color Complexity Index combining information-theoretic and perceptual measures, Historical Pigment Probability for dating-aware Bayesian pigment attribution, and Color Provenance Score for detecting anachronistic palettes. These sit alongside a complete 17-lesson curriculum, four color naming vocabularies, and a PromptGenerator module for generative AI workflows, designed to take art and design students from k-means basics through machine learning using a culturally meaningful dataset.
+`renoir` is a pedagogical Python package for computational color analysis of artworks from WikiArt. Its primary contributions are four interpretable metrics designed for art-historical reasoning: Palette Earth Mover's Distance for perceptual palette comparison, Color Complexity Index combining information-theoretic and perceptual measures, Historical Pigment Probability for dating-aware Bayesian pigment attribution, and Color Provenance Score for detecting anachronistic palettes. These sit alongside a complete 18-lesson curriculum, four color naming vocabularies, and a PromptGenerator module for generative AI workflows, designed to take art and design students from k-means basics through machine learning using a culturally meaningful dataset.
 
 ## Key Features
 
@@ -51,7 +51,7 @@ A computational tool for analyzing artist-specific works from WikiArt with compr
 
 ### Educational focus
 
-- **17 complete Jupyter notebooks** -- Progressive curriculum from basics to advanced ML
+- **18 complete Jupyter notebooks** -- Progressive curriculum from basics to advanced ML
 - Designed specifically for classroom use and student projects
 - Publication-ready visualizations
 - WikiArt cheatsheet for quick reference
@@ -197,7 +197,7 @@ print(f"Harmony Score: {harmony['harmony_score']:.2f}")
 print(f"Dominant harmony: {harmony['dominant_harmony']}")
 ```
 
-## Jupyter Notebooks - Complete 17-Lesson Curriculum
+## Jupyter Notebooks - Complete 18-Lesson Curriculum
 
 All notebooks are in `examples/color_analysis/`:
 
@@ -232,6 +232,10 @@ All notebooks are in `examples/color_analysis/`:
 ### Capstone (Lesson 17)
 
 17. **17_capstone_project.ipynb** - Complete AI-powered art intelligence platform
+
+### Supplementary (Lesson 18)
+
+18. **18_delta_e_backend_comparison.ipynb** - Side-by-side PEMD and CCI results under CIEDE2000 and Oklab on art-historical palettes
 
 ## Documentation
 
