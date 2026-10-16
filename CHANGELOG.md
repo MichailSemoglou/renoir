@@ -5,6 +5,13 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.1] - 2026-10-16
+
+### Fixed
+
+- **Phthalo Green description** no longer duplicates Phthalo Blue's;
+  it now reads "Intense, transparent green with a blue cast".
+
 ## [3.10.0] - 2026-10-06
 
 ### Added

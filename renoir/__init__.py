@@ -5,7 +5,7 @@ This package provides simple functions for extracting and analyzing works by
 specific artists from the WikiArt dataset, designed for teaching computational
 design and digital humanities courses.
 
-Version 3.10.0 expands the artist pigment vocabulary to 56 entries and
+Version 3.10 expands the artist pigment vocabulary to 56 entries and
 corrects the Color Provenance Score flag semantics so anachronism flags
 track pigment availability at the stated date.
 """
