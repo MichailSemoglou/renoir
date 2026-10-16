@@ -32,7 +32,6 @@ env/
 .vscode/
 .idea/
 .kilo/
-.kimi/
 *.swp
 *.swo
 *~
@@ -77,8 +76,6 @@ xaixarts2027/
 # Internal planning and strategy documents (not for public repo)
 ROADMAP.md
 REVIEW_DATASET.md
-AGENTS.md
-.github/copilot-instructions.md
 softwarex_paper/
 jose_paper/
 references/
