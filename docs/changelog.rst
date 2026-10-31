@@ -7,7 +7,7 @@ Changelog
 Added
 ~~~~~
 
-- Seven pigments in ``renoir/data/colors/artist_pigments.json``: Egyptian Blue (PB31, -3200), Orpiment (PY39, -1500), Realgar (PY39, -1500), Charcoal Black (PBk8, -40000), Weld lake (NY2, -1000), Mummy Brown (null, 1550, discontinued c. 1960), and Bistre (NBr11, 1500), extending coverage to the first synthetic pigment, the natural arsenic sulfides, a natural yellow lake, and two historical browns, ahead of the Zenodo dataset deposit
+- Seven pigments in ``renoir/data/colors/artist_pigments.json``: Egyptian Blue (PB31, -3200), Orpiment (PY39, -1500), Realgar (PY39, -1500), Charcoal Black (PBk8, -40000), Weld lake (NY2, -1000), Mummy Brown (null, 1550, discontinued 1964), and Bistre (NBr11, 1300), extending coverage to the first synthetic pigment, the natural arsenic sulfides, a natural yellow lake, and two historical browns, ahead of the Zenodo dataset deposit
 - Full value-level coverage in ``tests/test_artist_pigments.py``: the regression maps now lock the designation, introduction date, and reference color of all 63 entries, and the discontinuation years are checked both ways (present where expected, absent everywhere else)
 
 Fixed

@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Seven pigments** in `renoir/data/colors/artist_pigments.json`:
   Egyptian Blue (PB31, -3200), Orpiment (PY39, -1500), Realgar (PY39,
   -1500), Charcoal Black (PBk8, -40000), Weld lake (NY2, -1000), Mummy
-  Brown (null, 1550, discontinued c. 1960), and Bistre (NBr11, 1500).
+  Brown (null, 1550, discontinued 1964), and Bistre (NBr11, 1300).
   These extend coverage to the first synthetic pigment, the natural
   arsenic sulfides, a natural yellow lake, and two historical browns,
   ahead of the Zenodo dataset deposit.
