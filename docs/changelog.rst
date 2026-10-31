@@ -1,6 +1,140 @@
 Changelog
 =========
 
+3.10.2 (2026-10-31)
+-------------------
+
+Added
+~~~~~
+
+- Seven pigments in ``renoir/data/colors/artist_pigments.json``: Egyptian Blue (PB31, -3200), Orpiment (PY39, -1500), Realgar (PY39, -1500), Charcoal Black (PBk8, -40000), Weld lake (NY2, -1000), Mummy Brown (null, 1550, discontinued c. 1960), and Bistre (NBr11, 1500), extending coverage to the first synthetic pigment, the natural arsenic sulfides, a natural yellow lake, and two historical browns, ahead of the Zenodo dataset deposit
+- Full value-level coverage in ``tests/test_artist_pigments.py``: the regression maps now lock the designation, introduction date, and reference color of all 63 entries, and the discontinuation years are checked both ways (present where expected, absent everywhere else)
+
+Fixed
+~~~~~
+
+- Lemon Yellow re-identified from PY3 (1910) to PY31 (barium chromate, c. 1820): PY3 is documented as a 1928 Hoechst development, while barium chromate is the original lemon yellow of the nineteenth-century palette; the reference color ``#FFF44F`` is unchanged
+- Date corrections in ``renoir/data/colors/artist_pigments.json``: Carmine is 1523 (documented cochineal shipments; Tenochtitlan fell in August 1521, so 1520 predates any possible arrival), Dioxazine Purple is 1952 (marketed; 1928 was the Hoechst synthesis), Cobalt Teal is 1930 (the documented origin of cobalt titanate green spinel, PG50, per Casadio et al. 2012), and Chromium Oxide Green is c. 1840 (the earlier 1838 belongs to viridian, PG18; the anhydrous oxide is catalogued from c. 1840 and identified in paintings of 1845-1850, per Kühn 1969)
+- Sphinx rendering of the ``ColorAnalyzer.calculate_color_complexity()`` and ``ColorNamer.name()`` docstrings: added the blank lines required before their bullet lists, so both API entries render correctly in the online documentation
+
+3.10.1 (2026-10-16)
+-------------------
+
+Fixed
+~~~~~
+
+- Phthalo Green description no longer duplicates Phthalo Blue's; it now reads "Intense, transparent green with a blue cast"
+
+3.10.0 (2026-10-06)
+-------------------
+
+Added
+~~~~~
+
+- Seven pigments in ``renoir/data/colors/artist_pigments.json``: Lead White (PW1, -400; author-assigned reference color ``#F6F4ED``, labeled as such in the deposit documentation), Emerald Green (PG21, 1814, ``#50C878``), Chrome Yellow (PY34, 1809, ``#FFA700``), Azurite (PB30, -3000), Smalt (PB32, 1500), Verdigris (PG20, -300), and Malachite (PG39, -3000). These close the systematic gaps for pre-1800 whites and the nineteenth-century palette, and add the medieval and Renaissance backbone of the European easel tradition
+- Dataset schema validation in ``tests/test_artist_pigments.py``: every entry in ``artist_pigments.json`` is checked against the documented field semantics (required fields, hex/rgb consistency, closed family vocabulary, Color Index name format) and round-tripped through the naming pipeline, so malformed entries fail the build. Value-level regression checks lock every externally verified designation, date, and reference color, so a corrected value cannot regress silently
+
+Changed
+~~~~~~~
+
+- CPS flag semantics in ``ColorAnalyzer.colour_provenance_score()``: a color is now flagged as potentially anachronistic when every pigment it closely matches (CIEDE2000 <= 5.0) was unavailable at the stated year. The previous rule thresholded the best-match softmax probability, which tracked colorimetric distance rather than availability: an all-modern palette scored at 1700 produced no flags. The aggregate score is unchanged
+
+Fixed
+~~~~~
+
+- Color Index designations in ``renoir/data/colors/artist_pigments.json``, verified against Colour Index conventions and conservation sources: Carmine is NR4 (cochineal; PR83 is alizarin), Naples Yellow is PY41 (lead antimonate; PY42 is synthetic hydrated iron oxide), Indigo is NB1 (natural indigo; PB60 is synthetic indanthrone), Venetian Red and Indian Red are PR102 (natural red iron oxide; PR101 is synthetic), Vandyke Brown is NBr8 (genuine Van Dyke brown), Sap Green is NG2 (the buckthorn lake), Sepia is NBr9 (cuttlefish ink), and Hansa Yellow is PY1 (the original 1909 arylide; PY97 is a later generation). Olive Green and Permanent Green Light carry null ``ci_name`` as mixtures without a catalogued identifier
+- Introduction and discontinuation dates: Ultramarine Blue is dated by natural ultramarine (600; the synthetic form of 1826 is chemically identical and indistinguishable by color), Carmine is 1520 (cochineal reached Europe in the 1520s), Cadmium Orange is 1907 (first artist sales), Sap Green is 1600, Sepia is 1780 (adoption as an artists' pigment), Olive Green is 1900 (a convenience mixture), Terre Verte is -100 (classical antiquity), Transparent Red Oxide is 1980 (transparent iron oxides are modern synthetics), and Manganese Blue's ``year_discontinued`` is 1990
+- Reference colors: Quinacridone Red changed from ``#8E3A59`` (shared with Quinacridone Magenta) to ``#EF3753``, the Winsor & Newton Artists' Oil Colour swatch, and Titanium White from ``#FFFFFF`` (author-chosen) to ``#E4E4E4``, the named-color-list value. Every entry now has a distinct reference color; pure-white queries in the naming pipeline return Lead White
+- Chromium Oxide Green description no longer calls the synthetic oxide a natural earth green
+- Entries with null ``ci_name`` (Hooker's Green, Payne's Grey, Olive Green, Permanent Green Light) are excluded from ``ColorNamer.closest_pigment()`` matching; ``name()`` and ``historical_pigment_probability()`` still consider them
+
+3.9.0 (2026-09-10)
+------------------
+
+Added
+~~~~~
+
+- Oklab delta-E backend in ``renoir/color/_colorimetry.py``: pure-NumPy sRGB to Oklab transform (Ottosson, 2020) with ``srgb_to_oklab()``, ``srgb_to_oklab_tuple()``, and ``oklab_distance()``, plus a ``DeltaEStrategy`` registry resolved via ``get_delta_e_strategy()``. Registered strategies: ``"cie2000"`` (CIEDE2000 in CIELAB), ``"oklab"`` (Euclidean distance in Oklab), and ``"cam16"`` (below)
+- CAM16-UCS delta-E backend (Li et al., 2017) as the ``"cam16"`` strategy, backed by the optional ``colour-science`` dependency (new ``cam16`` extra: ``pip install 'renoir-wikiart[cam16]'``). ``srgb_to_cam16ucs()`` exposes the CAM16 viewing conditions via optional ``L_A`` and ``surround`` parameters
+- ``distance_metric`` parameter on ``ColorAnalyzer.palette_earth_movers_distance()`` and ``ColorAnalyzer.calculate_color_complexity()``, defaulting to ``"cie2000"`` for unchanged behavior. CCI normalizes perceptual spread by the metric's black-to-white distance (100 for CIEDE2000, 1 for Oklab) so scores remain comparable across backends
+- Notebook 18 ``examples/color_analysis/18_delta_e_backend_comparison.ipynb``: side-by-side PEMD and CCI results under CIEDE2000 and Oklab on art-historical palettes
+- Match confidence for color naming in ``renoir/color/namer.py``: ``ColorNamer.name(..., return_metadata=True)`` and ``ColorNamer.translate()`` results now include a ``confidence`` dictionary with a tier (exact/high/medium/low/none, banded by CIEDE2000 distance), a 0-100 score on the same exponential scale as ``historical_pigment_probability``, the delta-E of the match, and an ambiguity flag that names the runner-up on a near-tie. The module also exports ``PIGMENT_MATCH_GUIDANCE``, a plain-language note stating that names are colorimetric approximations, not material guarantees
+- Test coverage expansion (85% to 88% overall; 326 to 395 tests): fallback-path tests for the pure-NumPy colorimetry branches in ``tests/test_colorimetry_fallback.py`` (pinned to the canonical Sharma CIEDE2000 reference pair), ``tests/test_logging.py`` for the notebook logging helper (100%), CLI branch tests for ``_load_image`` errors and ``extract --format css -o``, and ``tests/test_properties.py`` with Hypothesis property tests for color invariants. New dev dependency: ``hypothesis>=6.0``
+- CI: new ``test-with-cam16`` job in ``tests.yml`` runs the suite with the ``cam16`` extra installed, so both the accelerated and fallback colorimetry paths are covered on every push
+- Tests in ``tests/test_colorimetry.py``: Oklab reference values, distance properties, strategy registry, and metric-parameter regression tests
+
+3.8.0 (2026-07-29)
+------------------
+
+Added
+~~~~~
+
+- Structured logging helper ``renoir.setup_notebook_logging()``: attaches a ``StreamHandler`` to the ``renoir`` logger namespace so progress messages appear in Jupyter notebooks without extra configuration. The handler is idempotent. Exported from ``renoir.__init__`` and implemented in ``renoir/logging.py``
+- Progress callback on long-running methods: ``ArtistAnalyzer._extract_work_palettes``, ``ArtistAnalyzer.artist_color_signature``, ``ArtistAnalyzer.analyze_works_color_signature``, and ``ColorNamer.historical_pigment_probability`` now accept an optional ``progress_callback`` parameter invoked as ``callback(completed, total)`` after each item, enabling ``tqdm``, ``rich``, or custom progress reporters
+- CLI with subcommands in ``renoir/cli.py``, using ``click`` as an optional ``cli`` extra: ``renoir artist <slug>``, ``renoir extract <image>``, ``renoir name <color>``, and ``renoir prompt <image>``. Stdout is machine-readable; progress writes to stderr. Install with ``pip install renoir-wikiart[cli]``
+- DSP palette extraction in ``renoir/color/dsp.py``: Distinctness-First Palette Selection, a constrained greedy algorithm that maximises perceptual distinctness (minimum pairwise CIEDE2000 distance) and guarantees at least one WCAG AA-compliant contrast pair. Available via ``ColorExtractor.extract_dominant_colors(method="dsp")`` and the CLI ``--method dsp`` flag. Includes semantic role assignment (Surface, On-Surface, Primary, Secondary, Accent) for design-token schemas
+- Shared colorimetry module ``renoir/color/_colorimetry.py``: consolidated six duplicated implementations of ``srgb_to_lab``, ``delta_e2000``, ``relative_luminance``, ``wcag_contrast``, ``hex_to_rgb``, and ``rgb_to_hex`` into a single source of truth
+- DSP refactor: ``_select_from_candidates`` split into five single-purpose functions; zero nested closures remain
+- Progress callback tests: ``historical_pigment_probability`` and ``analyze_works_color_signature`` now have unit tests verifying that ``progress_callback`` is invoked and that the final call reports ``completed == total``
+
+Fixed
+~~~~~
+
+- WCAG contrast gamma threshold: ``ColorAnalyzer.calculate_contrast_ratio`` used an sRGB linearisation threshold of 0.03928 (an approximation) instead of the correct IEC 61966-2-1 value of 0.04045, now unified via ``_colorimetry.py``
+
+3.7.0 (2026-07-28)
+------------------
+
+Added
+~~~~~
+
+- Automated test suite expansion: 295 tests (up from 255), 90% code coverage. New ``tests/conftest.py`` with shared fixtures, ``tests/test_color_harmony.py`` (26 tests for harmony detection), and expanded coverage in ``test_color_analysis.py``, ``test_color_visualization.py``, ``test_analyzer.py``, and ``test_prompt.py``
+- ``tests/helpers.py``: shared ``make_solid_image`` utility extracted from ``test_analyzer.py``, removing the duplicate ``_make_image`` function
+- Integration test opt-in: ``pytest_collection_modifyitems`` hook in ``tests/conftest.py`` skips integration tests by default and enables them when ``RUN_INTEGRATION=1`` is set or ``-m integration`` is passed
+- Regression test for ``create_artist_overview`` on dateless works (the default WikiArt dataset shape)
+- Regression test ``test_signature_without_sklearn``: verifies that ``analyze_works_color_signature`` completes without error when sklearn is absent
+- Regression test ``test_export_palette_css_prefix_with_newline``: verifies that a ``prefix`` ending with a newline character is rejected
+
+Fixed
+~~~~~
+
+- ``create_artist_overview`` no longer crashes with ``TypeError`` when works lack a ``date`` key
+- ``compare_palettes([], [])`` no longer crashes with ``KeyError``; returns a neutral zero-diff dictionary instead
+- ``palette_to_prompt_keywords([])`` no longer crashes with ``ZeroDivisionError``; returns ``[]`` for empty input
+- ``extract_artist_works`` no longer raises ``KeyError`` on datasets without an ``"artist"`` feature column
+- ``analyze_color_temperature_distribution`` now returns a neutral dictionary for empty input instead of raising ``ZeroDivisionError``
+- ``Dict[str, any]`` type annotations corrected to ``Dict[str, Any]`` in ``analysis.py`` and ``namer.py``
+- ``compare_artists_genres`` display guard changed from ``elif show`` to ``if show`` so saving no longer suppresses display
+- ``ColorNamer.name()`` now raises ``ValueError`` (not ``RuntimeError``) when no match is found, consistent with ``closest_pigment()``
+- Narrowed broad ``except Exception`` blocks in ``analyzer.py`` and ``extraction.py`` to specific exception types
+- Removed 9 unused imports and 1 unused variable across 6 source files
+- Fixed README parameter name mismatch (``n`` to ``n_variations``)
+- ``_finalize_figure`` in ``visualization.py`` and all save-path branches in ``analyzer.py`` now call ``fig.savefig(...)`` instead of ``plt.savefig(...)``, preventing the wrong figure from being saved when another matplotlib figure is active
+- ``_aggregate_palette`` no longer raises ``ImportError`` when sklearn is absent; falls back to returning deduplicated unique colors
+- ``_extract_work_palettes`` no longer raises ``ImportError`` when sklearn is absent; ``ConvergenceWarning`` is imported conditionally
+- ``export_palette_css`` uses ``re.fullmatch`` instead of ``re.match`` to validate the ``prefix`` parameter, so strings ending with a newline are correctly rejected
+- ``plot_named_palette`` return type corrected from ``Figure`` to ``Optional[Figure]`` to match the ``ImportError`` path that returns ``None``
+- ``plot_cross_vocabulary_naming`` now merges caller-provided ``vocabulary_labels`` over a full copy of the defaults instead of replacing them entirely
+- ``PromptGenerator.generate()`` empty-colors guard moved before the lazy ``_get_namer()`` and ``_get_analyzer()`` calls
+- ``detect_analogous_harmony`` docstring note corrected: wrap-around colors are detected correctly when adjacent after sorting; the actual limitation only occurs when intervening hues break the group anchor
+- ``quick_analysis`` docstring examples updated to doctest style
+
+Changed
+~~~~~~~
+
+- ``ColorNamer`` thread safety: ``closest_pigment``, ``translate``, and ``historical_pigment_probability`` now use temporary ``ColorNamer`` instances instead of mutating and restoring ``self.vocabulary``. The class docstring documents the thread-safety contract
+- ``extract_artist_works`` refactored to use a single loop with a match predicate, eliminating duplicated branching between HuggingFace and simple-list code paths
+- ``analyzer.py`` helpers extracted: ``_validate_artist_name``, ``_validate_works_list``, ``_count_field``, ``_check_viz_or_warn``, and ``_plot_distribution`` replace repeated validation, guard, and plotting blocks
+- ``visualization.py`` helpers extracted: ``_draw_palette_strip``, ``_finalize_figure``, ``_draw_candidate_panel``, and ``_draw_cross_vocab_cell`` replace 6 swatch-drawing loops, 12 save/show/return blocks, and two large inline rendering sections
+- ``analysis.py``: ``_largest_remainder`` moved from an inner function in ``palette_earth_movers_distance`` to module level
+- ``prompt.py``: ``_build_opener``, ``_describe_complexity``, and ``_apply_model_suffixes`` extracted from ``generate()``
+- ``check_visualization_support`` in ``__init__.py`` now delegates to the ``visualization.py`` version when matplotlib is available
+- ``analyze_temporal_distribution`` now calls ``_parse_year`` instead of duplicating the date-parsing logic
+- Plot methods return ``return None`` (explicit) instead of bare ``return`` on empty-data paths
+- ``plot_named_palette`` brightness calculation now uses the ``_calculate_brightness`` helper
+- Docstring notes added for known limitations: hue wrap-around in ``detect_analogous_harmony``, false-positive risk in ``detect_tetradic_harmony``, and O(n^3) growth in ``palette_earth_movers_distance``
+- Minimum Pillow version raised from ``>=8.0.0`` to ``>=10.3.0`` to exclude versions with known CVEs
+
 3.6.0 (2026-07-10)
 ------------------
 
@@ -239,3 +373,45 @@ Added
 - Basic artist work extraction from WikiArt
 - Genre, style, and temporal distribution analysis
 - MIT License
+
+Upgrade guide
+-------------
+
+From 3.6.0 to 3.7.0
+~~~~~~~~~~~~~~~~~~~
+
+One breaking behavioral change: ``ColorNamer.name()`` now raises ``ValueError`` instead of ``RuntimeError`` when no match is found. Callers catching ``RuntimeError`` must update their exception handlers. Other behavioral differences:
+
+- ``compare_palettes`` and ``palette_to_prompt_keywords`` now return neutral values for empty input instead of raising exceptions
+- ``ColorNamer`` methods ``closest_pigment``, ``translate``, and ``historical_pigment_probability`` no longer mutate ``self.vocabulary``. Instances are now safe to share across threads for read-only operations
+- Integration tests are deselected by default. Run them explicitly with ``pytest -m integration`` or set the ``RUN_INTEGRATION=1`` environment variable
+
+From 3.3.x to 3.4.0
+~~~~~~~~~~~~~~~~~~~
+
+No breaking changes. New imports available:
+
+- ``from renoir.color import PromptGenerator``
+
+New ``ColorNamer`` methods: ``translate()``, ``translate_all_vocabularies()``, ``historical_pigment_probability()``
+
+New ``ColorAnalyzer`` methods: ``palette_earth_movers_distance()``, ``calculate_color_complexity()``, ``colour_provenance_score()``
+
+From 3.0.0 to 3.0.1
+~~~~~~~~~~~~~~~~~~~
+
+No breaking changes. All existing code will continue to work. New error handling may surface previously silent errors, which is intentional for better reliability.
+
+From 2.0.0 to 3.0.0
+~~~~~~~~~~~~~~~~~~~
+
+New color analysis features are additive. Existing code continues to work unchanged. To use new features:
+
+.. code-block:: python
+
+    from renoir.color import ColorExtractor, ColorAnalyzer, ColorVisualizer
+
+From 1.0.0 to 2.0.0
+~~~~~~~~~~~~~~~~~~~
+
+Visualization features are optional. Install with ``pip install 'renoir-wikiart[visualization]'`` to enable plotting methods.
