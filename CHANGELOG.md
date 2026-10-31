@@ -5,6 +5,45 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.2] - 2026-10-31
+
+### Added
+
+- **Seven pigments** in `renoir/data/colors/artist_pigments.json`:
+  Egyptian Blue (PB31, -3200), Orpiment (PY39, -1500), Realgar (PY39,
+  -1500), Charcoal Black (PBk8, -40000), Weld lake (NY2, -1000), Mummy
+  Brown (null, 1550, discontinued c. 1960), and Bistre (NBr11, 1500).
+  These extend coverage to the first synthetic pigment, the natural
+  arsenic sulfides, a natural yellow lake, and two historical browns,
+  ahead of the Zenodo dataset deposit.
+- **Full value-level coverage** in `tests/test_artist_pigments.py`: the
+  regression maps now lock the designation, introduction date, and
+  reference color of all 63 entries, not only the externally verified
+  subset, and the discontinuation years are checked both ways (present
+  where expected, absent everywhere else).
+
+### Fixed
+
+- **Lemon Yellow** re-identified from PY3 (1910) to PY31 (barium
+  chromate, c. 1820): PY3 is documented as a 1928 Hoechst development,
+  while barium chromate is the original lemon yellow of the
+  nineteenth-century palette (Colour Index Third Edition, per the
+  Color of Art Pigment Database). The reference color `#FFF44F` is
+  unchanged.
+- **Date corrections** in `renoir/data/colors/artist_pigments.json`:
+  Carmine is 1523 (documented cochineal shipments; Tenochtitlan fell
+  in August 1521, so 1520 predates any possible arrival), Dioxazine
+  Purple is 1952 (marketed; 1928 was the Hoechst synthesis), Cobalt
+  Teal is 1930 (the documented origin of cobalt titanate green spinel,
+  PG50, per Casadio et al. 2012), and Chromium Oxide Green is c. 1840
+  (the earlier 1838 belongs to viridian, PG18; the anhydrous oxide is
+  catalogued from c. 1840 and identified in paintings of 1845-1850,
+  per Kühn 1969).
+- **Sphinx rendering** of the `ColorAnalyzer.calculate_color_complexity()`
+  and `ColorNamer.name()` docstrings: added the blank lines required
+  before their bullet lists, so both API entries render correctly in
+  the online documentation.
+
 ## [3.10.1] - 2026-10-16
 
 ### Fixed
