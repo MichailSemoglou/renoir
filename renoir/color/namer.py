@@ -402,6 +402,7 @@ class ColorNamer:
         Returns:
             If return_metadata=False: Color name string
             If return_metadata=True: Dictionary with keys:
+
                 - name: Color name
                 - hex: Hex color code
                 - rgb: RGB tuple

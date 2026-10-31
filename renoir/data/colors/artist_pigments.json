@@ -85,10 +85,23 @@
       244,
       79
     ],
-    "ci_name": "PY3",
+    "ci_name": "PY31",
     "family": "Yellow",
     "description": "Cool, greenish yellow",
-    "year_introduced": 1910
+    "year_introduced": 1820
+  },
+  {
+    "name": "Orpiment",
+    "hex": "#FFD764",
+    "rgb": [
+      255,
+      215,
+      100
+    ],
+    "ci_name": "PY39",
+    "family": "Yellow",
+    "description": "Brilliant golden yellow arsenic sulfide; toxic and light-sensitive",
+    "year_introduced": -1500
   },
   {
     "name": "Yellow Ochre",
@@ -167,6 +180,19 @@
     "family": "Orange",
     "description": "Brilliant, opaque orange",
     "year_introduced": 1907
+  },
+  {
+    "name": "Realgar",
+    "hex": "#D9481C",
+    "rgb": [
+      217,
+      72,
+      28
+    ],
+    "ci_name": "PY39",
+    "family": "Orange",
+    "description": "Bright orange-red arsenic sulfide; toxic and fugitive",
+    "year_introduced": -1500
   },
   {
     "name": "Cadmium Red Light",
@@ -283,7 +309,7 @@
     "ci_name": "PV23",
     "family": "Violet",
     "description": "Deep, transparent blue-violet",
-    "year_introduced": 1928
+    "year_introduced": 1952
   },
   {
     "name": "Cobalt Violet",
@@ -336,6 +362,19 @@
     "family": "Blue",
     "description": "Ground cobalt glass blue, prone to discoloration",
     "year_introduced": 1500
+  },
+  {
+    "name": "Egyptian Blue",
+    "hex": "#1034A6",
+    "rgb": [
+      16,
+      52,
+      166
+    ],
+    "ci_name": "PB31",
+    "family": "Blue",
+    "description": "The first synthetic pigment; vivid calcium copper silicate blue",
+    "year_introduced": -3200
   },
   {
     "name": "Cobalt Blue",
@@ -453,7 +492,7 @@
     "ci_name": "PG17",
     "family": "Green",
     "description": "Opaque, dull, slightly grayish green",
-    "year_introduced": 1838
+    "year_introduced": 1840
   },
   {
     "name": "Verdigris",
@@ -547,6 +586,19 @@
     "year_introduced": 1852
   },
   {
+    "name": "Weld lake",
+    "hex": "#EFE3A0",
+    "rgb": [
+      239,
+      227,
+      160
+    ],
+    "ci_name": "NY2",
+    "family": "Yellow",
+    "description": "Transparent lemon yellow lake from weld, used since antiquity",
+    "year_introduced": -1000
+  },
+  {
     "name": "Payne's Grey",
     "hex": "#536878",
     "rgb": [
@@ -599,6 +651,19 @@
     "year_introduced": 1920
   },
   {
+    "name": "Charcoal Black",
+    "hex": "#36454F",
+    "rgb": [
+      54,
+      69,
+      79
+    ],
+    "ci_name": "PBk8",
+    "family": "Black",
+    "description": "Soft, cool black from charred wood; a drawing material more than a paint",
+    "year_introduced": -40000
+  },
+  {
     "name": "Sepia",
     "hex": "#704214",
     "rgb": [
@@ -623,6 +688,33 @@
     "family": "Brown",
     "description": "Very dark, transparent brown",
     "year_introduced": 1600
+  },
+  {
+    "name": "Mummy Brown",
+    "hex": "#824B27",
+    "rgb": [
+      130,
+      75,
+      39
+    ],
+    "ci_name": null,
+    "family": "Brown",
+    "description": "Transparent bituminous brown ground from Egyptian mummies; fugitive",
+    "year_introduced": 1550,
+    "year_discontinued": 1964
+  },
+  {
+    "name": "Bistre",
+    "hex": "#3D2B1F",
+    "rgb": [
+      61,
+      43,
+      31
+    ],
+    "ci_name": "NBr11",
+    "family": "Brown",
+    "description": "Transparent dark brown from wood soot; the Old Master wash pigment",
+    "year_introduced": 1300
   },
   {
     "name": "Permanent Green Light",
@@ -661,7 +753,7 @@
     "ci_name": "PG50",
     "family": "Blue",
     "description": "Bright, opaque blue-green",
-    "year_introduced": 1950
+    "year_introduced": 1930
   },
   {
     "name": "Indigo",
@@ -687,7 +779,7 @@
     "ci_name": "NR4",
     "family": "Red",
     "description": "Deep, cool red",
-    "year_introduced": 1520
+    "year_introduced": 1523
   },
   {
     "name": "Quinacridone Red",

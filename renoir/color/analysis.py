@@ -1016,6 +1016,7 @@ class ColorAnalyzer:
         Calculate the Color Complexity Index (CCI) for a palette.
 
         A multi-dimensional information-theoretic measure combining:
+
         - Hue entropy (spread across the color wheel)
         - Perceptual spread (mean pairwise distance in the chosen
           perceptual space)

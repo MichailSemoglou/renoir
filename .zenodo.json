@@ -10,8 +10,8 @@
     }
   ],
   "license": "MIT",
-      "version": "3.10.1",
-  "publication_date": "2026-10-16",
+      "version": "3.10.2",
+  "publication_date": "2026-11-01",
   "keywords": [
     "Python",
     "art history",
@@ -41,7 +41,7 @@
     },
     {
       "scheme": "doi",
-      "identifier": "10.5281/zenodo.22693588",
+      "identifier": "10.5281/zenodo.23413652",
       "relation": "isNewVersionOf"
     }
   ],
