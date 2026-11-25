@@ -1,6 +1,30 @@
 Changelog
 =========
 
+3.11.0 (2026-11-25)
+-------------------
+
+Added
+~~~~~
+
+- Thirty-seven pigments and related colorants in ``renoir/data/colors/artist_pigments.json``, reaching the 100-entry target. Lead-Tin Yellow Type I and Type II carry null designations, PG36 is described as brominated, and the reviewed chronology includes Minium (c. -500), Indian Yellow (c. 1400, discontinued 1908), Brazilwood Lake (c. 1300), Dragon's Blood (c. 100), Maya Blue (c. 300, discontinued 1600), and Strontium Yellow (c. 1861, last catalogued 1896)
+- Public dataset documentation in ``README.md``: field semantics, dating and null conventions, discontinuation caveats, representative-swatch limitations, and a separate CC-BY 4.0 dataset license
+- Full value-level coverage of all 100 entries in ``tests/test_artist_pigments.py``, with an explicit hex-uniqueness check
+
+Changed
+~~~~~~~
+
+- Color naming and provenance results from the 100-entry vocabulary. In reproducible samples of 6,000 colors (seed 2026), the closest name changes for 30.6% of a uniform sRGB sample and 28.6% of a mid-tone sample (64-191 per channel); near-tie rates move from 25.1% to 27.9% and from 32.6% to 33.5%, respectively. Lead-Tin Yellow Type I and Type II are excluded from ``closest_pigment()`` matching but remain available to ``name()`` and ``historical_pigment_probability()``
+- CPS availability windows from the new entries and their verified dates. In 1,200 mid-tone colors (seed 7), flag counts from the 63-entry to 100-entry vocabularies change from 56 to 75 at 1200, 56 to 65 at 1500, 55 to 64 at 1700, 19 to 25 at 1850, and 5 to 11 at 1950. These are descriptive teaching outputs, not authentication evidence
+- Reproducible source data: ``ArtistAnalyzer`` pins WikiArt downloads to an immutable upstream revision, and curriculum sampling uses fixed random seeds
+- Curriculum visualization design across all 18 notebooks and ``ColorVisualizer``: a consistent visual style, clearer labels and charts, and deterministic capstone PNG export. Source colors and analytical results are unchanged
+
+Fixed
+~~~~~
+
+- Curriculum execution and exports: each chart appears once in inline backends, single-cluster DBSCAN evaluations report unavailable silhouette scores, and temporal lessons explain when WikiArt lacks date metadata. Dataset selection avoids decoding skipped artworks without reducing the sampling targets
+- Source distribution contents: all 18 curriculum notebooks remain in the archive, while Jupyter checkpoint copies are excluded
+
 3.10.2 (2026-11-01)
 -------------------
 
