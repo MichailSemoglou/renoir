@@ -486,6 +486,19 @@ class TestPlotPEMDComparison:
         assert isinstance(fig, Figure)
         plt.close()
 
+    def test_empty_pairs_raises(self, visualizer, cleanup_plots):
+        with pytest.raises(ValueError, match="at least one palette pair"):
+            visualizer.plot_pemd_comparison([], show=False)
+
+    def test_many_pairs_have_positive_panels(self, visualizer, cleanup_plots):
+        pair = ([((255, 0, 0), 1.0)], [((0, 0, 255), 1.0)])
+        fig = visualizer.plot_pemd_comparison(
+            [pair] * 5, pemd_values=[1.0] * 5, show=False
+        )
+        assert len(fig.axes) == 10
+        assert all(axis.get_position().height > 0 for axis in fig.axes)
+        plt.close()
+
     def test_mismatched_pemd_values_raises(self, visualizer, cleanup_plots):
         p1 = [((255, 0, 0), 1.0)]
         p2 = [((0, 0, 255), 1.0)]
@@ -529,6 +542,10 @@ class TestPlotCrossVocabularyNaming:
         )
         assert isinstance(fig, Figure)
         plt.close()
+
+    def test_empty_colors_raises(self, visualizer, cleanup_plots):
+        with pytest.raises(ValueError, match="at least one RGB color"):
+            visualizer.plot_cross_vocabulary_naming([], show=False)
 
     def test_save(self, visualizer, cleanup_plots, tmp_path):
         colors = [(100, 150, 200)]
