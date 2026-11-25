@@ -570,7 +570,8 @@ class ColorNamer:
                 best_distance = distance
                 best_match = pigment
 
-        assert best_match is not None
+        if best_match is None:
+            raise ValueError("No matching pigment found")
         return {
             "name": best_match["name"],
             "ci_name": best_match["ci_name"],
