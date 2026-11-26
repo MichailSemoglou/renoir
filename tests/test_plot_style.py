@@ -1,8 +1,8 @@
 """Regression tests for the shared modular-grid plotting style."""
 
-import matplotlib
 import pytest
 
+matplotlib = pytest.importorskip("matplotlib")
 matplotlib.use("Agg")
 
 from renoir.color._plot_style import (
@@ -35,6 +35,15 @@ def test_axis_style_uses_functional_black_and_white_rules():
     assert not ax.spines["top"].get_visible()
     assert not ax.spines["right"].get_visible()
     assert ax.spines["left"].get_edgecolor()[:3] == (17 / 255, 17 / 255, 17 / 255)
+
+
+def test_axis_style_honors_grid_direction():
+    fig = create_figure("Report")
+    ax = add_panel(fig, 0, 1.45, 5, 2.25)
+    style_axis(ax, grid="y")
+
+    assert not ax.xaxis.get_gridlines()[0].get_visible()
+    assert ax.yaxis.get_gridlines()[0].get_visible()
 
 
 def test_accent_is_single_functional_blue():

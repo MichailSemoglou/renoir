@@ -91,7 +91,8 @@ def style_axis(
         axis.set_xlabel(xlabel, fontsize=9, fontfamily=FONT, color=BLACK, labelpad=5)
     if ylabel is not None:
         axis.set_ylabel(ylabel, fontsize=9, fontfamily=FONT, color=BLACK, labelpad=5)
-    axis.grid(grid, color=BLACK, alpha=0.14, linewidth=0.6)
+    axis.grid(False)
+    axis.grid(True, axis=grid, color=BLACK, alpha=0.14, linewidth=0.6)
     axis.set_axisbelow(True)
     axis.spines["top"].set_visible(False)
     axis.spines["right"].set_visible(False)

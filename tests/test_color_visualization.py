@@ -573,3 +573,22 @@ class TestCalculateBrightness:
     def test_mid_gray(self, visualizer):
         brightness = visualizer._calculate_brightness((128, 128, 128))
         assert 100 < brightness < 160
+
+
+@pytest.mark.parametrize(
+    "method_name", ["plot_rgb_distribution", "plot_hsv_distribution"]
+)
+def test_distribution_labels_stay_inside_figure(visualizer, cleanup_plots, method_name):
+    colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 255)]
+    fig = getattr(visualizer, method_name)(colors, show=False)
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+
+    for axis in fig.axes:
+        for artist in [axis.xaxis.label, *axis.get_xticklabels()]:
+            bounds = artist.get_window_extent(renderer)
+            assert bounds.x0 >= 0
+            assert bounds.y0 >= 0
+            assert bounds.x1 <= fig.bbox.width
+            assert bounds.y1 <= fig.bbox.height
+    plt.close()

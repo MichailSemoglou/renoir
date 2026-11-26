@@ -6,7 +6,6 @@ These tests can be expanded as the package develops.
 
 import subprocess
 import sys
-import textwrap
 
 import pytest
 from unittest.mock import patch
@@ -139,21 +138,19 @@ def test_visualization_support_unavailable(caplog):
 
 
 def test_core_import_without_matplotlib():
-    code = textwrap.dedent("""
-        import builtins
-
-        original_import = builtins.__import__
-
-        def without_matplotlib(name, *args, **kwargs):
-            if name == "matplotlib" or name.startswith("matplotlib."):
-                raise ImportError("Matplotlib intentionally unavailable")
-            return original_import(name, *args, **kwargs)
-
-        builtins.__import__ = without_matplotlib
-        import renoir
-
-        assert renoir.VISUALIZATION_AVAILABLE is False
-        """)
+    code = "\n".join(
+        [
+            "import builtins",
+            "original_import = builtins.__import__",
+            "def without_matplotlib(name, *args, **kwargs):",
+            '    if name == "matplotlib" or name.startswith("matplotlib."):',
+            '        raise ImportError("Matplotlib intentionally unavailable")',
+            "    return original_import(name, *args, **kwargs)",
+            "builtins.__import__ = without_matplotlib",
+            "import renoir",
+            "assert renoir.VISUALIZATION_AVAILABLE is False",
+        ]
+    )
     result = subprocess.run(
         [sys.executable, "-c", code], capture_output=True, text=True
     )

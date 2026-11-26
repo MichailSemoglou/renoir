@@ -422,13 +422,14 @@ class ColorVisualizer:
         channel_names = ["Red", "Green", "Blue"]
         channel_colors = [ACCENT, "#333333", "#777777"]
         axes = [
-            add_panel(fig, index * 4.25, 1.25, 3.5, 6.75, f"{name} Channel")
+            add_panel(fig, index * 4.25, 1.25, 3.5, 6.0, f"{name} Channel")
             for index, name in enumerate(channel_names)
         ]
 
         for i, (ax, name, color) in enumerate(zip(axes, channel_names, channel_colors)):
             ax.hist(rgb_array[:, i], bins=20, color=color, alpha=0.8, edgecolor="black")
             ax.set_xlim(0, 255)
+            ax.set_xticks(np.linspace(0, 255, 6))
             style_axis(ax, "Value (0-255)", "Frequency")
 
         return self._finalize_figure(fig, save_path, show, "RGB distribution")
@@ -459,7 +460,7 @@ class ColorVisualizer:
 
         fig = create_figure(title, figsize=figsize)
         axes = [
-            add_panel(fig, index * 4.25, 1.25, 3.5, 6.75, panel_title)
+            add_panel(fig, index * 4.25, 1.25, 3.5, 6.0, panel_title)
             for index, panel_title in enumerate(
                 [
                     "Hue Distribution",
@@ -745,7 +746,7 @@ class ColorVisualizer:
                 method calls :class:`~renoir.color.namer.ColorNamer` internally.
             top_k: Number of candidate pigments to display (default 5).
             figsize: Figure dimensions ``(width, height)`` in inches.
-            save_path: File path for saving (PNG at 300 dpi or PDF).
+            save_path: File path for saving (PNG at 150 dpi or PDF).
             show: If True, display the figure with plt.show().
         """
         if results is None:
@@ -941,7 +942,7 @@ class ColorVisualizer:
             pemd_values: Pre-computed PEMD floats, one per pair.  If ``None``
                 values are computed internally (requires scipy).
             figsize: Figure dimensions ``(width, height)`` in inches.
-            save_path: File path for saving (PNG at 300 dpi or PDF).
+            save_path: File path for saving (PNG at 150 dpi or PDF).
             show: If True, display the figure with plt.show().
         """
         n_pairs = len(pairs)
@@ -1062,7 +1063,7 @@ class ColorVisualizer:
                 label.  Defaults to standard vocabulary names.
             figsize: Figure dimensions ``(width, height)`` in inches.
                 Auto-sized when ``None``.
-            save_path: File path for saving (PNG at 300 dpi or PDF).
+            save_path: File path for saving (PNG at 150 dpi or PDF).
             show: If True, display the figure with plt.show().
         """
         if not colors:
