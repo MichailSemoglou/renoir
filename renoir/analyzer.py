@@ -14,6 +14,8 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+_WIKIART_REVISION = "d559852d2b232e0fcf195e775866964f0564f2b5"
+
 if TYPE_CHECKING:
     from renoir.color import ColorAnalyzer, ColorNamer
 
@@ -57,7 +59,10 @@ class ArtistAnalyzer:
 
                 logger.info("Loading WikiArt dataset...")
                 self._dataset = load_dataset(
-                    "huggan/wikiart", split="train", cache_dir=self.cache_dir
+                    "huggan/wikiart",
+                    split="train",
+                    cache_dir=self.cache_dir,
+                    revision=_WIKIART_REVISION,
                 )
                 logger.info("Loaded %d artworks", len(self._dataset))
             except (ConnectionError, OSError, ValueError, RuntimeError) as e:

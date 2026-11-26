@@ -5,6 +5,76 @@ All notable changes to the renoir project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.11.0] - 2026-11-25
+
+### Added
+
+- **Thirty-seven pigments** in `renoir/data/colors/artist_pigments.json`,
+  reaching the 100-entry target. Old Master colors and historic whites and
+  greens: Lead-Tin Yellow Type I and Type II (null, c. 1300), Massicot
+  (PY46, c. -3000), Minium (PR105, c. -500), Chalk (PW18, c. -40000),
+  Gypsum (PW25, c. -3000), Lithopone (PW5, 1874), Scheele's Green (PG22,
+  1775), Cobalt Green (PG19, 1780), and Chrome Green (null, c. 1820).
+  Nineteenth-century and early modern additions: Zinc Yellow (PY36,
+  c. 1850), Chrome Orange (PO21, 1809), Cerulean Blue Chromium (PB36,
+  c. 1900), Manganese Violet (PV16, 1868), and Ultramarine Violet (PV15,
+  c. 1875).
+- **Natural dyes, lakes, and non-Western pigments**: Indian Yellow (NY20,
+  c. 1400, discontinued 1908), Gamboge (NY24, c. 1600), Kermes (NR3,
+  c. -1500), Brazilwood Lake (NR24, c. 1300), Dragon's Blood (NR31,
+  c. 100), Tyrian Purple (NV1, c. -1500), Han Blue (null, c. -800), Han
+  Purple (null, c. -800), Maya Blue (null, c. 300, discontinued 1600), and
+  Chinese Ink (null, c. -700).
+- **Earths and modern bookends**: Cassel Earth (NBr8, c. 1600), Asphaltum
+  (NBk6, c. 1600), Caput Mortuum (PR102, c. 1600), Strontium Yellow
+  (PY32, c. 1861, last catalogued 1896), Phthalo Turquoise (PB16, 1939),
+  Phthalo Green Yellow Shade (PG36, 1938), Nickel Titanate Yellow (PY53,
+  1963), Perylene Maroon (PR179, 1957), Perinone Orange (PO43, 1953),
+  Pyrrole Red (PR254, 1983), Bismuth Yellow (PY184, 1985), and YInMn Blue
+  (PB86, 2009).
+- **Public dataset documentation** in `README.md`: field semantics, dating
+  and null conventions, discontinuation caveats, representative-swatch
+  limitations, and a separate CC-BY 4.0 dataset license.
+- **Full value-level coverage** of the expanded dataset in
+  `tests/test_artist_pigments.py`: the regression maps now lock the
+  designation, introduction date, and reference color of all 100 entries,
+  with an explicit hex-uniqueness check.
+
+### Changed
+
+- **Color naming and provenance results** from the 100-entry vocabulary.
+  In reproducible samples of 6,000 colors (seed 2026), the closest name
+  changes for 30.6% of a uniform sRGB sample and 28.6% of a mid-tone sample
+  (64-191 per channel); near-tie rates move from 25.1% to 27.9% and from
+  32.6% to 33.5%, respectively. These changes reflect finer vocabulary
+  coverage rather than a new naming algorithm. Lead-Tin Yellow Type I and
+  Type II carry null designations and are therefore excluded from
+  `closest_pigment()` matching, while remaining available to `name()` and
+  `historical_pigment_probability()`.
+- **CPS availability windows** from the new entries and their verified
+  dates. In 1,200 mid-tone colors (seed 7), flag counts from the 63-entry
+  to 100-entry vocabularies change from 56 to 75 at 1200, 56 to 65 at 1500,
+  55 to 64 at 1700, 19 to 25 at 1850, and 5 to 11 at 1950. The counts
+  reflect new close matches, corrected introduction dates, and documented
+  discontinuation years; they are descriptive teaching outputs, not
+  authentication evidence.
+- **Reproducible source data**: `ArtistAnalyzer` pins WikiArt downloads to an
+  immutable upstream revision, and curriculum sampling uses fixed random seeds.
+- **Curriculum visualization design** across all 18 notebooks and
+  `ColorVisualizer`: a consistent visual style, clearer labels and charts, and
+  deterministic capstone PNG export. Source colors and analytical results are
+  unchanged.
+
+### Fixed
+
+- **Curriculum execution and exports**: each chart appears once in inline
+  backends, single-cluster DBSCAN evaluations report unavailable silhouette
+  scores, and temporal lessons explain when WikiArt lacks date metadata.
+  Dataset selection avoids decoding skipped artworks without reducing the
+  sampling targets.
+- **Source distribution contents**: all 18 curriculum notebooks remain in the
+  archive, while Jupyter checkpoint copies are excluded.
+
 ## [3.10.2] - 2026-11-01
 
 ### Added

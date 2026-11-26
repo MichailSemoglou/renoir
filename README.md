@@ -454,6 +454,42 @@ Uses the [WikiArt dataset](https://huggingface.co/datasets/huggan/wikiart) from 
 - Works by 129 artists
 - Rich metadata including genre, style, and artist information
 
+### Artist pigment dataset
+
+The packaged `renoir/data/colors/artist_pigments.json` file contains 100
+historical pigments and related colorants, including formulated inks and
+mixtures. Each entry has these fields:
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `name` | string | Common pigment or colorant name |
+| `hex` | string | Representative sRGB swatch as `#RRGGBB` |
+| `rgb` | array of 3 integers | The same swatch decoded to R, G, B |
+| `ci_name` | string or null | Color Index generic name, or null when no catalogued identifier exists |
+| `family` | string | One of ten color families |
+| `description` | string | Working properties in plain language |
+| `year_introduced` | integer | Approximate introduction or availability year; negative values denote BCE |
+| `year_discontinued` | integer, optional | Documented discontinuation or last recorded trade appearance |
+
+Dating combines discovery, first use, and market-availability conventions, as
+noted for individual entries in the research audit. Where color cannot
+distinguish natural from synthetic forms, the entry uses the natural
+designation and date. Null `ci_name` values cover mixtures and other
+colorants without a Color Index generic name; they are included in `name()`
+and `historical_pigment_probability()`, but excluded from
+`closest_pigment()` matching. A missing `year_discontinued` means that the
+end date is unknown, not that production necessarily continues.
+
+Reference colors are representative display swatches, not measurements.
+Names are colorimetric approximations rather than material identifications;
+similar pigments can share a near-tie, which `return_metadata=True` reports
+through the confidence and ambiguity fields.
+
+**Dataset license:** the artist pigment dataset is licensed separately from
+the software under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+When reusing the data, attribute Michail Semoglou and the *Historical Artist
+Pigments with Color Index Names and Introduction Dates* dataset.
+
 ## Requirements
 
 ### Core Requirements
@@ -507,7 +543,7 @@ If you use this software in your research or teaching, please cite:
   author = {Semoglou, Michail},
   title = {renoir: A Python Tool for Analyzing Artist-Specific Works from WikiArt},
   year = {2026},
-  version = {3.10.2},
+  version = {3.11.0},
   doi = {10.5281/zenodo.17355170},
   url = {https://github.com/MichailSemoglou/renoir}
 }
@@ -527,7 +563,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+Software: MIT License - see [LICENSE](LICENSE) for details.
+
+Artist pigment dataset: [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/),
+as described under [Dataset Information](#artist-pigment-dataset).
 
 ## Acknowledgments
 

@@ -54,12 +54,16 @@ class TestDatasetShape:
     """Test top-level structure of the dataset."""
 
     def test_entry_count(self, pigments):
-        """The published dataset describes exactly 63 pigments."""
-        assert len(pigments) == 63
+        """The published dataset describes exactly 100 pigments."""
+        assert len(pigments) == 100
 
     def test_names_are_unique(self, pigments):
         names = [p["name"] for p in pigments]
         assert len(names) == len(set(names))
+
+    def test_hex_values_are_unique(self, pigments):
+        hex_values = [p["hex"] for p in pigments]
+        assert len(hex_values) == len(set(hex_values))
 
 
 class TestEntryFields:
@@ -180,6 +184,43 @@ class TestEntryValues:
         "Quinacridone Red": ("PR209", 1958),
         "Transparent Red Oxide": ("PR101", 1980),
         "Hansa Yellow": ("PY1", 1910),
+        "Lead-Tin Yellow (Type I)": (None, 1300),
+        "Lead-Tin Yellow (Type II)": (None, 1300),
+        "Massicot": ("PY46", -3000),
+        "Minium": ("PR105", -500),
+        "Chalk": ("PW18", -40000),
+        "Gypsum": ("PW25", -3000),
+        "Lithopone": ("PW5", 1874),
+        "Scheele's Green": ("PG22", 1775),
+        "Cobalt Green": ("PG19", 1780),
+        "Chrome Green": (None, 1820),
+        "Zinc Yellow": ("PY36", 1850),
+        "Chrome Orange": ("PO21", 1809),
+        "Cerulean Blue Chromium": ("PB36", 1900),
+        "Manganese Violet": ("PV16", 1868),
+        "Ultramarine Violet": ("PV15", 1875),
+        "Indian Yellow": ("NY20", 1400),
+        "Gamboge": ("NY24", 1600),
+        "Kermes": ("NR3", -1500),
+        "Brazilwood Lake": ("NR24", 1300),
+        "Dragon's Blood": ("NR31", 100),
+        "Tyrian Purple": ("NV1", -1500),
+        "Han Blue": (None, -800),
+        "Han Purple": (None, -800),
+        "Maya Blue": (None, 300),
+        "Chinese Ink": (None, -700),
+        "Cassel Earth": ("NBr8", 1600),
+        "Asphaltum": ("NBk6", 1600),
+        "Caput Mortuum": ("PR102", 1600),
+        "Strontium Yellow": ("PY32", 1861),
+        "Phthalo Turquoise": ("PB16", 1939),
+        "Phthalo Green Yellow Shade": ("PG36", 1938),
+        "Nickel Titanate Yellow": ("PY53", 1963),
+        "Perylene Maroon": ("PR179", 1957),
+        "Perinone Orange": ("PO43", 1953),
+        "Pyrrole Red": ("PR254", 1983),
+        "Bismuth Yellow": ("PY184", 1985),
+        "YInMn Blue": ("PB86", 2009),
     }
 
     EXPECTED_HEX = {
@@ -246,11 +287,51 @@ class TestEntryValues:
         "Quinacridone Red": "#EF3753",
         "Transparent Red Oxide": "#8D4E23",
         "Hansa Yellow": "#E9D66B",
+        "Lead-Tin Yellow (Type I)": "#E6BE8A",
+        "Lead-Tin Yellow (Type II)": "#E8D48A",
+        "Massicot": "#E3C567",
+        "Minium": "#CA411F",
+        "Chalk": "#E9E3D3",
+        "Gypsum": "#EFEEE7",
+        "Lithopone": "#F1F0E8",
+        "Scheele's Green": "#478800",
+        "Cobalt Green": "#066E61",
+        "Chrome Green": "#3A7539",
+        "Zinc Yellow": "#FACA30",
+        "Chrome Orange": "#E73501",
+        "Cerulean Blue Chromium": "#006895",
+        "Manganese Violet": "#491174",
+        "Ultramarine Violet": "#5C246E",
+        "Indian Yellow": "#E3A857",
+        "Gamboge": "#E49B0F",
+        "Kermes": "#B0001A",
+        "Brazilwood Lake": "#9B6E6C",
+        "Dragon's Blood": "#841B2D",
+        "Tyrian Purple": "#66023C",
+        "Han Blue": "#446CCF",
+        "Han Purple": "#5218FA",
+        "Maya Blue": "#73C2FB",
+        "Chinese Ink": "#1B1B1B",
+        "Cassel Earth": "#3C2F2F",
+        "Asphaltum": "#2B1C0E",
+        "Caput Mortuum": "#592720",
+        "Strontium Yellow": "#E8D77A",
+        "Phthalo Turquoise": "#0D5A6B",
+        "Phthalo Green Yellow Shade": "#066545",
+        "Nickel Titanate Yellow": "#E3D966",
+        "Perylene Maroon": "#7D3645",
+        "Perinone Orange": "#F24F00",
+        "Pyrrole Red": "#D32432",
+        "Bismuth Yellow": "#EAE84B",
+        "YInMn Blue": "#306AC0",
     }
 
     EXPECTED_DISCONTINUED = {
         "Manganese Blue": 1990,
         "Mummy Brown": 1964,
+        "Indian Yellow": 1908,
+        "Maya Blue": 1600,
+        "Strontium Yellow": 1896,
     }
 
     def test_ci_names_and_dates(self, pigments):

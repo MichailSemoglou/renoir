@@ -819,5 +819,489 @@
     "family": "Yellow",
     "description": "Bright, transparent yellow",
     "year_introduced": 1910
+  },
+  {
+    "name": "Lead-Tin Yellow (Type I)",
+    "hex": "#E6BE8A",
+    "rgb": [
+      230,
+      190,
+      138
+    ],
+    "ci_name": null,
+    "family": "Yellow",
+    "description": "Opaque lead stannate yellow; the standard Old Master yellow",
+    "year_introduced": 1300
+  },
+  {
+    "name": "Lead-Tin Yellow (Type II)",
+    "hex": "#E8D48A",
+    "rgb": [
+      232,
+      212,
+      138
+    ],
+    "ci_name": null,
+    "family": "Yellow",
+    "description": "Semi-opaque lead-tin-silicate yellow linked to glass production",
+    "year_introduced": 1300
+  },
+  {
+    "name": "Massicot",
+    "hex": "#E3C567",
+    "rgb": [
+      227,
+      197,
+      103
+    ],
+    "ci_name": "PY46",
+    "family": "Yellow",
+    "description": "Opaque yellow lead monoxide; toxic and strongly siccative in oil",
+    "year_introduced": -3000
+  },
+  {
+    "name": "Minium",
+    "hex": "#CA411F",
+    "rgb": [
+      202,
+      65,
+      31
+    ],
+    "ci_name": "PR105",
+    "family": "Orange",
+    "description": "Opaque orange-red lead tetroxide; toxic and prone to darkening",
+    "year_introduced": -500
+  },
+  {
+    "name": "Chalk",
+    "hex": "#E9E3D3",
+    "rgb": [
+      233,
+      227,
+      211
+    ],
+    "ci_name": "PW18",
+    "family": "White",
+    "description": "Soft calcium carbonate white; transparent in oil and common in grounds",
+    "year_introduced": -40000
+  },
+  {
+    "name": "Gypsum",
+    "hex": "#EFEEE7",
+    "rgb": [
+      239,
+      238,
+      231
+    ],
+    "ci_name": "PW25",
+    "family": "White",
+    "description": "Soft, matte calcium sulfate white used in gesso and grounds",
+    "year_introduced": -3000
+  },
+  {
+    "name": "Lithopone",
+    "hex": "#F1F0E8",
+    "rgb": [
+      241,
+      240,
+      232
+    ],
+    "ci_name": "PW5",
+    "family": "White",
+    "description": "Opaque zinc sulfide and barium sulfate white; an inexpensive lead-white alternative",
+    "year_introduced": 1874
+  },
+  {
+    "name": "Scheele's Green",
+    "hex": "#478800",
+    "rgb": [
+      71,
+      136,
+      0
+    ],
+    "ci_name": "PG22",
+    "family": "Green",
+    "description": "Brilliant yellow-green copper arsenite; highly toxic and unstable",
+    "year_introduced": 1775
+  },
+  {
+    "name": "Cobalt Green",
+    "hex": "#066E61",
+    "rgb": [
+      6,
+      110,
+      97
+    ],
+    "ci_name": "PG19",
+    "family": "Green",
+    "description": "Permanent bluish-green cobalt zinc oxide (Rinmann's green); low tinting strength",
+    "year_introduced": 1780
+  },
+  {
+    "name": "Chrome Green",
+    "hex": "#3A7539",
+    "rgb": [
+      58,
+      117,
+      57
+    ],
+    "ci_name": null,
+    "family": "Green",
+    "description": "Opaque green mixture of chrome yellow and Prussian blue",
+    "year_introduced": 1820
+  },
+  {
+    "name": "Zinc Yellow",
+    "hex": "#FACA30",
+    "rgb": [
+      250,
+      202,
+      48
+    ],
+    "ci_name": "PY36",
+    "family": "Yellow",
+    "description": "Bright golden zinc chromate yellow; toxic and semi-transparent",
+    "year_introduced": 1850
+  },
+  {
+    "name": "Chrome Orange",
+    "hex": "#E73501",
+    "rgb": [
+      231,
+      53,
+      1
+    ],
+    "ci_name": "PO21",
+    "family": "Orange",
+    "description": "Brilliant, opaque basic lead chromate; toxic and sulfur-sensitive",
+    "year_introduced": 1809
+  },
+  {
+    "name": "Cerulean Blue Chromium",
+    "hex": "#006895",
+    "rgb": [
+      0,
+      104,
+      149
+    ],
+    "ci_name": "PB36",
+    "family": "Blue",
+    "description": "Lightfast, semi-opaque cobalt chromite blue with a green cast",
+    "year_introduced": 1900
+  },
+  {
+    "name": "Manganese Violet",
+    "hex": "#491174",
+    "rgb": [
+      73,
+      17,
+      116
+    ],
+    "ci_name": "PV16",
+    "family": "Violet",
+    "description": "Lightfast, semi-transparent manganese ammonium phosphate violet",
+    "year_introduced": 1868
+  },
+  {
+    "name": "Ultramarine Violet",
+    "hex": "#5C246E",
+    "rgb": [
+      92,
+      36,
+      110
+    ],
+    "ci_name": "PV15",
+    "family": "Violet",
+    "description": "Soft, lightfast violet variant of synthetic ultramarine; weak tinting strength",
+    "year_introduced": 1875
+  },
+  {
+    "name": "Indian Yellow",
+    "hex": "#E3A857",
+    "rgb": [
+      227,
+      168,
+      87
+    ],
+    "ci_name": "NY20",
+    "family": "Yellow",
+    "description": "Transparent, luminous golden yellow magnesium euxanthate lake",
+    "year_introduced": 1400,
+    "year_discontinued": 1908
+  },
+  {
+    "name": "Gamboge",
+    "hex": "#E49B0F",
+    "rgb": [
+      228,
+      155,
+      15
+    ],
+    "ci_name": "NY24",
+    "family": "Yellow",
+    "description": "Transparent, warm yellow gum resin; fugitive in light",
+    "year_introduced": 1600
+  },
+  {
+    "name": "Kermes",
+    "hex": "#B0001A",
+    "rgb": [
+      176,
+      0,
+      26
+    ],
+    "ci_name": "NR3",
+    "family": "Red",
+    "description": "Deep crimson lake from kermes scale insects; used since antiquity",
+    "year_introduced": -1500
+  },
+  {
+    "name": "Brazilwood Lake",
+    "hex": "#9B6E6C",
+    "rgb": [
+      155,
+      110,
+      108
+    ],
+    "ci_name": "NR24",
+    "family": "Red",
+    "description": "Transparent, fugitive red lake from brazilwood; used in medieval painting",
+    "year_introduced": 1300
+  },
+  {
+    "name": "Dragon's Blood",
+    "hex": "#841B2D",
+    "rgb": [
+      132,
+      27,
+      45
+    ],
+    "ci_name": "NR31",
+    "family": "Red",
+    "description": "Deep, transparent red plant resin; fugitive and rarely used",
+    "year_introduced": 100
+  },
+  {
+    "name": "Tyrian Purple",
+    "hex": "#66023C",
+    "rgb": [
+      102,
+      2,
+      60
+    ],
+    "ci_name": "NV1",
+    "family": "Violet",
+    "description": "Deep, lightfast purple dye from Mediterranean mollusks; rare and costly",
+    "year_introduced": -1500
+  },
+  {
+    "name": "Han Blue",
+    "hex": "#446CCF",
+    "rgb": [
+      68,
+      108,
+      207
+    ],
+    "ci_name": null,
+    "family": "Blue",
+    "description": "Bright synthetic barium copper silicate blue from ancient China",
+    "year_introduced": -800
+  },
+  {
+    "name": "Han Purple",
+    "hex": "#5218FA",
+    "rgb": [
+      82,
+      24,
+      250
+    ],
+    "ci_name": null,
+    "family": "Violet",
+    "description": "Brilliant synthetic barium copper silicate purple from ancient China",
+    "year_introduced": -800
+  },
+  {
+    "name": "Maya Blue",
+    "hex": "#73C2FB",
+    "rgb": [
+      115,
+      194,
+      251
+    ],
+    "ci_name": null,
+    "family": "Blue",
+    "description": "Stable, bright azure composite of indigo and palygorskite clay",
+    "year_introduced": 300,
+    "year_discontinued": 1600
+  },
+  {
+    "name": "Chinese Ink",
+    "hex": "#1B1B1B",
+    "rgb": [
+      27,
+      27,
+      27
+    ],
+    "ci_name": null,
+    "family": "Black",
+    "description": "Dense, lightfast carbon black bound with animal glue for calligraphy and painting",
+    "year_introduced": -700
+  },
+  {
+    "name": "Cassel Earth",
+    "hex": "#3C2F2F",
+    "rgb": [
+      60,
+      47,
+      47
+    ],
+    "ci_name": "NBr8",
+    "family": "Brown",
+    "description": "Deep, transparent lignite earth brown; similar to Vandyke brown",
+    "year_introduced": 1600
+  },
+  {
+    "name": "Asphaltum",
+    "hex": "#2B1C0E",
+    "rgb": [
+      43,
+      28,
+      14
+    ],
+    "ci_name": "NBk6",
+    "family": "Brown",
+    "description": "Transparent black-brown bitumen; fugitive and slow drying",
+    "year_introduced": 1600
+  },
+  {
+    "name": "Caput Mortuum",
+    "hex": "#592720",
+    "rgb": [
+      89,
+      39,
+      32
+    ],
+    "ci_name": "PR102",
+    "family": "Brown",
+    "description": "Transparent, lightfast red-brown natural iron oxide",
+    "year_introduced": 1600
+  },
+  {
+    "name": "Strontium Yellow",
+    "hex": "#E8D77A",
+    "rgb": [
+      232,
+      215,
+      122
+    ],
+    "ci_name": "PY32",
+    "family": "Yellow",
+    "description": "Pale, opaque strontium chromate yellow; fugitive in artists' paints",
+    "year_introduced": 1861,
+    "year_discontinued": 1896
+  },
+  {
+    "name": "Phthalo Turquoise",
+    "hex": "#0D5A6B",
+    "rgb": [
+      13,
+      90,
+      107
+    ],
+    "ci_name": "PB16",
+    "family": "Blue",
+    "description": "Intense, transparent metal-free phthalocyanine blue-green",
+    "year_introduced": 1939
+  },
+  {
+    "name": "Phthalo Green Yellow Shade",
+    "hex": "#066545",
+    "rgb": [
+      6,
+      101,
+      69
+    ],
+    "ci_name": "PG36",
+    "family": "Green",
+    "description": "Intense, transparent yellow-shade brominated copper phthalocyanine green",
+    "year_introduced": 1938
+  },
+  {
+    "name": "Nickel Titanate Yellow",
+    "hex": "#E3D966",
+    "rgb": [
+      227,
+      217,
+      102
+    ],
+    "ci_name": "PY53",
+    "family": "Yellow",
+    "description": "Lightfast, semi-opaque lemon yellow nickel antimony titanium oxide",
+    "year_introduced": 1963
+  },
+  {
+    "name": "Perylene Maroon",
+    "hex": "#7D3645",
+    "rgb": [
+      125,
+      54,
+      69
+    ],
+    "ci_name": "PR179",
+    "family": "Red",
+    "description": "Transparent, lightfast deep maroon with strong tinting strength",
+    "year_introduced": 1957
+  },
+  {
+    "name": "Perinone Orange",
+    "hex": "#F24F00",
+    "rgb": [
+      242,
+      79,
+      0
+    ],
+    "ci_name": "PO43",
+    "family": "Orange",
+    "description": "Brilliant, transparent vat orange with high tinting strength",
+    "year_introduced": 1953
+  },
+  {
+    "name": "Pyrrole Red",
+    "hex": "#D32432",
+    "rgb": [
+      211,
+      36,
+      50
+    ],
+    "ci_name": "PR254",
+    "family": "Red",
+    "description": "Brilliant, opaque diketopyrrolopyrrole red with excellent lightfastness",
+    "year_introduced": 1983
+  },
+  {
+    "name": "Bismuth Yellow",
+    "hex": "#EAE84B",
+    "rgb": [
+      234,
+      232,
+      75
+    ],
+    "ci_name": "PY184",
+    "family": "Yellow",
+    "description": "Bright, opaque bismuth vanadate lemon yellow; a cadmium alternative",
+    "year_introduced": 1985
+  },
+  {
+    "name": "YInMn Blue",
+    "hex": "#306AC0",
+    "rgb": [
+      48,
+      106,
+      192
+    ],
+    "ci_name": "PB86",
+    "family": "Blue",
+    "description": "Durable, bright yttrium indium manganese oxide blue discovered in 2009",
+    "year_introduced": 2009
   }
 ]

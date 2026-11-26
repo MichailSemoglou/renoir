@@ -4,6 +4,9 @@ Basic tests for the renoir package.
 These tests can be expanded as the package develops.
 """
 
+import subprocess
+import sys
+
 import pytest
 from unittest.mock import patch
 from tests.helpers import make_solid_image
@@ -132,6 +135,26 @@ def test_visualization_support_unavailable(caplog):
             result = check_visualization_support()
     assert result is False
     assert "renoir-wikiart[visualization]" in caplog.text
+
+
+def test_core_import_without_matplotlib():
+    code = "\n".join(
+        [
+            "import builtins",
+            "original_import = builtins.__import__",
+            "def without_matplotlib(name, *args, **kwargs):",
+            '    if name == "matplotlib" or name.startswith("matplotlib."):',
+            '        raise ImportError("Matplotlib intentionally unavailable")',
+            "    return original_import(name, *args, **kwargs)",
+            "builtins.__import__ = without_matplotlib",
+            "import renoir",
+            "assert renoir.VISUALIZATION_AVAILABLE is False",
+        ]
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code], capture_output=True, text=True
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def test_visualization_methods_exist():
@@ -353,6 +376,20 @@ class TestLoadDatasetFailure:
             analyzer.extract_artist_works("claude-monet")
             analyzer.extract_artist_works("claude-monet")
             assert mock_ld.call_count == 1  # cached after first call
+
+    def test_load_dataset_uses_immutable_revision(self):
+        analyzer = ArtistAnalyzer()
+        with patch("datasets.load_dataset", return_value=MOCK_WORKS) as mock_ld:
+            analyzer.load_dataset()
+            revision = mock_ld.call_args.kwargs["revision"]
+            assert len(revision) == 40
+            assert set(revision) <= set("0123456789abcdef")
+            mock_ld.assert_called_once_with(
+                "huggan/wikiart",
+                split="train",
+                cache_dir=None,
+                revision=revision,
+            )
 
 
 class TestQuickAnalysis:

@@ -486,6 +486,19 @@ class TestPlotPEMDComparison:
         assert isinstance(fig, Figure)
         plt.close()
 
+    def test_empty_pairs_raises(self, visualizer, cleanup_plots):
+        with pytest.raises(ValueError, match="at least one palette pair"):
+            visualizer.plot_pemd_comparison([], show=False)
+
+    def test_many_pairs_have_positive_panels(self, visualizer, cleanup_plots):
+        pair = ([((255, 0, 0), 1.0)], [((0, 0, 255), 1.0)])
+        fig = visualizer.plot_pemd_comparison(
+            [pair] * 5, pemd_values=[1.0] * 5, show=False
+        )
+        assert len(fig.axes) == 10
+        assert all(axis.get_position().height > 0 for axis in fig.axes)
+        plt.close()
+
     def test_mismatched_pemd_values_raises(self, visualizer, cleanup_plots):
         p1 = [((255, 0, 0), 1.0)]
         p2 = [((0, 0, 255), 1.0)]
@@ -530,6 +543,10 @@ class TestPlotCrossVocabularyNaming:
         assert isinstance(fig, Figure)
         plt.close()
 
+    def test_empty_colors_raises(self, visualizer, cleanup_plots):
+        with pytest.raises(ValueError, match="at least one RGB color"):
+            visualizer.plot_cross_vocabulary_naming([], show=False)
+
     def test_save(self, visualizer, cleanup_plots, tmp_path):
         colors = [(100, 150, 200)]
         save_path = str(tmp_path / "out.png")
@@ -556,3 +573,22 @@ class TestCalculateBrightness:
     def test_mid_gray(self, visualizer):
         brightness = visualizer._calculate_brightness((128, 128, 128))
         assert 100 < brightness < 160
+
+
+@pytest.mark.parametrize(
+    "method_name", ["plot_rgb_distribution", "plot_hsv_distribution"]
+)
+def test_distribution_labels_stay_inside_figure(visualizer, cleanup_plots, method_name):
+    colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 255)]
+    fig = getattr(visualizer, method_name)(colors, show=False)
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+
+    for axis in fig.axes:
+        for artist in [axis.xaxis.label, *axis.get_xticklabels()]:
+            bounds = artist.get_window_extent(renderer)
+            assert bounds.x0 >= 0
+            assert bounds.y0 >= 0
+            assert bounds.x1 <= fig.bbox.width
+            assert bounds.y1 <= fig.bbox.height
+    plt.close()

@@ -10,6 +10,8 @@ include CITATION.cff
 
 # Include examples
 recursive-include examples *.py *.ipynb
+prune examples/.ipynb_checkpoints
+prune examples/color_analysis/.ipynb_checkpoints
 
 # Include documentation
 recursive-include docs *.md
